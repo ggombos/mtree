@@ -1,0 +1,5 @@
+# mtree extension
+comment = 'M-tree implementation - %picksplitStrategy%'
+default_version = '1.0'
+module_pathname = '$libdir/$mtree'
+relocatable = true
