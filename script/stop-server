@@ -1,0 +1,67 @@
+#!/bin/bash
+#
+# Stops the server.
+
+set -e
+
+readonly NUMBER_OF_ARGUMENTS="$#"
+readonly POSTGRESQL_DIRECTORY="$1"
+
+
+#######################################
+# Prints echo command to stdout with green color and timestamp.
+# Arguments:
+#   Message.
+#######################################
+function print_info() {
+  echo -e "\033[0;32m[$(date +'%Y-%m-%dT%H:%M:%S%z')]: $*\033[0m" >&1
+}
+
+#######################################
+# Redirects stdout from echo command to stderr with red color and timestamp.
+# Arguments:
+#   Error message.
+#######################################
+function print_error() {
+  echo -e "\033[0;31m[$(date +'%Y-%m-%dT%H:%M:%S%z')]: $*\033[0m" >&2
+}
+
+#######################################
+# Checks if a directory exists.
+# Arguments:
+#   Directory path.
+#######################################
+function check_directory() {
+  if [ ! -d "$1" ]; then
+    print_error "Directory DOES NOT exists: $1"
+    exit 1
+  fi
+}
+
+#######################################
+# Validates the command line arguments.
+# Arguments:
+#   None
+#######################################
+function validate_arguments() {
+  if [ "${NUMBER_OF_ARGUMENTS}" -ne 1 ]; then
+    print_error "Invalid number of arguments (1 REQUIRED)."
+    exit 1
+  fi
+  check_directory "${POSTGRESQL_DIRECTORY}"
+  print_info "Argument is valid!"
+}
+
+#######################################
+# Stops the server.
+# Arguments:
+#   None
+#######################################
+function stop_server() {
+  print_info "Please enter postgres user's password."
+  su -c "${POSTGRESQL_DIRECTORY}/bin/pg_ctl -D ${POSTGRESQL_DIRECTORY}/data/ stop" postgres
+  print_info "Server stopped!"
+}
+
+validate_arguments
+stop_server
