@@ -2,11 +2,10 @@
 #
 # Compiles M-tree implementation with all useful flags.
 
-#readonly SOURCE_FILE="/home/vm/Development/mtree/source/generic/mtree.c"
-readonly SOURCE_FILE="/home/vm/Development/mtree/source/generic/mtree_text.c"
-readonly SOURCE_FILE_TMP="/home/vm/Development/mtree/source/generic/mtree_tmp.c"
-readonly SOURCE_FILE_OBJECT="/home/vm/Development/mtree/mtree_tmp.o"
-readonly POSTGRESQL_DIRECTORY="/usr/local/postgresql/include/server"
+readonly SOURCE_FILE="/home/zsolt/WD/Development/mtree_gist/source/generic/mtree_text.c"
+readonly SOURCE_FILE_TMP="/home/zsolt/WD/Development/mtree_gist/source/generic/mtree_tmp.c"
+readonly SOURCE_FILE_OBJECT="./mtree_tmp.o"
+readonly POSTGRESQL_DIRECTORY="/usr/local/pgsql/include/server"
 
 #######################################
 # Compiles C source code with flags.

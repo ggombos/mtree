@@ -156,11 +156,13 @@ function configure_postgresql() {
 #######################################
 function build_postgresql() {
   #make world
+  make
   print_info "PostgreSQL world is made!"
   #make check
   print_info "PostgreSQL world is checked!"
   print_info "Please enter root password."
-  su -c "make install-world"
+  #su -c "make install-world"
+  make install
   print_info "PostgreSQL world is installed!"
 }
 
@@ -237,13 +239,13 @@ function initalize_database() {
   print_info "Database initalized. Installation finished."
 }
 
-#validate_arguments
-#check_prerequisites
-#get_source_code
-#configure_postgresql
-#build_postgresql
-#clear_files
-#add_postgresql_to_path
-#post_installation_setup
+validate_arguments
+check_prerequisites
+get_source_code
+configure_postgresql
+build_postgresql
+clear_files
+add_postgresql_to_path
+post_installation_setup
 create_user_and_data_directory
 initalize_database

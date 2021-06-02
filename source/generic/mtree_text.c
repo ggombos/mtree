@@ -7,6 +7,8 @@
 #include "mtree_utils_var.h"
 #include "utils/builtins.h"
 
+#include <math.h>
+
 #define SameStrategyNumber      1
 #define OverlapStrategyNumber   2
 #define ContainsStrategyNumber  3
@@ -421,8 +423,8 @@ Datum gmt_text_picksplit(PG_FUNCTION_ARGS)
 {
   GistEntryVector* entryVector = (GistEntryVector*) PG_GETARG_POINTER(0);
   GIST_SPLITVEC* vector = (GIST_SPLITVEC*) PG_GETARG_POINTER(1);
-  OffsetNumber maxOffset = entryVector->n - 1;
-  OffsetNumber numberBytes = (maxOffset + 1) * sizeof(OffsetNumber);
+  OffsetNumber maxOffset = (OffsetNumber) (entryVector->n - 1);
+  OffsetNumber numberBytes = (OffsetNumber) ((maxOffset + 1) * sizeof(OffsetNumber));
   OffsetNumber* left;
   OffsetNumber* right;
 
@@ -453,7 +455,7 @@ Datum gmt_text_picksplit(PG_FUNCTION_ARGS)
   switch (picksplitStrategy) {
     case Random:
       leftIndex = (int) random() % (maxOffset - 1);
-      rightIndex = (leftIndex + 1) + (random() % (maxOffset - leftIndex - 1));
+      rightIndex = (int) ((leftIndex + 1) + (random() % (maxOffset - leftIndex - 1)));
       break;
     case FirstTwo:
       leftIndex = 0;
@@ -487,8 +489,8 @@ Datum gmt_text_picksplit(PG_FUNCTION_ARGS)
       break;
     case SamplingMinCoveringSum:
       for (int i = 0; i < trialCount; ++i) {
-        leftCandidateIndex = random() % (maxOffset - 1);
-        rightCandidateIndex = (leftCandidateIndex + 1) + (random() % (maxOffset - leftCandidateIndex - 1));
+        leftCandidateIndex = (int) random() % (maxOffset - 1);
+        rightCandidateIndex = (int) ((leftCandidateIndex + 1) + (random() % (maxOffset - leftCandidateIndex - 1)));
         int leftRadius = 0, rightRadius = 0;
 
         for (int currentIndex = 0; currentIndex < maxOffset; currentIndex++) {
@@ -516,8 +518,8 @@ Datum gmt_text_picksplit(PG_FUNCTION_ARGS)
       break;
     case SamplingMinCoveringMax:
       for (int i = 0; i < trialCount; ++i) {
-        leftCandidateIndex = random() % (maxOffset - 1);
-        rightCandidateIndex = (leftCandidateIndex + 1) + (random() % (maxOffset - leftCandidateIndex - 1));
+        leftCandidateIndex = (int) random() % (maxOffset - 1);
+        rightCandidateIndex = (int) ((leftCandidateIndex + 1) + (random() % (maxOffset - leftCandidateIndex - 1)));
         int leftRadius = 0, rightRadius = 0;
 
         for (int currentIndex = 0; currentIndex < maxOffset; ++currentIndex) {
@@ -545,8 +547,8 @@ Datum gmt_text_picksplit(PG_FUNCTION_ARGS)
       break;
     case SamplingMinOverlapArea:
       for (int i = 0; i < trialCount; i++) {
-        leftCandidateIndex = random() % (maxOffset - 1);
-        rightCandidateIndex = (leftCandidateIndex + 1) + (random() % (maxOffset - leftCandidateIndex - 1));
+        leftCandidateIndex = (int) random() % (maxOffset - 1);
+        rightCandidateIndex = (int) ((leftCandidateIndex + 1) + (random() % (maxOffset - leftCandidateIndex - 1)));
         int distance = get_matrix_distance(maxOffset, entries, distances, leftCandidateIndex, rightCandidateIndex);
         int leftRadius = 0, rightRadius = 0;
 
@@ -568,7 +570,7 @@ Datum gmt_text_picksplit(PG_FUNCTION_ARGS)
 
         double currentOverlapArea = get_area_overlap(leftRadius, rightRadius, distance);
         if (minOverlapArea == -1 || currentOverlapArea < minOverlapArea) {
-          minOverlapArea = currentOverlapArea;
+          minOverlapArea = (int) currentOverlapArea;
           leftIndex = leftCandidateIndex;
           rightIndex = rightCandidateIndex;
         }
@@ -577,7 +579,7 @@ Datum gmt_text_picksplit(PG_FUNCTION_ARGS)
     case SamplingMinAreaSum:
       for (int i = 0; i < trialCount; i++) {
         leftCandidateIndex = (int) random() % (maxOffset - 1);
-        rightCandidateIndex = (leftCandidateIndex + 1) + (random() % (maxOffset - leftCandidateIndex - 1));
+        rightCandidateIndex = (int) ((leftCandidateIndex + 1) + (random() % (maxOffset - leftCandidateIndex - 1)));
         int leftRadius = 0, rightRadius = 0;
 
         for (int currentIndex = 0; currentIndex < maxOffset; currentIndex++) {
