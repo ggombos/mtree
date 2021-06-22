@@ -5,8 +5,9 @@
 #define __MTREE_UTILS_VAR_H__
 
 #include "access/gist.h"
-#include "mtree_gist.h"
 #include "mb/pg_wchar.h"
+
+#include "mtree_gist.h"
 
 /* Variable length key */
 typedef struct

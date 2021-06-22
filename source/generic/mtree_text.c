@@ -1,13 +1,14 @@
 /*
  * contrib/mtree_gist/mtree_text.c
  */
+#include <math.h>
+
 #include "postgres.h"
+
+#include "utils/builtins.h"
 
 #include "mtree_gist.h"
 #include "mtree_utils_var.h"
-#include "utils/builtins.h"
-
-#include <math.h>
 
 #define SameStrategyNumber      1
 #define OverlapStrategyNumber   2
