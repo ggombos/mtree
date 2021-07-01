@@ -26,7 +26,7 @@ CREATE TYPE gmtreekey_var (
   INTERNALLENGTH = VARIABLE,
   INPUT  = gmtreekey_var_in,
   OUTPUT = gmtreekey_var_out,
-  STORAGE = EXTENDED
+	STORAGE = EXTENDED
 );
 
 --
@@ -101,6 +101,16 @@ RETURNS float8
 AS 'MODULE_PATHNAME', 'gmt_text_distance_internal'
 LANGUAGE C IMMUTABLE STRICT;
 
+CREATE OR REPLACE FUNCTION gmt_var_decompress(internal)
+RETURNS internal
+AS 'MODULE_PATHNAME', 'gmt_var_decompress'
+LANGUAGE C IMMUTABLE STRICT;
+
+CREATE OR REPLACE FUNCTION gmt_var_fetch(internal)
+RETURNS internal
+AS 'MODULE_PATHNAME', 'gmt_var_fetch'
+LANGUAGE C IMMUTABLE STRICT;
+
 --
 --
 --
@@ -108,6 +118,7 @@ LANGUAGE C IMMUTABLE STRICT;
 --
 --
 --
+/*
 CREATE OPERATOR = (
   COMMUTATOR = =,
   LEFTARG = text,
@@ -142,7 +153,7 @@ CREATE OPERATOR #<# (
   RIGHTARG = text,
   PROCEDURE = gmt_text_contained
 );
-
+*/
 -- Create the operator class
 CREATE OPERATOR CLASS gist_text_ops
 DEFAULT FOR TYPE text USING gist
@@ -181,7 +192,7 @@ AS
   FUNCTION  5  gmt_text_penalty (internal, internal, internal),
   FUNCTION  6  gmt_text_picksplit (internal, internal),
   FUNCTION  7  gmt_text_same (gmtreekey_var, gmtreekey_var, internal),
-  FUNCTION  8  gmt_text_distance_internal (internal, gmtreekey_var, smallint, oid, internal);
+  FUNCTION  8  gmt_text_distance_internal (internal, gmtreekey_var, smallint, oid, internal),
   STORAGE      gmtreekey_var;
 
 ALTER OPERATOR FAMILY gist_bpchar_ops USING gist ADD

@@ -3,16 +3,16 @@
 DROP TABLE IF EXISTS Songs;
 CREATE TABLE Songs (
     x    INTEGER,
-    data music_gist
+    data text
 );
-COPY Songs(x, data) FROM '%datacsv%' DELIMITER ',' CSV HEADER;
+COPY Songs(x, data) FROM '/home/postgres/1000.csv' DELIMITER ',' CSV HEADER;
 
 SET enable_seqscan = off;
 
 \timing on
 
 \echo '#region Create index:'
-CREATE INDEX index_test ON Songs USING gist (data music_gist_opclass);
+CREATE INDEX index_test ON Songs USING gist (data gist_text_ops);
 \echo '#endregion'
 
 \echo '#region Range based query - short - small:'
