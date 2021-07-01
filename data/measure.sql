@@ -118,3 +118,7 @@ EXPLAIN ANALYZE SELECT x, data, (data <-> 'ggagcbggagdcgggeccbaffecdc') AS dst F
 EXPLAIN ANALYZE SELECT x, data, (data <-> 'gaggaggagfedefedc') AS dst FROM Songs ORDER BY dst LIMIT 100;
 EXPLAIN ANALYZE SELECT x, data, (data <-> 'gaggaggagfedefedc') AS dst FROM Songs ORDER BY dst LIMIT 100;
 \echo '#endregion'
+
+\echo '#region Drop index:'
+DROP INDEX index_test;
+\echo '#endregion'
