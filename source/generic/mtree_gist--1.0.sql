@@ -54,27 +54,27 @@ RETURNS internal
 AS 'MODULE_PATHNAME'
 LANGUAGE C IMMUTABLE STRICT;
 
-CREATE OR REPLACE FUNCTION gmt_text_distance(gmtreekey_var, gmtreekey_var) -- TODO
+CREATE OR REPLACE FUNCTION gmt_text_distance(gmtreekey_var, gmtreekey_var)
 RETURNS integer
 AS 'MODULE_PATHNAME', 'gmt_text_distance'
 LANGUAGE C IMMUTABLE STRICT;
 
-CREATE OR REPLACE FUNCTION gmt_text_overlap(gmtreekey_var, gmtreekey_var) -- TODO
+CREATE OR REPLACE FUNCTION gmt_text_overlap(gmtreekey_var, gmtreekey_var)
 RETURNS bool
 AS 'MODULE_PATHNAME', 'gmt_text_overlap'
 LANGUAGE C IMMUTABLE STRICT;
 
-CREATE OR REPLACE FUNCTION gmt_text_contains(gmtreekey_var, gmtreekey_var) -- TODO
+CREATE OR REPLACE FUNCTION gmt_text_contains(gmtreekey_var, gmtreekey_var)
 RETURNS bool
 AS 'MODULE_PATHNAME', 'gmt_text_contains'
 LANGUAGE C IMMUTABLE STRICT;
 
-CREATE OR REPLACE FUNCTION gmt_text_contained(gmtreekey_var, gmtreekey_var) -- TODO
+CREATE OR REPLACE FUNCTION gmt_text_contained(gmtreekey_var, gmtreekey_var)
 RETURNS bool
 AS 'MODULE_PATHNAME', 'gmt_text_contained'
 LANGUAGE C IMMUTABLE STRICT;
 
-CREATE OR REPLACE FUNCTION gmt_text_distance_internal(internal, gmtreekey_var, smallint, oid, internal) -- TODO
+CREATE OR REPLACE FUNCTION gmt_text_distance_internal(internal, gmtreekey_var, smallint, oid, internal)
 RETURNS float8
 AS 'MODULE_PATHNAME', 'gmt_text_distance_internal'
 LANGUAGE C IMMUTABLE STRICT;
@@ -90,7 +90,7 @@ AS 'MODULE_PATHNAME', 'gmt_var_fetch'
 LANGUAGE C IMMUTABLE STRICT;
 
 -- text operators
-CREATE OPERATOR = (
+/*CREATE OPERATOR = (
   COMMUTATOR = =,
   LEFTARG = text,
   RIGHTARG = text,
@@ -124,7 +124,7 @@ CREATE OPERATOR #<# (
   RIGHTARG = text,
   PROCEDURE = gmt_text_contained
 );
-
+*/
 CREATE OPERATOR CLASS gist_text_ops
 DEFAULT FOR TYPE text USING gist
 AS
@@ -132,11 +132,11 @@ AS
   OPERATOR  2  <=  ,
   OPERATOR  3  >=  ,
   OPERATOR  4  >   ,
-  OPERATOR  5  =   ,
+  /*OPERATOR  5  =   ,
   OPERATOR  6  #&# ,
   OPERATOR  7  #># ,
   OPERATOR  8  #<# ,
-  OPERATOR  9  <-> (gmtreekey_var, gmtreekey_var) FOR ORDER BY integer_ops,
+  OPERATOR  9  <-> (gmtreekey_var, gmtreekey_var) FOR ORDER BY integer_ops,*/
   FUNCTION  1  gmt_text_consistent (internal, text, int2, oid, internal),
   FUNCTION  2  gmt_text_union (internal, internal),
   FUNCTION  3  gmt_text_compress (internal),
