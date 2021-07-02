@@ -3,11 +3,17 @@
  */
 #ifndef __MTREE_UTILS_VAR_H__
 #define __MTREE_UTILS_VAR_H__
+#include <float.h>
+#include <limits.h>
+#include <math.h>
+
+#include "mtree_gist.h"
 
 #include "access/gist.h"
 #include "mb/pg_wchar.h"
-
-#include "mtree_gist.h"
+#include "utils/builtins.h"
+#include "utils/pg_locale.h"
+#include "utils/rel.h"
 
 /* Variable length key */
 typedef struct

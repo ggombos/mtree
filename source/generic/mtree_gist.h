@@ -4,8 +4,8 @@
 #ifndef __MTREE_GIST_H__
 #define __MTREE_GIST_H__
 
+#include "postgres.h"
 #include "access/nbtree.h"
-#include "fmgr.h"
 
 /* Indexed types */
 enum gmtree_type

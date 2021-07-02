@@ -1,13 +1,7 @@
 /*
  * contrib/mtree_gist/mtree_text.c
  */
-#include <math.h>
 
-#include "postgres.h"
-
-#include "utils/builtins.h"
-
-#include "mtree_gist.h"
 #include "mtree_utils_var.h"
 
 #ifdef PG_MODULE_MAGIC
@@ -45,11 +39,9 @@ UnionStrategy unionStrategy = Best;
 PicksplitStrategy picksplitStrategy = SamplingMinCoveringMax;
 
 PG_FUNCTION_INFO_V1(gmt_text_compress);
-PG_FUNCTION_INFO_V1(gmt_bpchar_compress);
 PG_FUNCTION_INFO_V1(gmt_text_union);
 PG_FUNCTION_INFO_V1(gmt_text_picksplit);
 PG_FUNCTION_INFO_V1(gmt_text_consistent);
-PG_FUNCTION_INFO_V1(gmt_bpchar_consistent);
 PG_FUNCTION_INFO_V1(gmt_text_penalty);
 PG_FUNCTION_INFO_V1(gmt_text_same);
 
@@ -58,108 +50,6 @@ PG_FUNCTION_INFO_V1(gmt_text_overlap);
 PG_FUNCTION_INFO_V1(gmt_text_contains);
 PG_FUNCTION_INFO_V1(gmt_text_contained);
 PG_FUNCTION_INFO_V1(gmt_text_distance_internal);
-
-PG_FUNCTION_INFO_V1(gmt_decompress);
-PG_FUNCTION_INFO_V1(gmtreekey_in);
-PG_FUNCTION_INFO_V1(gmtreekey_out);
-
-/**************************************************
- * In/Out for keys
- **************************************************/
-
-Datum gmtreekey_in(PG_FUNCTION_ARGS)
-{
-  ereport(ERROR,
-          (errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
-           errmsg("<datatype>key_in() not implemented")));
-
-  PG_RETURN_POINTER(NULL);
-}
-
-
-
-Datum gmtreekey_out(PG_FUNCTION_ARGS)
-{
-  ereport(ERROR,
-          (errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
-           errmsg("<datatype>key_out() not implemented")));
-
-  PG_RETURN_POINTER(NULL);
-}
-
-/* GiST DeCompress methods do not do anything. */
-Datum gmt_decompress(PG_FUNCTION_ARGS)
-{
-  PG_RETURN_POINTER(PG_GETARG_POINTER(0));
-}
-
-
-/* Used for key sorting */
-typedef struct
-{
-  int i;
-  GMT_VARKEY *t;
-} Vsrt;
-
-typedef struct
-{
-  const gmtree_vinfo *tinfo;
-  Oid collation;
-  FmgrInfo *flinfo;
-} gmt_vsrt_arg;
-
-PG_FUNCTION_INFO_V1(gmt_var_decompress);
-PG_FUNCTION_INFO_V1(gmt_var_fetch);
-
-Datum gmt_var_decompress(PG_FUNCTION_ARGS)
-{
-  GISTENTRY *entry = (GISTENTRY *)PG_GETARG_POINTER(0);
-  GMT_VARKEY *key = (GMT_VARKEY *)PG_DETOAST_DATUM(entry->key);
-
-  if (key != (GMT_VARKEY *)DatumGetPointer(entry->key))
-  {
-    GISTENTRY *retval = (GISTENTRY *)palloc(sizeof(GISTENTRY));
-
-    gistentryinit(*retval, PointerGetDatum(key), entry->rel, entry->page, entry->offset, false);
-
-    PG_RETURN_POINTER(retval);
-  }
-
-  PG_RETURN_POINTER(entry);
-}
-
-/* Returns a better readable representation of variable key ( sets pointer ) */
-GMT_VARKEY_R gmt_var_key_readable(const GMT_VARKEY *k)
-{
-  GMT_VARKEY_R r;
-  r.lower = (bytea *)&(((char *)k)[VARHDRSZ]);
-  if (VARSIZE(k) > (VARHDRSZ + (VARSIZE(r.lower))))
-  {
-    r.upper = (bytea *)&(((char *)k)[VARHDRSZ + INTALIGN(VARSIZE(r.lower))]);
-  }
-  else
-  {
-    r.upper = r.lower;
-  }
-  return r;
-}
-
-Datum gmt_var_fetch(PG_FUNCTION_ARGS)
-{
-  GISTENTRY *entry = (GISTENTRY *)PG_GETARG_POINTER(0);
-  GMT_VARKEY *key = (GMT_VARKEY *)PG_DETOAST_DATUM(entry->key);
-  GMT_VARKEY_R r = gmt_var_key_readable(key);
-  GISTENTRY *retval;
-
-  retval = palloc(sizeof(GISTENTRY));
-  gistentryinit(*retval, PointerGetDatum(r.lower), entry->rel, entry->page, entry->offset, true);
-
-  PG_RETURN_POINTER(retval);
-}
-
-/**************************************************
- * For comparison
- **************************************************/
 
 static bool gmt_textgt(const void* a, const void* b, Oid collation, FmgrInfo* flinfo)
 {
@@ -224,36 +114,6 @@ static gmtree_vinfo tinfo =
   NULL
 };
 
-/**************************************************
- * Useful functions
- **************************************************/
-
-Datum gmt_text_distance(PG_FUNCTION_ARGS) {
-  int asd = 1;
-  ereport(ERROR, (errcode(ERRCODE_WARNING_DYNAMIC_RESULT_SETS_RETURNED), errmsg("gmt_text_distance")));
-  PG_RETURN_POINTER(string_distance(PG_GETARG_POINTER(0), PG_GETARG_POINTER(1)));
-}
-
-Datum gmt_text_overlap(PG_FUNCTION_ARGS) {
-  ereport(ERROR, (errcode(ERRCODE_WARNING_DYNAMIC_RESULT_SETS_RETURNED), errmsg("gmt_text_overlap")));
-  PG_RETURN_POINTER(NULL);
-}
-
-Datum gmt_text_contains(PG_FUNCTION_ARGS) {
-  ereport(ERROR, (errcode(ERRCODE_WARNING_DYNAMIC_RESULT_SETS_RETURNED), errmsg("gmt_text_contains")));
-  PG_RETURN_POINTER(NULL);
-}
-
-Datum gmt_text_contained(PG_FUNCTION_ARGS) {
-  ereport(ERROR, (errcode(ERRCODE_WARNING_DYNAMIC_RESULT_SETS_RETURNED), errmsg("gmt_text_contained")));
-  PG_RETURN_POINTER(NULL);
-}
-
-Datum gmt_text_distance_internal(PG_FUNCTION_ARGS) {
-  ereport(ERROR, (errcode(ERRCODE_WARNING_DYNAMIC_RESULT_SETS_RETURNED), errmsg("gmt_text_distance_internal")));
-  PG_RETURN_POINTER(NULL);
-}
-
 int string_distance(const char* a, const char* b)
 {
   int lengthOfA = (int) strlen(a);
@@ -283,6 +143,44 @@ int string_distance(const char* a, const char* b)
   }
 
   return column[lengthOfA];
+}
+
+Datum gmt_text_distance(PG_FUNCTION_ARGS) {
+  /*ereport(ERROR, (errcode(ERRCODE_WARNING_DYNAMIC_RESULT_SETS_RETURNED), errmsg("gmt_text_distance")));*/
+  GMT_VARKEY* first = PG_GETARG_GMT_P(0);
+  GMT_VARKEY* second = PG_GETARG_GMT_P(1);
+  PG_RETURN_POINTER(string_distance(first->vl_dat, second->vl_dat));
+}
+
+Datum gmt_text_overlap(PG_FUNCTION_ARGS) {
+  /*ereport(ERROR, (errcode(ERRCODE_WARNING_DYNAMIC_RESULT_SETS_RETURNED), errmsg("gmt_text_overlap")));*/
+  GMT_VARKEY* first = PG_GETARG_GMT_P(0);
+  GMT_VARKEY* second = PG_GETARG_GMT_P(1);
+  bool result = string_distance(first->vl_dat, second->vl_dat) <= first->coveringRadius + second->coveringRadius;
+  PG_RETURN_BOOL(result);
+}
+
+Datum gmt_text_contains(PG_FUNCTION_ARGS) {
+  /*ereport(ERROR, (errcode(ERRCODE_WARNING_DYNAMIC_RESULT_SETS_RETURNED), errmsg("gmt_text_contains")));*/
+  GMT_VARKEY* first = PG_GETARG_GMT_P(0);
+  GMT_VARKEY* second = PG_GETARG_GMT_P(1);
+  bool result = first->coveringRadius >= string_distance(first->vl_dat, second->vl_dat) + second->coveringRadius;
+  PG_RETURN_BOOL(result);
+}
+
+Datum gmt_text_contained(PG_FUNCTION_ARGS) {
+  /*ereport(ERROR, (errcode(ERRCODE_WARNING_DYNAMIC_RESULT_SETS_RETURNED), errmsg("gmt_text_contained")));*/
+  GMT_VARKEY* first = PG_GETARG_GMT_P(0);
+  GMT_VARKEY* second = PG_GETARG_GMT_P(1);
+  bool result = second->coveringRadius >= string_distance(second->vl_dat, first->vl_dat) + first->coveringRadius;
+  PG_RETURN_BOOL(result);
+}
+
+Datum gmt_text_distance_internal(PG_FUNCTION_ARGS) {
+  /*ereport(ERROR, (errcode(ERRCODE_WARNING_DYNAMIC_RESULT_SETS_RETURNED), errmsg("gmt_text_distance_internal")));*/
+  GMT_VARKEY* first = PG_GETARG_GMT_P(0);
+  GMT_VARKEY* second = PG_GETARG_GMT_P(1);
+  PG_RETURN_POINTER(string_distance(first->vl_dat, second->vl_dat));
 }
 
 bool text_equals(GMT_VARKEY* first, GMT_VARKEY* second)
@@ -348,22 +246,7 @@ double get_area_overlap(int radiusOne, int radiusTwo, int distance)
   return a1 + a2;
 }
 
-/**************************************************
- * For operator classes/families
- **************************************************/
-
-
-
-/**************************************************
- * Text operations
- **************************************************/
-
 Datum gmt_text_compress(PG_FUNCTION_ARGS)
-{
-  PG_RETURN_POINTER(PG_GETARG_POINTER(0));
-}
-
-Datum gmt_bpchar_compress(PG_FUNCTION_ARGS)
 {
   PG_RETURN_POINTER(PG_GETARG_POINTER(0));
 }
@@ -373,73 +256,7 @@ Datum gmt_text_decompress(PG_FUNCTION_ARGS)
   PG_RETURN_POINTER(PG_GETARG_POINTER(0));
 }
 
-Datum gmt_bpchar_decompress(PG_FUNCTION_ARGS)
-{
-  PG_RETURN_POINTER(PG_GETARG_POINTER(0));
-}
-
 Datum gmt_text_consistent(PG_FUNCTION_ARGS)
-{
-  GISTENTRY* entry = (GISTENTRY*) PG_GETARG_POINTER(0);
-  GMT_VARKEY* query = PG_GETARG_GMT_P(1);
-  StrategyNumber strategy = (StrategyNumber) PG_GETARG_UINT16(2);
-  bool* recheck = (bool*) PG_GETARG_POINTER(4);
-  GMT_VARKEY* key = DatumGetMtreeGist(entry->key);
-  bool returnValue;
-  int distance = string_distance(key->vl_dat, query->vl_dat);
-
-  if (GIST_LEAF(entry))
-  {
-    *recheck = false;
-    switch(strategy)
-    {
-      case SameStrategyNumber:
-        returnValue = text_equals(key, query);
-        break;
-      case OverlapStrategyNumber:
-        returnValue = text_overlap(key, query, distance);
-        break;
-      case ContainsStrategyNumber:
-        returnValue = text_contains(key, query, distance);
-        break;
-      case ContainedStrategyNumber:
-        returnValue = text_contains(query, key, distance);
-        break;
-      default:
-        elog(ERROR, "Invalid consistent strategy: %distance", strategy);
-        break;
-    }
-  }
-  else
-  {
-    switch(strategy)
-    {
-      case SameStrategyNumber:
-        returnValue = text_contains(key, query, distance);
-        *recheck = true;
-        break;
-      case OverlapStrategyNumber:
-        returnValue = text_overlap(key, query, distance);
-        *recheck = !text_contains(query, key, distance);
-        break;
-      case ContainsStrategyNumber:
-        returnValue = text_contains(key, query, distance);
-        *recheck = true;
-        break;
-      case ContainedStrategyNumber:
-        returnValue = text_overlap(key, query, distance);
-        *recheck = text_contains(query, key, distance);
-        break;
-      default:
-        elog(ERROR, "Invalid consistent strategy: %distance", strategy);
-        break;
-    }
-  }
-
-  PG_RETURN_BOOL(returnValue);
-}
-
-Datum gmt_bpchar_consistent(PG_FUNCTION_ARGS)
 {
   GISTENTRY* entry = (GISTENTRY*) PG_GETARG_POINTER(0);
   GMT_VARKEY* query = PG_GETARG_GMT_P(1);

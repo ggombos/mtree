@@ -3,13 +3,7 @@
 -- Complain if script is sourced in psql, rather than via CREATE EXTENSION
 \echo Use "CREATE EXTENSION mtree_gist" to load this file. \quit
 
---
---
---
 -- type, input and output functions
---
---
---
 CREATE TYPE gmtreekey_var;
 
 CREATE FUNCTION gmtreekey_var_in(cstring)
@@ -29,29 +23,13 @@ CREATE TYPE gmtreekey_var (
 	STORAGE = EXTENDED
 );
 
---
---
---
--- text and bpchar operations
---
---
---
+-- text operations
 CREATE FUNCTION gmt_text_consistent(internal,text,int2,oid,internal)
 RETURNS bool
 AS 'MODULE_PATHNAME'
 LANGUAGE C IMMUTABLE STRICT;
 
-CREATE FUNCTION gmt_bpchar_consistent(internal,bpchar,int2,oid,internal)
-RETURNS bool
-AS 'MODULE_PATHNAME'
-LANGUAGE C IMMUTABLE STRICT;
-
 CREATE FUNCTION gmt_text_compress(internal)
-RETURNS internal
-AS 'MODULE_PATHNAME'
-LANGUAGE C IMMUTABLE STRICT;
-
-CREATE FUNCTION gmt_bpchar_compress(internal)
 RETURNS internal
 AS 'MODULE_PATHNAME'
 LANGUAGE C IMMUTABLE STRICT;
@@ -76,27 +54,27 @@ RETURNS internal
 AS 'MODULE_PATHNAME'
 LANGUAGE C IMMUTABLE STRICT;
 
-CREATE OR REPLACE FUNCTION gmt_text_distance(gmtreekey_var, gmtreekey_var)
+CREATE OR REPLACE FUNCTION gmt_text_distance(gmtreekey_var, gmtreekey_var) -- TODO
 RETURNS integer
 AS 'MODULE_PATHNAME', 'gmt_text_distance'
 LANGUAGE C IMMUTABLE STRICT;
 
-CREATE OR REPLACE FUNCTION gmt_text_overlap(gmtreekey_var, gmtreekey_var)
+CREATE OR REPLACE FUNCTION gmt_text_overlap(gmtreekey_var, gmtreekey_var) -- TODO
 RETURNS bool
 AS 'MODULE_PATHNAME', 'gmt_text_overlap'
 LANGUAGE C IMMUTABLE STRICT;
 
-CREATE OR REPLACE FUNCTION gmt_text_contains(gmtreekey_var, gmtreekey_var)
+CREATE OR REPLACE FUNCTION gmt_text_contains(gmtreekey_var, gmtreekey_var) -- TODO
 RETURNS bool
 AS 'MODULE_PATHNAME', 'gmt_text_contains'
 LANGUAGE C IMMUTABLE STRICT;
 
-CREATE OR REPLACE FUNCTION gmt_text_contained(gmtreekey_var, gmtreekey_var)
+CREATE OR REPLACE FUNCTION gmt_text_contained(gmtreekey_var, gmtreekey_var) -- TODO
 RETURNS bool
 AS 'MODULE_PATHNAME', 'gmt_text_contained'
 LANGUAGE C IMMUTABLE STRICT;
 
-CREATE OR REPLACE FUNCTION gmt_text_distance_internal(internal, gmtreekey_var, smallint, oid, internal)
+CREATE OR REPLACE FUNCTION gmt_text_distance_internal(internal, gmtreekey_var, smallint, oid, internal) -- TODO
 RETURNS float8
 AS 'MODULE_PATHNAME', 'gmt_text_distance_internal'
 LANGUAGE C IMMUTABLE STRICT;
@@ -111,14 +89,7 @@ RETURNS internal
 AS 'MODULE_PATHNAME', 'gmt_var_fetch'
 LANGUAGE C IMMUTABLE STRICT;
 
---
---
---
--- text and bpchar operators
---
---
---
-/*
+-- text operators
 CREATE OPERATOR = (
   COMMUTATOR = =,
   LEFTARG = text,
@@ -153,16 +124,19 @@ CREATE OPERATOR #<# (
   RIGHTARG = text,
   PROCEDURE = gmt_text_contained
 );
-*/
--- Create the operator class
+
 CREATE OPERATOR CLASS gist_text_ops
 DEFAULT FOR TYPE text USING gist
 AS
-  OPERATOR  1  <  ,
-  OPERATOR  2  <= ,
-  OPERATOR  3  =  ,
-  OPERATOR  4  >= ,
-  OPERATOR  5  >  ,
+  OPERATOR  1  <   ,
+  OPERATOR  2  <=  ,
+  OPERATOR  3  >=  ,
+  OPERATOR  4  >   ,
+  OPERATOR  5  =   ,
+  OPERATOR  6  #&# ,
+  OPERATOR  7  #># ,
+  OPERATOR  8  #<# ,
+  OPERATOR  9  <-> (gmtreekey_var, gmtreekey_var) FOR ORDER BY integer_ops,
   FUNCTION  1  gmt_text_consistent (internal, text, int2, oid, internal),
   FUNCTION  2  gmt_text_union (internal, internal),
   FUNCTION  3  gmt_text_compress (internal),
@@ -175,26 +149,3 @@ AS
 ALTER OPERATOR FAMILY gist_text_ops USING gist ADD
   OPERATOR  6  <> (text, text) ,
   FUNCTION  9 (text, text) gmt_var_fetch (internal) ;
-
----- Create the operator class
-CREATE OPERATOR CLASS gist_bpchar_ops
-DEFAULT FOR TYPE bpchar USING gist
-AS
-  OPERATOR  1  <  ,
-  OPERATOR  2  <= ,
-  OPERATOR  3  =  ,
-  OPERATOR  4  >= ,
-  OPERATOR  5  >  ,
-  FUNCTION  1  gmt_bpchar_consistent (internal, bpchar , int2, oid, internal),
-  FUNCTION  2  gmt_text_union (internal, internal),
-  FUNCTION  3  gmt_bpchar_compress (internal),
-  FUNCTION  4  gmt_var_decompress (internal),
-  FUNCTION  5  gmt_text_penalty (internal, internal, internal),
-  FUNCTION  6  gmt_text_picksplit (internal, internal),
-  FUNCTION  7  gmt_text_same (gmtreekey_var, gmtreekey_var, internal),
-  FUNCTION  8  gmt_text_distance_internal (internal, gmtreekey_var, smallint, oid, internal),
-  STORAGE      gmtreekey_var;
-
-ALTER OPERATOR FAMILY gist_bpchar_ops USING gist ADD
-  OPERATOR  6  <> (bpchar, bpchar) ,
-  FUNCTION  9 (bpchar, bpchar) gmt_var_fetch (internal) ;
