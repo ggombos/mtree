@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Installs the latest version of PostgreSQL from source code.
+# Installs the specified version of PostgreSQL from source code.
 
 set -e
 
@@ -89,7 +89,7 @@ function get_package_manager() {
 #######################################
 function get_info_command() {
   if [[ "apt" == "$1" ]]; then
-    echo "show"
+    echo "search"
   elif [[ "dnf" == "$1" ]]; then
     echo "info"
   elif [[ "pacman" == "$1" ]]; then
@@ -114,6 +114,7 @@ function check_prerequisites() {
   local COMMANDS=(chown cc gcc readline make md5sum tar useradd wget zlib)
   for cmd in "${COMMANDS[@]}"
   do
+    "${PACKAGE_MANAGER}" install "${cmd}"
     if [[ ! $("${PACKAGE_MANAGER}" "${SEARCH_COMMAND}" "${cmd}") > /dev/null ]]; then
       print_error "Missing prerequisite: ${cmd}"
       print_error "Install it manually, then run this script again!"
