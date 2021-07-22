@@ -24,52 +24,52 @@ CREATE TYPE gmtreekey_var (
 );
 
 -- text operations
-CREATE FUNCTION gmt_text_consistent(internal,text,int2,oid,internal)
+CREATE FUNCTION gmt_text_consistent(internal, text, int2, oid, internal)
 RETURNS bool
-AS 'MODULE_PATHNAME'
+AS 'MODULE_PATHNAME', 'gmt_text_consistent'
 LANGUAGE C IMMUTABLE STRICT;
 
 CREATE FUNCTION gmt_text_compress(internal)
 RETURNS internal
-AS 'MODULE_PATHNAME'
+AS 'MODULE_PATHNAME', 'gmt_text_compress'
 LANGUAGE C IMMUTABLE STRICT;
 
-CREATE FUNCTION gmt_text_penalty(internal,internal,internal)
+CREATE FUNCTION gmt_text_penalty(internal, internal, internal)
 RETURNS internal
-AS 'MODULE_PATHNAME'
+AS 'MODULE_PATHNAME', 'gmt_text_penalty'
 LANGUAGE C IMMUTABLE STRICT;
 
 CREATE FUNCTION gmt_text_picksplit(internal, internal)
 RETURNS internal
-AS 'MODULE_PATHNAME'
+AS 'MODULE_PATHNAME', 'gmt_text_picksplit'
 LANGUAGE C IMMUTABLE STRICT;
 
 CREATE FUNCTION gmt_text_union(internal, internal)
 RETURNS gmtreekey_var
-AS 'MODULE_PATHNAME'
+AS 'MODULE_PATHNAME', 'gmt_text_union'
 LANGUAGE C IMMUTABLE STRICT;
 
 CREATE FUNCTION gmt_text_same(gmtreekey_var, gmtreekey_var, internal)
 RETURNS internal
-AS 'MODULE_PATHNAME'
+AS 'MODULE_PATHNAME', 'gmt_text_same'
 LANGUAGE C IMMUTABLE STRICT;
 
-CREATE OR REPLACE FUNCTION gmt_text_distance(gmtreekey_var, gmtreekey_var)
+CREATE OR REPLACE FUNCTION gmt_text_distance(text, text)
 RETURNS integer
 AS 'MODULE_PATHNAME', 'gmt_text_distance'
 LANGUAGE C IMMUTABLE STRICT;
 
-CREATE OR REPLACE FUNCTION gmt_text_overlap(gmtreekey_var, gmtreekey_var)
+CREATE OR REPLACE FUNCTION gmt_text_overlap(text, text)
 RETURNS bool
 AS 'MODULE_PATHNAME', 'gmt_text_overlap'
 LANGUAGE C IMMUTABLE STRICT;
 
-CREATE OR REPLACE FUNCTION gmt_text_contains(gmtreekey_var, gmtreekey_var)
+CREATE OR REPLACE FUNCTION gmt_text_contains(text, text)
 RETURNS bool
 AS 'MODULE_PATHNAME', 'gmt_text_contains'
 LANGUAGE C IMMUTABLE STRICT;
 
-CREATE OR REPLACE FUNCTION gmt_text_contained(gmtreekey_var, gmtreekey_var)
+CREATE OR REPLACE FUNCTION gmt_text_contained(text, text)
 RETURNS bool
 AS 'MODULE_PATHNAME', 'gmt_text_contained'
 LANGUAGE C IMMUTABLE STRICT;
@@ -90,13 +90,6 @@ AS 'MODULE_PATHNAME', 'gmt_var_fetch'
 LANGUAGE C IMMUTABLE STRICT;
 
 -- text operators
-/*CREATE OPERATOR = (
-  COMMUTATOR = =,
-  LEFTARG = text,
-  RIGHTARG = text,
-  PROCEDURE = gmt_text_same
-);
-
 CREATE OPERATOR <-> (
   COMMUTATOR = <->,
   LEFTARG = text,
@@ -124,7 +117,7 @@ CREATE OPERATOR #<# (
   RIGHTARG = text,
   PROCEDURE = gmt_text_contained
 );
-*/
+
 CREATE OPERATOR CLASS gist_text_ops
 DEFAULT FOR TYPE text USING gist
 AS
@@ -132,11 +125,12 @@ AS
   OPERATOR  2  <=  ,
   OPERATOR  3  >=  ,
   OPERATOR  4  >   ,
-  /*OPERATOR  5  =   ,
+  OPERATOR  5  =   ,
   OPERATOR  6  #&# ,
   OPERATOR  7  #># ,
   OPERATOR  8  #<# ,
-  OPERATOR  9  <-> (gmtreekey_var, gmtreekey_var) FOR ORDER BY integer_ops,*/
+--OPERATOR  9  <-> (gmtreekey_var, gmtreekey_var) FOR ORDER BY integer_ops,
+--OPERATOR 10  <> (text, text),
   FUNCTION  1  gmt_text_consistent (internal, text, int2, oid, internal),
   FUNCTION  2  gmt_text_union (internal, internal),
   FUNCTION  3  gmt_text_compress (internal),
@@ -144,8 +138,5 @@ AS
   FUNCTION  5  gmt_text_penalty (internal, internal, internal),
   FUNCTION  6  gmt_text_picksplit (internal, internal),
   FUNCTION  7  gmt_text_same (gmtreekey_var, gmtreekey_var, internal),
+  FUNCTION  8 (text, text) gmt_var_fetch (internal),
   STORAGE      gmtreekey_var;
-
-ALTER OPERATOR FAMILY gist_text_ops USING gist ADD
-  OPERATOR  6  <> (text, text) ,
-  FUNCTION  9 (text, text) gmt_var_fetch (internal) ;

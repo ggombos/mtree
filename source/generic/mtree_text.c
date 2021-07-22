@@ -116,13 +116,12 @@ static gmtree_vinfo tinfo =
 
 int string_distance(const char* a, const char* b)
 {
-  int lengthOfA = (int) strlen(a);
-  int lengthOfB = (int) strlen(b);
+  const int lengthOfA = (int) strlen(a);
+  const int lengthOfB = (int) strlen(b);
   int x, y, lastDiagonal, oldDiagonal;
   int column[lengthOfA + 1];
 
-  column[0] = 0;
-  for (y = 1; y <= lengthOfA; ++y)
+  for (y = 0; y <= lengthOfA; ++y)
   {
     column[y] = y;
   }
