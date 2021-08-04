@@ -1,6 +1,3 @@
-
-
-
 # M-tree index extension for PostgreSQL
 
 ## Motivation
@@ -16,93 +13,70 @@ The original VP-tree and BK-tree implementations can be found [HERE](https://git
 ## How to use
 
 To make life easier, I created several `bash` scripts to make build and installation faster. In the following I will explain how to use them.
+### How to try M-tree index
 
-### TL;DR
-
-```sh
-bash script/install-postgresql <target-directory> <version-number>
-bash script/install-mtree <source-directory> <postgresql-directory>
-bash script/start-server <postgresql-directory>
-```
-
-### Install PostgreSQL
-
-To use a PostgreSQL index, you will obviously need a working PostgreSQL installation. You can install PostgreSQL from a package manager, but if you are brave enough, you can run my script which will build the package from source code.
+Change directory to the root folder with the normal user (zsolt).
 
 ```sh
-bash script/install-postgresql <target-directory> <version-number>
+cd /
 ```
 
-Arguments:
-+ `<target-directory>`: Path of the directory where you want to install PostgreSQL without trailing slash *(e.g. /usr/local/postgresql)*
-+ `<version-number>`: The PostgreSQL version number you want to install *(e.g. 13.1)*
-
-### Install M-tree index
-
-If you have a working PostgreSQL installation, you can install M-tree index to it. Just run the following script.
+Install M-tree index from source.
 
 ```sh
-bash script/install-mtree <source-directory> <postgresql-directory>
+sudo bash /run/media/zsolt/DATA/Development/mtree_gist/script/install
 ```
 
-Arguments:
-+ `<source-directory>`: Path of this repository's source directory without trailing slash *(e.g. /home/user/mtree/source)*
-+ `<postgresql-directory>`: Path of the directory where you installed PostgreSQL without trailing slash *(e.g. /usr/local/postgresql)*
-
-#### Uninstall M-tree index
-
-If something goes wrong or you no longer want to use our M-tree index implementation, you can simply uninstall it using the following script.
+Start server.
 
 ```sh
-bash script/uninstall-mtree <postgresql-directory>
+sudo bash /run/media/zsolt/DATA/Development/mtree_gist/script/start
 ```
 
-Arguments:
-+ `<postgresql-directory>`: Path of the directory where you installed PostgreSQL without trailing slash *(e.g. /usr/local/postgresql)*
-
-### Start server
-
-After PostgreSQL and M-tree index has been installed its time to run the server and do some intense database related stuff!
-
-```sh
-bash script/start-server <postgresql-directory>
-```
-
-Arguments:
-+ `<postgresql-directory>`: Path of the directory where you installed PostgreSQL without trailing slash *(e.g. /usr/local/postgresql)*
-
-#### Stop server
-
-If you feel that you accomplished everything in your life, you can stop the server with the following script.
-
-```sh
-bash script/stop-server <postgresql-directory>
-```
-
-Arguments:
-+ `<postgresql-directory>`: Path of the directory where you installed PostgreSQL without trailing slash *(e.g. /usr/local/postgresql)*
-
-### Create extensions and measure performance
-
-Using the index is a little bit more complicated so I can't provide scripts for this purpose, but I will show the commands you should use. You can find useful commands in `documentation` folder.
-
-First, you should switch to `postgres` user.
+Change to database user (postgres).
 
 ```sh
 su postgres
 ```
 
-After you switched user, you should create the extension you want to try out. If something goes wrong, run these commands from `psql` prompt or from `PGAdmin`.
+Get into PostgreSQL interactive terminal.
 
 ```sh
-<postgresql-directory>/bin/psql -c 'DROP EXTENSION IF EXISTS <extension-name> CASCADE'
-<postgresql-directory>/bin/psql -c 'CREATE EXTENSION <extension-name>'
+psql
 ```
 
-After you created the extension, you can run the measuring SQL script.
+Create extension.
 
 ```sh
-<postgresql-directory>/bin/psql -f <postgresql-directory>/data/measure.sql
+CREATE INDEX index_test ON Songs USING gist (data gist_text_ops);
 ```
 
-**Profit.**
+Measure performance.
+
+```sh
+\i /home/postgres/measure.sql
+```
+
+Drop extension.
+
+```sh
+DROP EXTENSION mtree_gist;
+```
+
+Get out of PostgreSQL interactive terminal.
+
+```sh
+exit
+```
+
+Change to normal user (zsolt).
+
+```sh
+su zsolt
+```
+
+Stop server.
+
+```sh
+sudo bash /run/media/zsolt/DATA/Development/mtree_gist/script/stop
+```

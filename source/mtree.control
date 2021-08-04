@@ -1,6 +1,0 @@
-# mtree extension
-comment = 'M-tree index implementation with picksplit strategy: %picksplitStrategy%'
-default_version = '1.0'
-module_pathname = '%libdir%/mtree%i%'
-relocatable = true
-trusted = true

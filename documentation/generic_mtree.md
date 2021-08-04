@@ -39,3 +39,7 @@ Declares several types to implement variable length data structures with the hel
 ### `mtree_text.c`
 
 
+
+###
+
+TODO: ltree_consistent -> strategy number hogyan működik
