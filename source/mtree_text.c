@@ -229,8 +229,8 @@ Datum mtree_text_picksplit(PG_FUNCTION_ARGS) {
 
   switch (PICKSPLIT_STRATEGY) {
     case Random:
-      leftIndex = random() % (maxOffset - 1);
-      rightIndex = (leftIndex + 1) + (random() % (maxOffset - leftIndex - 1));
+      leftIndex = ((int) random()) % (maxOffset - 1);
+      rightIndex = (leftIndex + 1) + (((int) random()) % (maxOffset - leftIndex - 1));
       break;
     case FirstTwo:
       leftIndex = 0;
@@ -264,8 +264,8 @@ Datum mtree_text_picksplit(PG_FUNCTION_ARGS) {
       break;
     case SamplingMinCoveringSum:
       for (int i = 0; i < trialCount; ++i) {
-        leftCandidateIndex = random() % (maxOffset - 1);
-        rightCandidateIndex = (leftCandidateIndex + 1) + (random() % (maxOffset - leftCandidateIndex - 1));
+        leftCandidateIndex = ((int) random()) % (maxOffset - 1);
+        rightCandidateIndex = (leftCandidateIndex + 1) + (((int) random()) % (maxOffset - leftCandidateIndex - 1));
         int leftRadius = 0, rightRadius = 0;
 
         for (int currentIndex = 0; currentIndex < maxOffset; currentIndex++) {
@@ -293,8 +293,8 @@ Datum mtree_text_picksplit(PG_FUNCTION_ARGS) {
       break;
     case SamplingMinCoveringMax:
       for (int i = 0; i < trialCount; ++i) {
-        leftCandidateIndex = random() % (maxOffset - 1);
-        rightCandidateIndex = (leftCandidateIndex + 1) + (random() % (maxOffset - leftCandidateIndex - 1));
+        leftCandidateIndex = ((int) random()) % (maxOffset - 1);
+        rightCandidateIndex = (leftCandidateIndex + 1) + (((int) random()) % (maxOffset - leftCandidateIndex - 1));
         int leftRadius = 0, rightRadius = 0;
 
         for (int currentIndex = 0; currentIndex < maxOffset; ++currentIndex) {
@@ -322,8 +322,8 @@ Datum mtree_text_picksplit(PG_FUNCTION_ARGS) {
       break;
     case SamplingMinOverlapArea:
       for (int i = 0; i < trialCount; i++) {
-        leftCandidateIndex = random() % (maxOffset - 1);
-        rightCandidateIndex = (leftCandidateIndex + 1) + (random() % (maxOffset - leftCandidateIndex - 1));
+        leftCandidateIndex = ((int) random()) % (maxOffset - 1);
+        rightCandidateIndex = (leftCandidateIndex + 1) + (((int) random()) % (maxOffset - leftCandidateIndex - 1));
         int distance = get_distance(maxOffset, entries, distances, leftCandidateIndex, rightCandidateIndex);
         int leftRadius = 0, rightRadius = 0;
 
@@ -345,7 +345,7 @@ Datum mtree_text_picksplit(PG_FUNCTION_ARGS) {
 
         double currentOverlapArea = overlap_area(leftRadius, rightRadius, distance);
         if (minOverlapArea == -1 || currentOverlapArea < minOverlapArea) {
-          minOverlapArea = currentOverlapArea;
+          minOverlapArea = (int) currentOverlapArea;
           leftIndex = leftCandidateIndex;
           rightIndex = rightCandidateIndex;
         }
@@ -353,8 +353,8 @@ Datum mtree_text_picksplit(PG_FUNCTION_ARGS) {
       break;
     case SamplingMinAreaSum:
       for (int i = 0; i < trialCount; i++) {
-        leftCandidateIndex = random() % (maxOffset - 1);
-        rightCandidateIndex = (leftCandidateIndex + 1) + (random() % (maxOffset - leftCandidateIndex - 1));
+        leftCandidateIndex = ((int) random()) % (maxOffset - 1);
+        rightCandidateIndex = (leftCandidateIndex + 1) + (((int) random()) % (maxOffset - leftCandidateIndex - 1));
         int leftRadius = 0, rightRadius = 0;
 
         for (int currentIndex = 0; currentIndex < maxOffset; currentIndex++) {
