@@ -5,8 +5,8 @@
 #include "mtree_util.h"
 
 int string_distance(char* a, char* b) {
-  int lengthOfA = strlen(a);
-  int lengthOfB = strlen(b);
+  int lengthOfA = (int) strlen(a);
+  int lengthOfB = (int) strlen(b);
   int x, y, lastDiagonal, oldDiagonal;
   int column[lengthOfA + 1];
 

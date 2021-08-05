@@ -35,10 +35,6 @@ typedef struct {
   char vl_data[FLEXIBLE_ARRAY_MEMBER];
 } mtree_text;
 
-/* TODO: Strategy should be a parameter! */
-const UnionStrategy UNION_STRATEGY = Best;
-const PicksplitStrategy PICKSPLIT_STRATEGY = Random;
-
 /* TODO: Some of these can be simplified */
 #define SameStrategyNumber      1 //  =
 #define OverlapStrategyNumber   2 // #&#

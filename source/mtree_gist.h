@@ -4,10 +4,6 @@
 #ifndef __MTREE_GIST_H__
 #define __MTREE_GIST_H__
 
-#ifdef PG_MODULE_MAGIC
-PG_MODULE_MAGIC;
-#endif
-
 typedef enum {
   First,
   Best
