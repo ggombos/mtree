@@ -27,6 +27,8 @@ function create_and_copy_so() {
   rm "${SOURCE_DIRECTORY}/mtree_text_util_tmp.c"
   rm "${SOURCE_DIRECTORY}/mtree_util_tmp.c"  
   rm "${SOURCE_DIRECTORY}/mtree_text.o"
+  rm "${SOURCE_DIRECTORY}/mtree_text_util.o"
+  rm "${SOURCE_DIRECTORY}/mtree_util.o"  
   rm "${SOURCE_DIRECTORY}/mtree_text.so"
 }
 
