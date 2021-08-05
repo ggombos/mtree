@@ -24,13 +24,13 @@ cd /
 Install M-tree index from source.
 
 ```sh
-sudo bash /run/media/zsolt/DATA/Development/mtree_gist/script/install
+sudo bash /run/media/zsolt/DATA/Development/mtree_gist/script/install.sh
 ```
 
 Start server.
 
 ```sh
-sudo bash /run/media/zsolt/DATA/Development/mtree_gist/script/start
+sudo bash /run/media/zsolt/DATA/Development/mtree_gist/script/start.sh
 ```
 
 Change to database user (postgres).
@@ -47,19 +47,25 @@ psql
 
 Create extension.
 
-```sh
-CREATE INDEX index_test ON Songs USING gist (data gist_text_ops);
+```sql
+CREATE EXTENSION mtree_gist;
+```
+
+Create index.
+
+```sql
+CREATE INDEX index_test ON Songs USING gist (data mtree_text_opclass);
 ```
 
 Measure performance.
 
-```sh
+```sql
 \i /home/postgres/measure.sql
 ```
 
 Drop extension.
 
-```sh
+```sql
 DROP EXTENSION mtree_gist;
 ```
 
@@ -78,5 +84,5 @@ su zsolt
 Stop server.
 
 ```sh
-sudo bash /run/media/zsolt/DATA/Development/mtree_gist/script/stop
+sudo bash /run/media/zsolt/DATA/Development/mtree_gist/script/stop.sh
 ```

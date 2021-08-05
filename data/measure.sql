@@ -3,7 +3,7 @@
 DROP TABLE IF EXISTS Songs;
 CREATE TABLE Songs (
     x    INTEGER,
-    data text
+    data mtree_text
 );
 COPY Songs(x, data) FROM '/home/postgres/1000.csv' DELIMITER ',' CSV HEADER;
 
@@ -12,7 +12,7 @@ SET enable_seqscan = off;
 \timing on
 
 \echo '#region Create index:'
-CREATE INDEX index_test ON Songs USING gist (data gist_text_ops);
+CREATE INDEX index_test ON Songs USING gist (data mtree_text_opclass);
 \echo '#endregion'
 
 \echo '#region Range based query - short - small:'
@@ -121,4 +121,8 @@ EXPLAIN ANALYZE SELECT x, data, (data <-> 'gaggaggagfedefedc') AS dst FROM Songs
 
 \echo '#region Drop index:'
 DROP INDEX index_test;
+\echo '#endregion'
+
+\echo '#region Drop table:'
+DROP TABLE IF EXISTS Songs;
 \echo '#endregion'
