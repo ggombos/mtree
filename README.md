@@ -13,76 +13,36 @@ The original VP-tree and BK-tree implementations can be found [HERE](https://git
 ## How to use
 
 To make life easier, I created several `bash` scripts to make build and installation faster. In the following I will explain how to use them.
+
 ### How to try M-tree index
 
-Change directory to the root folder with the normal user (zsolt).
+Run the following commands with your default user:
 
-```sh
-cd /
+```bash
+$ cd /
+$ sudo ./script/install.sh
 ```
 
-Install M-tree index from source.
+Open another terminal window and run the following commands:
 
-```sh
-sudo bash /run/media/zsolt/DATA/Development/mtree_gist/script/install.sh
+```bash
+$ sudo -iu postgres
+$ sudo ./script/start.sh
+$ psql
 ```
 
-Start server.
-
-```sh
-sudo bash /run/media/zsolt/DATA/Development/mtree_gist/script/start.sh
-```
-
-Change to database user (postgres).
-
-```sh
-su postgres
-```
-
-Get into PostgreSQL interactive terminal.
-
-```sh
-psql
-```
-
-Create extension.
+At this point your terminal will change, because you will use the `PostgreSQL` interactive terminal. Please note, that the `postgres` user should own the specified file.
 
 ```sql
-CREATE EXTENSION mtree_gist;
+> DROP EXTENSION IF EXISTS mtree_gist;
+> CREATE EXTENSION mtree_gist;
+> \i <absolute-path-to-sql-file>
+> DROP EXTENSION mtree_gist;
+> exit
 ```
 
-Create index.
+Run the following command:
 
-```sql
-CREATE INDEX index_test ON Songs USING gist (data mtree_text_opclass);
-```
-
-Measure performance.
-
-```sql
-\i /home/postgres/measure.sql
-```
-
-Drop extension.
-
-```sql
-DROP EXTENSION mtree_gist;
-```
-
-Get out of PostgreSQL interactive terminal.
-
-```sh
-exit
-```
-
-Change to normal user (zsolt).
-
-```sh
-su zsolt
-```
-
-Stop server.
-
-```sh
-sudo bash /run/media/zsolt/DATA/Development/mtree_gist/script/stop.sh
+```bash
+$ sudo ./script/stop.sh
 ```

@@ -1,19 +1,12 @@
 #!/bin/bash
-#
-# Installs the generic PostgreSQL extension.
 
-# Source code directory of the M-tree index
-readonly SOURCE_DIRECTORY="/run/media/zsolt/DATA/Development/mtree_gist/source"
-# Include directory
+set -e
+
+readonly SOURCE_DIRECTORY="/home/zsolt/DATA/Development/mtree_gist/source"
 readonly POSTGRESQL_INCLUDE_DIRECTORY="/usr/include/postgresql/server"
-# PostgreSQL home of SQL and control files
 readonly POSTGRESQL_EXTENSION_DIRECTORY="/usr/share/postgresql/extension"
-# PostgreSQL home of shared object libraries
 readonly POSTGRESQL_LIBRARY_DIRECTORY="/usr/lib/postgresql"
 
-#
-# Creates shared object library from the generic source code
-#
 function create_and_copy_so() {
   cp "${SOURCE_DIRECTORY}/mtree_text.c" "${SOURCE_DIRECTORY}/mtree_text_tmp.c"
   cc -fPIC -c -I "${POSTGRESQL_INCLUDE_DIRECTORY}" "${SOURCE_DIRECTORY}/mtree_text_tmp.c" -o "${SOURCE_DIRECTORY}/mtree_text.o"
@@ -25,16 +18,13 @@ function create_and_copy_so() {
   cp "${SOURCE_DIRECTORY}/mtree_text.so" "${POSTGRESQL_LIBRARY_DIRECTORY}/mtree_gist.so"
   rm "${SOURCE_DIRECTORY}/mtree_text_tmp.c"
   rm "${SOURCE_DIRECTORY}/mtree_text_util_tmp.c"
-  rm "${SOURCE_DIRECTORY}/mtree_util_tmp.c"  
+  rm "${SOURCE_DIRECTORY}/mtree_util_tmp.c"
   rm "${SOURCE_DIRECTORY}/mtree_text.o"
   rm "${SOURCE_DIRECTORY}/mtree_text_util.o"
-  rm "${SOURCE_DIRECTORY}/mtree_util.o"  
+  rm "${SOURCE_DIRECTORY}/mtree_util.o"
   rm "${SOURCE_DIRECTORY}/mtree_text.so"
 }
 
-#
-#
-#
 function copy_sql_and_control() {
   cp "${SOURCE_DIRECTORY}/mtree_gist--1.0.sql" "${POSTGRESQL_EXTENSION_DIRECTORY}/mtree_gist--1.0.sql"
   cp "${SOURCE_DIRECTORY}/mtree_gist.control" "${SOURCE_DIRECTORY}/mtree_gist_tmp.control"
