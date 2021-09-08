@@ -153,7 +153,7 @@ AS
   OPERATOR 2 #&# ,
   OPERATOR 3 #># ,
   OPERATOR 4 #<# ,
-  OPERATOR 5 <-> (mtree_text, mtree_text) FOR ORDER BY integer_ops,
+  OPERATOR 5 <-> (mtree_text, mtree_text) FOR ORDER BY pg_catalog.integer_ops,
   FUNCTION 1 mtree_text_consistent (internal, mtree_text, smallint, oid, internal),
   FUNCTION 2 mtree_text_union (internal, internal),
   FUNCTION 3 mtree_text_compress (internal),

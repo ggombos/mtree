@@ -17,8 +17,8 @@ bool mtree_text_overlap_distance(mtree_text* first, mtree_text* second, int dist
   return distance <= first->coveringRadius + second->coveringRadius;
 }
 
-bool mtree_text_contains_distance(mtree_text* big, mtree_text* small, int distance) {
-  return big->coveringRadius >= distance + small->coveringRadius;
+bool mtree_text_contains_distance(mtree_text* first, mtree_text* second, int distance) {
+  return first->coveringRadius >= distance + second->coveringRadius;
 }
 
 bool mtree_text_contained_distance(mtree_text* first, mtree_text* second, int distance) {
@@ -42,8 +42,8 @@ bool mtree_text_overlap_wrapper(mtree_text* first, mtree_text* second) {
   return mtree_text_overlap_distance(first, second, mtree_text_string_distance(first, second));
 }
 
-bool mtree_text_contains_wrapper(mtree_text* big, mtree_text* small) {
-  return mtree_text_contains_distance(big, small, mtree_text_string_distance(big, small));
+bool mtree_text_contains_wrapper(mtree_text* first, mtree_text* second) {
+  return mtree_text_contains_distance(first, second, mtree_text_string_distance(first, second));
 }
 
 bool mtree_text_contained_wrapper(mtree_text* first, mtree_text* second) {

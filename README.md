@@ -34,10 +34,10 @@ $ psql
 At this point your terminal will change, because you will use the `PostgreSQL` interactive terminal. Please note, that the `postgres` user should own the specified file.
 
 ```sql
-> DROP EXTENSION IF EXISTS mtree_gist;
+> DROP EXTENSION IF EXISTS mtree_gist CASCADE;
 > CREATE EXTENSION mtree_gist;
 > \i <absolute-path-to-sql-file>
-> DROP EXTENSION mtree_gist;
+> DROP EXTENSION mtree_gist CASCADE;
 > exit
 ```
 

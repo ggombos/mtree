@@ -49,7 +49,7 @@ Datum mtree_text_input(PG_FUNCTION_ARGS) {
     coveringRadius = atoi(number);
   }
 
-  size_t stringLength = strlen(string); /* TODO: int -> size_t (IS IT OK?) */
+  size_t stringLength = strlen(string);
   mtree_text* result = (mtree_text*) palloc(OWNHDRSZ + stringLength * sizeof(char) + 1);
   result->coveringRadius = coveringRadius;
   result->parentDistance = 0;
@@ -69,7 +69,7 @@ Datum mtree_text_output(PG_FUNCTION_ARGS) {
   if (text->coveringRadius == 0) {
     result = psprintf("%s", text->vl_data);
   } else {
-    result = psprintf("%distance|%s", text->coveringRadius, text->vl_data);
+    result = psprintf("distance|%d data|%s", text->coveringRadius, text->vl_data);
   }
 
   PG_RETURN_CSTRING(result);
@@ -100,7 +100,7 @@ Datum mtree_text_consistent(PG_FUNCTION_ARGS) {
         returnValue = mtree_text_contained_distance(key, query, distance);
         break;
       default:
-        elog(ERROR, "Invalid consistent strategy: %distance", strategy);
+        elog(ERROR, "Invalid consistent strategy: %d", strategy);
         break;
     }
   } else {
@@ -122,7 +122,7 @@ Datum mtree_text_consistent(PG_FUNCTION_ARGS) {
         *recheck = !mtree_text_contained_distance(key, query, distance);
         break;
       default:
-        elog(ERROR, "Invalid consistent strategy: %distance", strategy);
+        elog(ERROR, "Invalid consistent strategy: %d", strategy);
         break;
     }
   }
@@ -150,7 +150,7 @@ Datum mtree_text_union(PG_FUNCTION_ARGS) {
       searchRange = ranges;
       break;
     default:
-      elog(ERROR, "Invalid union strategy: %distance", UNION_STRATEGY);
+      elog(ERROR, "Invalid union strategy: %d", UNION_STRATEGY);
       break;
   }
 
