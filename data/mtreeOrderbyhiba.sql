@@ -12,4 +12,4 @@ CREATE INDEX fingerprint2_gist_index ON fingerprints2 USING gist (hash_gist mtre
 
 SET enable_seqscan = off;
 
-SELECT song_fk, hash, offset2, (hash_gist <-> 'a3272361800000000000') AS dst FROM fingerprints2 ORDER BY dst LIMIT 30;
+SELECT song_fk, hash, offset2, (hash_gist <-> 'a3272361800000000000') AS dst FROM fingerprints2 ORDER BY dst USING LIMIT 30;

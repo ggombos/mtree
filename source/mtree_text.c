@@ -36,6 +36,7 @@ PG_FUNCTION_INFO_V1(mtree_text_contained);
 PG_FUNCTION_INFO_V1(mtree_text_equals_first);
 
 Datum mtree_text_input(PG_FUNCTION_ARGS) {
+  /*elog(INFO, "mtree_text_input");*/
   char* string = PG_GETARG_CSTRING(0);
   int coveringRadius = 0;
 
@@ -440,9 +441,11 @@ Datum mtree_text_distance_float(PG_FUNCTION_ARGS) {
   GISTENTRY* entry = (GISTENTRY*) PG_GETARG_POINTER(0);
   mtree_text* query = PG_GETARG_MTREE_TEXT_P(1);
   mtree_text* key = DatumGetMtreeText(entry->key);
+  elog(INFO, "query: %s  key: %s  distance: %d", query->vl_data, key->vl_data, mtree_text_string_distance(query, key));
+  PG_RETURN_INT32(mtree_text_string_distance(query, key));/*
   double returnValue = mtree_text_string_distance(query, key);
 
-  PG_RETURN_FLOAT8(returnValue);
+  PG_RETURN_FLOAT8(returnValue);*/
 }
 
 Datum mtree_text_distance(PG_FUNCTION_ARGS) {
@@ -461,6 +464,7 @@ Datum mtree_text_overlap(PG_FUNCTION_ARGS) {
 }
 
 Datum mtree_text_contains(PG_FUNCTION_ARGS) {
+  elog(INFO, "mtree_text_contains");
   mtree_text* first = PG_GETARG_MTREE_TEXT_P(0);
   mtree_text* second = PG_GETARG_MTREE_TEXT_P(1);
   bool result = mtree_text_contains_wrapper(first, second);

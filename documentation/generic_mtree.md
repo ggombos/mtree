@@ -1,45 +1,33 @@
-# Generic M-tree index in PostgreSQL
+# TODO
 
-This is the documentation of the generalized M-tree index in PostgreSQL.
-This implementation is based on the official B-tree index implementation.
+- A coveringRadius egy hekkelés, hogyan működik a ranged query? --> more like rangeRadius
 
-## Our target
+Order by hiba:
+- be kell billenteni az isOrdered kapcsolót (csak tipp, utána kell nézni)
+- az adat elején lévő intet range-el kellene kiváltani !!!!!!
 
-We want to implement an M-tree based index extension supporting various data types.
+## Stuff happened since last week
 
-## File contents
+Szakdolgozat:
++ https://www.inf.elte.hu/content/programtervezo-informatikus-autonomrendszer-informatikus-msc-diplomamunka-tudnivalok.t.2946?m=510
++ https://www.inf.elte.hu/content/zarovizsga-menetrend.t.1072?m=140y
++ 3 tárgy amelynek köze van a dolgozathoz; legalább egy kötelező legyen.
++ https://www.inf.elte.hu/dstore/document/1157/PTI_MSc_2018%20Szoftvertechnol%C3%B3gia%20nappali%20tagozat%202021%20febru%C3%A1r-m%C3%A1rcius.pdf
++ Témavezető: Gergő
 
-In the following we explain the source file contents.
+ORDER BY hiba:
++ A hiba csak ASC esetében jön elő (ez a default).
++ Furcsán hívódnak a függvények, a contains/contained egyáltalán nem, ami minimum gyanús, hiszen az operátornak hívnia kellene.
 
-### `mtree_gist--1.0.sql`
+Range:
++ https://www.alibabacloud.com/blog/range-types-in-postgresql-and-gist-indexes_595128
++ Pontosan hogyan nézzen ki ez a range érték?
++ coveringRadius helyett rangeRadius -> tehát akkor a "legkissebb" és "legnagyobb" elemmel akarjuk jelölni az intervallumot?
 
-Creates the SQL types, functions and operators (operator families) to support GiST implementation of the index.
+## New stuff on the meeting
 
-### `mtree_gist.h`
-
-Declares all the supported types.
-List of all supported types:
-
-- `int2`
-- `text`
-
-### `mtree_gist.c`
-
-Implements the generalized `input`, `output` and `decompress` methods.
-In our case, decompress doesn't do anything useful.
-
-### `mtree_utils_var.h`
-
-Declares several types to implement variable length data structures with the help of `varlena` data type. The code often referst to it by the `bytea` alias.
-
-### `mtree_utils_var.c`
-
-
-
-### `mtree_text.c`
-
-
-
-###
-
-TODO: ltree_consistent -> strategy number hogyan működik
++ Function 8 mire jó?
++ GiST DESC-nél az order by-nak van valami oka, hogy nem működik?
++ DESC-nél nem az indexet használja
++ cube extension -> isLeaf | mi ilyet nem használunk, kellene? befolyásolhatja a számítást
++

@@ -20,14 +20,14 @@ Run the following commands with your default user:
 
 ```bash
 $ cd /
-$ sudo ./script/install.sh
+$ sudo ./../script/install.sh
 ```
 
 Open another terminal window and run the following commands:
 
 ```bash
 $ sudo -iu postgres
-$ sudo ./script/start.sh
+$ sudo ./../script/start.sh
 $ psql
 ```
 
@@ -44,5 +44,5 @@ At this point your terminal will change, because you will use the `PostgreSQL` i
 Run the following command:
 
 ```bash
-$ sudo ./script/stop.sh
+$ sudo ./../script/stop.sh
 ```
