@@ -441,7 +441,8 @@ Datum mtree_text_distance_float(PG_FUNCTION_ARGS) {
   GISTENTRY* entry = (GISTENTRY*) PG_GETARG_POINTER(0);
   mtree_text* query = PG_GETARG_MTREE_TEXT_P(1);
   mtree_text* key = DatumGetMtreeText(entry->key);
-  elog(INFO, "query: %s  key: %s  distance: %d", query->vl_data, key->vl_data, mtree_text_string_distance(query, key));
+  bool isLeaf = GistPageIsLeaf(entry->page);
+  elog(INFO, "query: %s  key: %s  distance: %d  isLeaf: %d", query->vl_data, key->vl_data, mtree_text_string_distance(query, key), isLeaf);
   PG_RETURN_INT32(mtree_text_string_distance(query, key));/*
   double returnValue = mtree_text_string_distance(query, key);
 
