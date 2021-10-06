@@ -70,13 +70,14 @@ LANGUAGE C STRICT IMMUTABLE PARALLEL SAFE;
 
 -- [Optional] Distance function (internal)
 CREATE OR REPLACE FUNCTION mtree_text_distance_float(internal, mtree_text, smallint, oid, internal)
-RETURNS float8
+RETURNS int4
 AS 'MODULE_PATHNAME', 'mtree_text_distance_float'
 LANGUAGE C STRICT IMMUTABLE PARALLEL SAFE;
 
+
 -- [Other] Distance function
 CREATE OR REPLACE FUNCTION mtree_text_distance(mtree_text, mtree_text)
-RETURNS integer
+RETURNS float8
 AS 'MODULE_PATHNAME', 'mtree_text_distance'
 LANGUAGE C STRICT IMMUTABLE PARALLEL SAFE;
 
@@ -153,7 +154,7 @@ AS
   OPERATOR 2 #&# ,
   OPERATOR 3 #># ,
   OPERATOR 4 #<# ,
-  OPERATOR 5 <-> (mtree_text, mtree_text) FOR ORDER BY pg_catalog.integer_ops,
+  OPERATOR 15 <-> (mtree_text, mtree_text) FOR ORDER BY float_ops,
   FUNCTION 1 mtree_text_consistent (internal, mtree_text, smallint, oid, internal),
   FUNCTION 2 mtree_text_union (internal, internal),
   FUNCTION 3 mtree_text_compress (internal),
