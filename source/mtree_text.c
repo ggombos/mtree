@@ -36,7 +36,7 @@ PG_FUNCTION_INFO_V1(mtree_text_contained);
 PG_FUNCTION_INFO_V1(mtree_text_equals_first);
 
 Datum mtree_text_input(PG_FUNCTION_ARGS) {
-  /*elog(INFO, "mtree_text_input");*/
+  // elog(INFO, "mtree_text_input");
   char* string = PG_GETARG_CSTRING(0);
   int coveringRadius = 0;
 
@@ -64,6 +64,7 @@ Datum mtree_text_input(PG_FUNCTION_ARGS) {
 }
 
 Datum mtree_text_output(PG_FUNCTION_ARGS) {
+  elog(INFO, "mtree_text_output");
   mtree_text* text = PG_GETARG_MTREE_TEXT_P(0);
   char* result;
 
@@ -77,6 +78,8 @@ Datum mtree_text_output(PG_FUNCTION_ARGS) {
 }
 
 Datum mtree_text_consistent(PG_FUNCTION_ARGS) {
+  elog(INFO, "mtree_text_consistent");
+
   GISTENTRY* entry = (GISTENTRY*) PG_GETARG_POINTER(0);
   mtree_text* query = PG_GETARG_MTREE_TEXT_P(1);
   StrategyNumber strategy = (StrategyNumber) PG_GETARG_UINT16(2);
@@ -132,6 +135,7 @@ Datum mtree_text_consistent(PG_FUNCTION_ARGS) {
 }
 
 Datum mtree_text_union(PG_FUNCTION_ARGS) {
+  // elog(INFO, "mtree_text_union");
   GistEntryVector* entryVector = (GistEntryVector*) PG_GETARG_POINTER(0);
   GISTENTRY* entry = entryVector->vector;
   int ranges = entryVector->n;
@@ -185,6 +189,7 @@ Datum mtree_text_union(PG_FUNCTION_ARGS) {
 }
 
 Datum mtree_text_same(PG_FUNCTION_ARGS) {
+  elog(INFO, "mtree_text_same");
   mtree_text* first = PG_GETARG_MTREE_TEXT_P(0);
   mtree_text* second = PG_GETARG_MTREE_TEXT_P(1);
   bool result = mtree_text_equals(first, second);
@@ -192,6 +197,7 @@ Datum mtree_text_same(PG_FUNCTION_ARGS) {
 }
 
 Datum mtree_text_penalty(PG_FUNCTION_ARGS) {
+  // elog(INFO, "mtree_text_penalty");
   GISTENTRY* originalEntry = (GISTENTRY*) PG_GETARG_POINTER(0);
   GISTENTRY* newEntry = (GISTENTRY*) PG_GETARG_POINTER(1);
   float* penalty = (float*) PG_GETARG_POINTER(2);
@@ -206,6 +212,8 @@ Datum mtree_text_penalty(PG_FUNCTION_ARGS) {
 }
 
 Datum mtree_text_picksplit(PG_FUNCTION_ARGS) {
+  // elog(INFO, "mtree_text_picksplit");
+
   GistEntryVector* entryVector = (GistEntryVector*) PG_GETARG_POINTER(0);
   GIST_SPLITVEC* vector = (GIST_SPLITVEC*) PG_GETARG_POINTER(1);
   OffsetNumber maxOffset = (OffsetNumber) entryVector->n - 1;
@@ -442,18 +450,31 @@ Datum mtree_text_distance_float(PG_FUNCTION_ARGS) {
   mtree_text* query = PG_GETARG_MTREE_TEXT_P(1);
   mtree_text* key = DatumGetMtreeText(entry->key);
   bool isLeaf = GistPageIsLeaf(entry->page);
-  elog(INFO, "query: %s  key: %s  distance: %d  isLeaf: %d", query->vl_data, key->vl_data, mtree_text_string_distance(query, key), isLeaf);
-  PG_RETURN_INT32(mtree_text_string_distance(query, key));/*
-  double returnValue = mtree_text_string_distance(query, key);
+  bool *recheck = (bool *) PG_GETARG_POINTER(4);
+  
+  if (isLeaf) {
+	  *recheck = true;
+  } else {
+	  *recheck = false;
+  }
+  
+  // elog(INFO, "query: %s  key: %s  distance: %d  isLeaf: %d", query->vl_data, key->vl_data, mtree_text_string_distance(query, key), isLeaf);
+  // PG_RETURN_INT32(mtree_text_string_distance(query, key));
+  double returnValue = (double)mtree_text_string_distance(query, key);
 
-  PG_RETURN_FLOAT8(returnValue);*/
+  PG_RETURN_FLOAT4(returnValue);
 }
 
 Datum mtree_text_distance(PG_FUNCTION_ARGS) {
   mtree_text* first = PG_GETARG_MTREE_TEXT_P(0);
   mtree_text* second = PG_GETARG_MTREE_TEXT_P(1);
+  // elog(INFO, "first: %s  second: %s  distance: %f  ", first->vl_data, second->vl_data, (float)mtree_text_string_distance(first, second));
+  
+  //itt kellene hogy ha level adja vissza a tavolsagot
+  //ha nem level akkor adja vissza az alatta levo minimum tavolsagot
 
-  PG_RETURN_INT32(mtree_text_string_distance(first, second));
+  // PG_RETURN_INT32(mtree_text_string_distance(first, second));
+  PG_RETURN_FLOAT8((float)mtree_text_string_distance(first, second));
 }
 
 Datum mtree_text_overlap(PG_FUNCTION_ARGS) {
@@ -474,6 +495,7 @@ Datum mtree_text_contains(PG_FUNCTION_ARGS) {
 }
 
 Datum mtree_text_contained(PG_FUNCTION_ARGS) {
+  elog(INFO, "mtree_text_containd");
   mtree_text* first = PG_GETARG_MTREE_TEXT_P(0);
   mtree_text* second = PG_GETARG_MTREE_TEXT_P(1);
   bool result = mtree_text_contained_wrapper(first, second);
