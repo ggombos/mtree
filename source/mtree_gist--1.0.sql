@@ -70,10 +70,9 @@ LANGUAGE C STRICT IMMUTABLE PARALLEL SAFE;
 
 -- [Optional] Distance function (internal)
 CREATE OR REPLACE FUNCTION mtree_text_distance_float(internal, mtree_text, smallint, oid, internal)
-RETURNS int4
+RETURNS float8
 AS 'MODULE_PATHNAME', 'mtree_text_distance_float'
 LANGUAGE C STRICT IMMUTABLE PARALLEL SAFE;
-
 
 -- [Other] Distance function
 CREATE OR REPLACE FUNCTION mtree_text_distance(mtree_text, mtree_text)

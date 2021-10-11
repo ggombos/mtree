@@ -451,30 +451,24 @@ Datum mtree_text_distance_float(PG_FUNCTION_ARGS) {
   mtree_text* key = DatumGetMtreeText(entry->key);
   bool isLeaf = GistPageIsLeaf(entry->page);
   bool *recheck = (bool *) PG_GETARG_POINTER(4);
-  
+
   if (isLeaf) {
 	  *recheck = true;
   } else {
 	  *recheck = false;
   }
-  
-  // elog(INFO, "query: %s  key: %s  distance: %d  isLeaf: %d", query->vl_data, key->vl_data, mtree_text_string_distance(query, key), isLeaf);
-  // PG_RETURN_INT32(mtree_text_string_distance(query, key));
-  double returnValue = (double)mtree_text_string_distance(query, key);
 
-  PG_RETURN_FLOAT4(returnValue);
+  PG_RETURN_FLOAT8(mtree_text_string_distance(query, key));
 }
 
 Datum mtree_text_distance(PG_FUNCTION_ARGS) {
   mtree_text* first = PG_GETARG_MTREE_TEXT_P(0);
   mtree_text* second = PG_GETARG_MTREE_TEXT_P(1);
-  // elog(INFO, "first: %s  second: %s  distance: %f  ", first->vl_data, second->vl_data, (float)mtree_text_string_distance(first, second));
-  
+
   //itt kellene hogy ha level adja vissza a tavolsagot
   //ha nem level akkor adja vissza az alatta levo minimum tavolsagot
 
-  // PG_RETURN_INT32(mtree_text_string_distance(first, second));
-  PG_RETURN_FLOAT8((float)mtree_text_string_distance(first, second));
+  PG_RETURN_FLOAT8(mtree_text_string_distance(first, second));
 }
 
 Datum mtree_text_overlap(PG_FUNCTION_ARGS) {
