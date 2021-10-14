@@ -13,7 +13,7 @@ PG_MODULE_MAGIC;
 
 /* TODO: Strategy should be a parameter! */
 const UnionStrategy UNION_STRATEGY = Best;
-const PicksplitStrategy PICKSPLIT_STRATEGY = Random;
+const PicksplitStrategy PICKSPLIT_STRATEGY = SamplingMinOverlapArea;
 
 PG_FUNCTION_INFO_V1(mtree_text_input);
 PG_FUNCTION_INFO_V1(mtree_text_output);
@@ -36,7 +36,7 @@ PG_FUNCTION_INFO_V1(mtree_text_contained);
 PG_FUNCTION_INFO_V1(mtree_text_equals_first);
 
 Datum mtree_text_input(PG_FUNCTION_ARGS) {
-  // elog(INFO, "mtree_text_input");
+  /* elog(INFO, "mtree_text_input"); */
   char* string = PG_GETARG_CSTRING(0);
   int coveringRadius = 0;
 
@@ -64,7 +64,7 @@ Datum mtree_text_input(PG_FUNCTION_ARGS) {
 }
 
 Datum mtree_text_output(PG_FUNCTION_ARGS) {
-  elog(INFO, "mtree_text_output");
+  /* elog(INFO, "mtree_text_output"); */
   mtree_text* text = PG_GETARG_MTREE_TEXT_P(0);
   char* result;
 
@@ -78,7 +78,7 @@ Datum mtree_text_output(PG_FUNCTION_ARGS) {
 }
 
 Datum mtree_text_consistent(PG_FUNCTION_ARGS) {
-  elog(INFO, "mtree_text_consistent");
+  /* elog(INFO, "mtree_text_consistent"); */
 
   GISTENTRY* entry = (GISTENTRY*) PG_GETARG_POINTER(0);
   mtree_text* query = PG_GETARG_MTREE_TEXT_P(1);
@@ -135,7 +135,7 @@ Datum mtree_text_consistent(PG_FUNCTION_ARGS) {
 }
 
 Datum mtree_text_union(PG_FUNCTION_ARGS) {
-  // elog(INFO, "mtree_text_union");
+  /* elog(INFO, "mtree_text_union"); */
   GistEntryVector* entryVector = (GistEntryVector*) PG_GETARG_POINTER(0);
   GISTENTRY* entry = entryVector->vector;
   int ranges = entryVector->n;
@@ -189,7 +189,7 @@ Datum mtree_text_union(PG_FUNCTION_ARGS) {
 }
 
 Datum mtree_text_same(PG_FUNCTION_ARGS) {
-  elog(INFO, "mtree_text_same");
+  /* elog(INFO, "mtree_text_same"); */
   mtree_text* first = PG_GETARG_MTREE_TEXT_P(0);
   mtree_text* second = PG_GETARG_MTREE_TEXT_P(1);
   bool result = mtree_text_equals(first, second);
@@ -197,7 +197,7 @@ Datum mtree_text_same(PG_FUNCTION_ARGS) {
 }
 
 Datum mtree_text_penalty(PG_FUNCTION_ARGS) {
-  // elog(INFO, "mtree_text_penalty");
+  /* elog(INFO, "mtree_text_penalty"); */
   GISTENTRY* originalEntry = (GISTENTRY*) PG_GETARG_POINTER(0);
   GISTENTRY* newEntry = (GISTENTRY*) PG_GETARG_POINTER(1);
   float* penalty = (float*) PG_GETARG_POINTER(2);
@@ -212,8 +212,7 @@ Datum mtree_text_penalty(PG_FUNCTION_ARGS) {
 }
 
 Datum mtree_text_picksplit(PG_FUNCTION_ARGS) {
-  // elog(INFO, "mtree_text_picksplit");
-
+  /* elog(INFO, "mtree_text_picksplit"); */
   GistEntryVector* entryVector = (GistEntryVector*) PG_GETARG_POINTER(0);
   GIST_SPLITVEC* vector = (GIST_SPLITVEC*) PG_GETARG_POINTER(1);
   OffsetNumber maxOffset = (OffsetNumber) entryVector->n - 1;
@@ -438,40 +437,41 @@ Datum mtree_text_picksplit(PG_FUNCTION_ARGS) {
 }
 
 Datum mtree_text_compress(PG_FUNCTION_ARGS) {
+  /* elog(INFO, "mtree_text_compress"); */
   PG_RETURN_POINTER(PG_GETARG_POINTER(0));
 }
 
 Datum mtree_text_decompress(PG_FUNCTION_ARGS) {
+  /* elog(INFO, "mtree_text_decompress"); */
   PG_RETURN_POINTER(PG_GETARG_POINTER(0));
 }
 
 Datum mtree_text_distance_float(PG_FUNCTION_ARGS) {
+  /* elog(INFO, "mtree_text_distance_float"); */
   GISTENTRY* entry = (GISTENTRY*) PG_GETARG_POINTER(0);
   mtree_text* query = PG_GETARG_MTREE_TEXT_P(1);
   mtree_text* key = DatumGetMtreeText(entry->key);
   bool isLeaf = GistPageIsLeaf(entry->page);
   bool *recheck = (bool *) PG_GETARG_POINTER(4);
 
-  if (isLeaf) {
-	  *recheck = true;
-  } else {
-	  *recheck = false;
-  }
-
   PG_RETURN_FLOAT8(mtree_text_string_distance(query, key));
 }
 
 Datum mtree_text_distance(PG_FUNCTION_ARGS) {
+  /* elog(INFO, "mtree_text_distance"); */
   mtree_text* first = PG_GETARG_MTREE_TEXT_P(0);
   mtree_text* second = PG_GETARG_MTREE_TEXT_P(1);
 
-  //itt kellene hogy ha level adja vissza a tavolsagot
-  //ha nem level akkor adja vissza az alatta levo minimum tavolsagot
+  /*
+    leaf     -> return distance
+    non-leaf -> return distance to closest children
+  */
 
   PG_RETURN_FLOAT8(mtree_text_string_distance(first, second));
 }
 
 Datum mtree_text_overlap(PG_FUNCTION_ARGS) {
+  /* elog(INFO, "mtree_text_overlap"); */
   mtree_text* first = PG_GETARG_MTREE_TEXT_P(0);
   mtree_text* second = PG_GETARG_MTREE_TEXT_P(1);
   bool result = mtree_text_overlap_wrapper(first, second);
@@ -480,7 +480,7 @@ Datum mtree_text_overlap(PG_FUNCTION_ARGS) {
 }
 
 Datum mtree_text_contains(PG_FUNCTION_ARGS) {
-  elog(INFO, "mtree_text_contains");
+  /* elog(INFO, "mtree_text_contains"); */
   mtree_text* first = PG_GETARG_MTREE_TEXT_P(0);
   mtree_text* second = PG_GETARG_MTREE_TEXT_P(1);
   bool result = mtree_text_contains_wrapper(first, second);
@@ -489,7 +489,7 @@ Datum mtree_text_contains(PG_FUNCTION_ARGS) {
 }
 
 Datum mtree_text_contained(PG_FUNCTION_ARGS) {
-  elog(INFO, "mtree_text_containd");
+  /* elog(INFO, "mtree_text_contained"); */
   mtree_text* first = PG_GETARG_MTREE_TEXT_P(0);
   mtree_text* second = PG_GETARG_MTREE_TEXT_P(1);
   bool result = mtree_text_contained_wrapper(first, second);
@@ -498,6 +498,7 @@ Datum mtree_text_contained(PG_FUNCTION_ARGS) {
 }
 
 Datum mtree_text_equals_first(PG_FUNCTION_ARGS) {
+  /* elog(INFO, "mtree_text_equals_first"); */
   mtree_text* first = (mtree_text*) PG_GETARG_POINTER(0);
   mtree_text* second = (mtree_text*) PG_GETARG_POINTER(1);
   bool* result = (bool*) PG_GETARG_POINTER(2);
