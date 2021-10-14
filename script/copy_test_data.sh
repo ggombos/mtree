@@ -13,6 +13,7 @@ function copy_file() {
 copy_file "1000.csv"
 copy_file "fingerprint_create_indexes.sql"
 copy_file "fingerprint_create_tables.sql"
+copy_file "fingerprint_data_10"
 copy_file "fingerprint_data_1000"
 copy_file "fingerprint_data_10000"
 copy_file "fingerprint_data_1002156"
