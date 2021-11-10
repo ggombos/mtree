@@ -1,0 +1,9 @@
+DROP EXTENSION IF EXISTS mtree_gist CASCADE;
+CREATE EXTENSION mtree_gist;
+
+DROP TABLE IF EXISTS Test_1000 CASCADE;
+CREATE TABLE Test_1000 (
+  x    INTEGER,
+  data mtree_text
+);
+COPY Test_1000(x, data) FROM '/home/postgres/1000.csv' DELIMITER ',' CSV HEADER;

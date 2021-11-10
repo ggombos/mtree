@@ -10,6 +10,9 @@ function copy_file() {
   chown postgres "${TARGET_DATA_DIRECTORY}/$1"
 }
 
+copy_file "1000_create_indexes.sql"
+copy_file "1000_create_tables.sql"
+copy_file "1000_measure.sql"
 copy_file "1000.csv"
 copy_file "fingerprint_create_indexes.sql"
 copy_file "fingerprint_create_tables.sql"
