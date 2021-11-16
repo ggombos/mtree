@@ -168,3 +168,30 @@ https://www.postgresql.org/docs/current/xindex.html#XINDEX-ORDERING-OPS
     (Tömbökre is megoldott, csak azt meg kell nézni, hogyan)
 - Ezt a parancsot ki kellene próbálni:
   sudo sh -c "/bin/echo 3 > /proc/sys/vm/drop_caches"
+
+### Dolgok amik történtek
+
+#### Gergő megszerelte az ORDER BY-t!
+
+Úgy tűnik a gondot a `FLOAT8` típus okozta, eddig ismeretlen okból fakadóan.
+Most minden `FLOAT4` és így jónak is tűnik.
+
+#### M-tree index implementálása számokra (majd tömbökre)
+
+Nem biztos, hogy ez `GiST` indexszel triviális feladat lesz. Ismerünk erre példát?
+
+https://stackoverflow.com/questions/4058731/can-postgresql-index-array-columns
+
+https://www.postgresql.org/docs/13/arrays.html#ARRAYS-SEARCHING
+
+https://www.postgresql.org/docs/13/indexes-types.html
+
+A `GiN` biztosan tud ilyet.
+
+https://www.postgresql.org/docs/13/gin-extensibility.html
+
+Az `intarray` extension éppen ilyesmire lett kitalálva, ez segíthet. Nem tiszta,
+hogy pontosan azokra az operátorokra van-e értelmezve, amiket mi is használni
+szeretnénk majd (`&&, @>, <@, @@` -> ezeket tudja).
+
+https://www.postgresql.org/docs/13/intarray.html
