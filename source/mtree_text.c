@@ -135,7 +135,7 @@ Datum mtree_text_consistent(PG_FUNCTION_ARGS) {
 }
 
 Datum mtree_text_union(PG_FUNCTION_ARGS) {
-  /* elog(INFO, "mtree_text_union"); */
+  // elog(INFO, "mtree_text_union"); 
   GistEntryVector* entryVector = (GistEntryVector*) PG_GETARG_POINTER(0);
   GISTENTRY* entry = entryVector->vector;
   int ranges = entryVector->n;
@@ -447,14 +447,19 @@ Datum mtree_text_decompress(PG_FUNCTION_ARGS) {
 }
 
 Datum mtree_text_distance_float(PG_FUNCTION_ARGS) {
-  /* elog(INFO, "mtree_text_distance_float"); */
   GISTENTRY* entry = (GISTENTRY*) PG_GETARG_POINTER(0);
   mtree_text* query = PG_GETARG_MTREE_TEXT_P(1);
   mtree_text* key = DatumGetMtreeText(entry->key);
   bool isLeaf = GistPageIsLeaf(entry->page);
   bool *recheck = (bool *) PG_GETARG_POINTER(4);
+  // elog(INFO, "mtree_text_distance_float %d %s %s %d" , isLeaf, query->vl_data, key->vl_data, mtree_text_string_distance(query, key)); 
+  
+  if (isLeaf) {
+	  *recheck = true;
+  }
+	  
 
-  PG_RETURN_FLOAT8(mtree_text_string_distance(query, key));
+  PG_RETURN_FLOAT4(mtree_text_string_distance(query, key));
 }
 
 Datum mtree_text_distance(PG_FUNCTION_ARGS) {
@@ -467,7 +472,7 @@ Datum mtree_text_distance(PG_FUNCTION_ARGS) {
     non-leaf -> return distance to closest children
   */
 
-  PG_RETURN_FLOAT8(mtree_text_string_distance(first, second));
+  PG_RETURN_FLOAT4(mtree_text_string_distance(first, second));
 }
 
 Datum mtree_text_overlap(PG_FUNCTION_ARGS) {
