@@ -145,3 +145,26 @@ https://www.postgresql.org/docs/current/xindex.html#XINDEX-ORDERING-OPS
   -> https://www.postgresql.org/docs/current/sql-createopclass.html ()
 - FLOAT és INT egyesítést el kell végezni a kódban amit Gergő felpusholt.
 - Érdemes lenne egy automata tesztet írni , amivel meg lehet nézni, hogy éppen jó-e a rendezés.
+
+### Események
+
+- Indokolatlan mennyiségű levelezés
+  - Oroszok
+  - PostgreSQL levelező lista
+  - Slack újra próbálása
+- Korábbi teszt adatokkal összehasonlítás
+  - Egy picit lassabb lett az index, ennek utána kell járni
+  - Lassabb az index építés is
+    - Ez lehet, hogy PostgreSQL verzió miatt (is?) van, mert a régi index
+      is elég lassan készült el (arányaiban)
+- Dockerfile készítés
+  - Jajj de régen csináltam már ilyet!
+  - Valamiért nem akar beimportálódni a GPG kulcs Pestről, ami furcsa.
+
+### 2021.11.10.
+
+- Kezdjük el implementálni az M-tree index-et tömbökre
+  - Érdemes lehet először számokkal kezdeni, a véletlenszerű generálás egyszerűsége miatt
+    (Tömbökre is megoldott, csak azt meg kell nézni, hogyan)
+- Ezt a parancsot ki kellene próbálni:
+  sudo sh -c "/bin/echo 3 > /proc/sys/vm/drop_caches"
