@@ -147,13 +147,13 @@ CREATE OPERATOR #<# (
 -- Operator class
 CREATE OPERATOR CLASS mtree_text_opclass
 DEFAULT FOR TYPE mtree_text
-USING gist
+USING GiST
 AS
   OPERATOR 1 = ,
   OPERATOR 2 #&# ,
   OPERATOR 3 #># ,
   OPERATOR 4 #<# ,
-  OPERATOR 15 <-> (mtree_text, mtree_text) FOR ORDER BY float_ops,  --ha integer_ops, akkor seq scan-t hasznal
+  OPERATOR 15 <-> (mtree_text, mtree_text) FOR ORDER BY float_ops,
   FUNCTION 1 mtree_text_consistent (internal, mtree_text, smallint, oid, internal),
   FUNCTION 2 mtree_text_union (internal, internal),
   FUNCTION 3 mtree_text_compress (internal),
