@@ -1,15 +1,17 @@
-CREATE TABLE fingerprints2 (
-  id  SERIAL PRIMARY KEY,
-  song_fk INTEGER,
-  hash	TEXT,
-  offset2  INTEGER,
+DROP TABLE IF EXISTS fingerprint_order_by_test;
+CREATE TABLE fingerprint_order_by_test (
+  id        SERIAL PRIMARY KEY,
+  song_fk   INTEGER,
+  hash	    TEXT,
+  offset2   INTEGER,
   hash_gist mtree_text
 );
 
-\copy fingerprints2 FROM '/home/postgres/fingerprintData';
+\copy fingerprint_order_by_test FROM '/home/postgres/fingerprint_data_10000';
 
-CREATE INDEX fingerprint2_gist_index ON fingerprints2 USING gist (hash_gist mtree_text_opclass);
+CREATE INDEX fingerprint_order_by_test_index ON fingerprint_order_by_test USING GiST (hash_gist mtree_text_opclass);
 
-SET enable_seqscan = off;
+SET enable_seqscan = OFF;
 
-EXPLAIN ANALYZE SELECT song_fk, hash, offset2, (hash_gist <-> 'a3272361800000000000') AS dst FROM fingerprints2 ORDER BY dst USING LIMIT 30;
+-- EXPLAIN ANALYZE
+SELECT song_fk, hash, offset2, (hash_gist <-> 'xxx3272361800000000000') AS dst FROM fingerprint_order_by_test ORDER BY (hash_gist <-> 'xxx3272361800000000000');

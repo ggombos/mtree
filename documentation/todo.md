@@ -174,7 +174,19 @@ https://www.postgresql.org/docs/current/xindex.html#XINDEX-ORDERING-OPS
 #### Gergő megszerelte az ORDER BY-t!
 
 Úgy tűnik a gondot a `FLOAT8` típus okozta, eddig ismeretlen okból fakadóan.
-Most minden `FLOAT4` és így jónak is tűnik.
+Most minden `FLOAT4` és így jónak is tűnik. Ezt nem _"tiltja"_ a dokumentáció
+sem, meg van engedve a távolságfüggvénynél a `FLOAT4` típus is.
+
+https://www.postgresql.org/docs/13/gist-extensibility.html
+
+Nálam egyébként a milliós méretű adathalmazra való index építés továbbra is elég
+lassú, ez nem tudom, hogy egyéni jelenség-e. Mi a tapasztalat? Kipróbáltam a
+
+```sh
+sudo sh -c "/bin/echo 3 > /proc/sys/vm/drop_caches"
+```
+
+parancsot is, de nem segített.
 
 #### M-tree index implementálása számokra (majd tömbökre)
 
