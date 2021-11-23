@@ -2,17 +2,16 @@
 
 set -e
 
-readonly SOURCE_FILE="/home/zsolt/DATA/Development/mtree_gist/source/mtree_text.c"
-readonly SOURCE_FILE_TMP="/home/zsolt/DATA/Development/mtree_gist/source/mtree_tmp.c"
-readonly OBJECT_FILE="/home/zsolt/DATA/Development/mtree_gist/source/mtree_tmp.o"
+readonly SOURCE_DIRECTORY="/home/zsolt/DATA/Development/mtree_gist/source"
 readonly POSTGRESQL_DIRECTORY="/usr/include/postgresql/server"
 
 function compile_source_code() {
-  cp "${SOURCE_FILE}" "${SOURCE_FILE_TMP}"
-  gcc -fPIC -c -isystem "${POSTGRESQL_DIRECTORY}" "${SOURCE_FILE_TMP}" -o "${OBJECT_FILE}" -Wall -Wextra -Wfloat-equal -Wundef -Wshadow -Wpointer-arith -Wcast-align -Wstrict-prototypes -Wstrict-overflow=5 -Wwrite-strings -Waggregate-return -Wcast-qual -Wswitch-default -Wswitch-enum -Wconversion -Wunreachable-code
-  rm "${SOURCE_FILE_TMP}"
-  rm "${OBJECT_FILE}"
+  cp "$1" "$2"
+  gcc -fPIC -c -isystem "${POSTGRESQL_DIRECTORY}" "$2" -o "$3" -Wall -Wextra -Wfloat-equal -Wundef -Wshadow -Wpointer-arith -Wcast-align -Wstrict-prototypes -Wstrict-overflow=5 -Wwrite-strings -Waggregate-return -Wcast-qual -Wswitch-default -Wswitch-enum -Wconversion -Wunreachable-code
+  rm "$2"
+  rm "$3"
 }
 
 clear
-compile_source_code
+compile_source_code "${SOURCE_DIRECTORY}/mtree_int8.c" "${SOURCE_DIRECTORY}/mtree_int8_tmp.c" "${SOURCE_DIRECTORY}/mtree_int8_tmp.o"
+compile_source_code "${SOURCE_DIRECTORY}/mtree_text.c" "${SOURCE_DIRECTORY}/mtree_text_tmp.c" "${SOURCE_DIRECTORY}/mtree_text_tmp.o"
