@@ -10,7 +10,7 @@ int mtree_text_string_distance(mtree_text* first, mtree_text* second) {
 }
 
 bool mtree_text_equals(mtree_text* first, mtree_text* second) {
-  return strcmp(first->vl_data, second->vl_data) == 0; /* TODO: !strcmp -> strcmp() == 0 */
+  return strcmp(first->vl_data, second->vl_data) == 0;
 }
 
 bool mtree_text_overlap_distance(mtree_text* first, mtree_text* second, int distance) {

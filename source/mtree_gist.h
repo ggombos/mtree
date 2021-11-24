@@ -20,4 +20,11 @@ typedef enum {
   SamplingMinAreaSum
 } PicksplitStrategy;
 
+/* TODO: Some of these can be simplified */
+#define SameStrategyNumber      1 //  =
+#define OverlapStrategyNumber   2 // #&#
+#define ContainsStrategyNumber  3 // #>#
+#define ContainedStrategyNumber 4 // #<#
+#define MAX2(a, b) ((a) > (b) ? (a) : (b))
+
 #endif
