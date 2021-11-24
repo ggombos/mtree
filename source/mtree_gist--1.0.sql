@@ -3,6 +3,10 @@
 -- complain if script is sourced in psql, rather than via CREATE EXTENSION
 \echo Use "CREATE EXTENSION mtree_gist" to load this file. \quit
 
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+-- mtree_text (for text type)
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
 -- Declaring data type
 CREATE TYPE mtree_text;
 
@@ -162,3 +166,158 @@ AS
   FUNCTION 6 mtree_text_picksplit (internal, internal),
   FUNCTION 7 mtree_text_equals_first (mtree_text, mtree_text, internal),
   FUNCTION 8 mtree_text_distance_float (internal, mtree_text, smallint, oid, internal);
+
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+-- int8 (for int8)
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
+-- Declaring data type
+CREATE TYPE mtree_int8;
+
+-- Input function
+CREATE OR REPLACE FUNCTION mtree_int8_input(cstring)
+RETURNS mtree_int8
+AS 'MODULE_PATHNAME', 'mtree_int8_input'
+LANGUAGE C STRICT IMMUTABLE PARALLEL SAFE;
+
+-- Output function
+CREATE OR REPLACE FUNCTION mtree_int8_output(mtree_int8)
+RETURNS cstring
+AS 'MODULE_PATHNAME', 'mtree_int8_output'
+LANGUAGE C STRICT IMMUTABLE PARALLEL SAFE;
+
+-- Data type definition
+CREATE TYPE mtree_int8 (
+  INTERNALLENGTH = VARIABLE,
+  INPUT = mtree_int8_input,
+  OUTPUT = mtree_int8_output,
+  STORAGE = extended
+);
+
+-- [Correctness] Consistent function
+CREATE OR REPLACE FUNCTION mtree_int8_consistent(internal, mtree_int8, smallint, oid, internal)
+RETURNS bool
+AS 'MODULE_PATHNAME', 'mtree_int8_consistent'
+LANGUAGE C STRICT;
+
+-- [Correctness] Union function
+CREATE OR REPLACE FUNCTION mtree_int8_union(internal, internal)
+RETURNS mtree_int8
+AS 'MODULE_PATHNAME', 'mtree_int8_union'
+LANGUAGE C STRICT IMMUTABLE PARALLEL SAFE;
+
+-- [Correctness] Same function
+CREATE OR REPLACE FUNCTION mtree_int8_same(mtree_int8, mtree_int8)
+RETURNS bool
+AS 'MODULE_PATHNAME', 'mtree_int8_same'
+LANGUAGE C STRICT IMMUTABLE PARALLEL SAFE;
+
+-- [Efficiency] Penalty function
+CREATE OR REPLACE FUNCTION mtree_int8_penalty(internal, internal, internal)
+RETURNS internal
+AS 'MODULE_PATHNAME', 'mtree_int8_penalty'
+LANGUAGE C STRICT IMMUTABLE PARALLEL SAFE;
+
+-- [Efficiency] Picksplit function
+CREATE OR REPLACE FUNCTION mtree_int8_picksplit(internal, internal)
+RETURNS internal
+AS 'MODULE_PATHNAME', 'mtree_int8_picksplit'
+LANGUAGE C STRICT IMMUTABLE PARALLEL SAFE;
+
+-- [Optional] Compress function
+CREATE OR REPLACE FUNCTION mtree_int8_compress(internal)
+RETURNS internal
+AS 'MODULE_PATHNAME', 'mtree_int8_compress'
+LANGUAGE C STRICT IMMUTABLE PARALLEL SAFE;
+
+-- [Optional] Decompress function
+CREATE OR REPLACE FUNCTION mtree_int8_decompress(internal)
+RETURNS internal
+AS 'MODULE_PATHNAME', 'mtree_int8_decompress'
+LANGUAGE C STRICT IMMUTABLE PARALLEL SAFE;
+
+-- [Operator] Overlap function
+CREATE OR REPLACE FUNCTION mtree_int8_overlap_operator(mtree_int8, mtree_int8)
+RETURNS bool
+AS 'MODULE_PATHNAME', 'mtree_int8_overlap_operator'
+LANGUAGE C STRICT IMMUTABLE PARALLEL SAFE;
+
+-- [Operator] Contains function
+CREATE OR REPLACE FUNCTION mtree_int8_contains_operator(mtree_int8, mtree_int8)
+RETURNS bool
+AS 'MODULE_PATHNAME', 'mtree_int8_contains_operator'
+LANGUAGE C STRICT IMMUTABLE PARALLEL SAFE;
+
+-- [Operator] Contained function
+CREATE OR REPLACE FUNCTION mtree_int8_contained_operator(mtree_int8, mtree_int8)
+RETURNS bool
+AS 'MODULE_PATHNAME', 'mtree_int8_contained_operator'
+LANGUAGE C STRICT IMMUTABLE PARALLEL SAFE;
+
+-- [Operator] Distance function (Ordering operator)
+CREATE OR REPLACE FUNCTION mtree_int8_distance_operator(mtree_int8, mtree_int8)
+RETURNS float4
+AS 'MODULE_PATHNAME', 'mtree_int8_distance_operator'
+LANGUAGE C STRICT IMMUTABLE PARALLEL SAFE;
+
+-- Equals operator
+CREATE OPERATOR = (
+  COMMUTATOR = =,
+  LEFTARG = mtree_int8,
+  RIGHTARG = mtree_int8,
+  PROCEDURE = mtree_int8_same
+);
+
+-- Overlap operator
+CREATE OPERATOR #&# (
+  COMMUTATOR = #&#,
+  LEFTARG = mtree_int8,
+  RIGHTARG = mtree_int8,
+  PROCEDURE = mtree_int8_overlap_operator
+);
+
+-- Contains operator
+CREATE OPERATOR #># (
+  COMMUTATOR = #<#,
+  LEFTARG = mtree_int8,
+  RIGHTARG = mtree_int8,
+  PROCEDURE = mtree_int8_contains_operator
+);
+
+-- Contained operator
+CREATE OPERATOR #<# (
+  COMMUTATOR = #>#,
+  LEFTARG = mtree_int8,
+  RIGHTARG = mtree_int8,
+  PROCEDURE = mtree_int8_contained_operator
+);
+
+-- Distance operator
+CREATE OPERATOR <-> (
+  COMMUTATOR = <->,
+  LEFTARG = mtree_int8,
+  RIGHTARG = mtree_int8,
+  PROCEDURE = mtree_int8_distance_operator
+);
+
+-- Operator class
+CREATE OPERATOR CLASS mtree_int8_opclass
+DEFAULT FOR TYPE mtree_int8
+USING GiST
+AS
+  -- Operators
+  OPERATOR 1 = ,
+  OPERATOR 2 #&# ,
+  OPERATOR 3 #># ,
+  OPERATOR 4 #<# ,
+  OPERATOR 15 <-> (mtree_int8, mtree_int8) FOR ORDER BY float_ops,
+  -- Functions
+  FUNCTION 1 mtree_int8_consistent (internal, mtree_int8, smallint, oid, internal),
+  FUNCTION 2 mtree_int8_union (internal, internal),
+  FUNCTION 3 mtree_int8_compress (internal),
+  FUNCTION 4 mtree_int8_decompress (internal),
+  FUNCTION 5 mtree_int8_penalty (internal, internal, internal),
+  FUNCTION 6 mtree_int8_picksplit (internal, internal),
+  FUNCTION 7 mtree_int8_same (mtree_int8, mtree_int8, internal),
+  FUNCTION 8 mtree_int8_distance (internal, mtree_int8, smallint, oid, internal)
+;
