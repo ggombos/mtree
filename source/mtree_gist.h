@@ -20,6 +20,10 @@ typedef enum {
   SamplingMinAreaSum
 } PicksplitStrategy;
 
+/* TODO: Strategy should be a parameter! */
+extern const UnionStrategy UNION_STRATEGY;
+extern const PicksplitStrategy PICKSPLIT_STRATEGY;
+
 /* TODO: Some of these can be simplified */
 #define SameStrategyNumber      1 //  =
 #define OverlapStrategyNumber   2 // #&#

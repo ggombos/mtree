@@ -6,7 +6,7 @@
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 -- mtree_text (for text type)
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-
+/*
 -- Declaring data type
 CREATE TYPE mtree_text;
 
@@ -166,7 +166,7 @@ AS
   FUNCTION 6 mtree_text_picksplit (internal, internal),
   FUNCTION 7 mtree_text_equals_first (mtree_text, mtree_text, internal),
   FUNCTION 8 mtree_text_distance_float (internal, mtree_text, smallint, oid, internal);
-
+*/
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 -- int8 (for int8)
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -234,6 +234,12 @@ LANGUAGE C STRICT IMMUTABLE PARALLEL SAFE;
 CREATE OR REPLACE FUNCTION mtree_int8_decompress(internal)
 RETURNS internal
 AS 'MODULE_PATHNAME', 'mtree_int8_decompress'
+LANGUAGE C STRICT IMMUTABLE PARALLEL SAFE;
+
+-- [Optional] Distance function
+CREATE OR REPLACE FUNCTION mtree_int8_distance(internal, mtree_int8, smallint, oid, internal)
+RETURNS float4
+AS 'MODULE_PATHNAME', 'mtree_int8_distance'
 LANGUAGE C STRICT IMMUTABLE PARALLEL SAFE;
 
 -- [Operator] Overlap function
@@ -318,6 +324,6 @@ AS
   FUNCTION 4 mtree_int8_decompress (internal),
   FUNCTION 5 mtree_int8_penalty (internal, internal, internal),
   FUNCTION 6 mtree_int8_picksplit (internal, internal),
-  FUNCTION 7 mtree_int8_same (mtree_int8, mtree_int8, internal),
+  FUNCTION 7 mtree_int8_same (mtree_int8, mtree_int8),
   FUNCTION 8 mtree_int8_distance (internal, mtree_int8, smallint, oid, internal)
 ;

@@ -11,10 +11,6 @@
 PG_MODULE_MAGIC;
 #endif
 
-/* TODO: Strategy should be a parameter! */
-const UnionStrategy UNION_STRATEGY = Best;
-const PicksplitStrategy PICKSPLIT_STRATEGY = SamplingMinOverlapArea;
-
 PG_FUNCTION_INFO_V1(mtree_text_input);
 PG_FUNCTION_INFO_V1(mtree_text_output);
 

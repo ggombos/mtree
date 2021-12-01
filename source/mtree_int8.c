@@ -2,16 +2,13 @@
  * contrib/mtree_gist/mtree_int8.c
  */
 #include "mtree_int8.h"
+
 #include "mtree_int8_util.h"
 #include "mtree_util.h"
 
 #ifdef PG_MODULE_MAGIC
 PG_MODULE_MAGIC;
 #endif
-
-/* TODO: Strategy should be a parameter! */
-const UnionStrategy UNION_STRATEGY = Best;
-const PicksplitStrategy PICKSPLIT_STRATEGY = SamplingMinOverlapArea;
 
 PG_FUNCTION_INFO_V1(mtree_int8_input);
 PG_FUNCTION_INFO_V1(mtree_int8_output);
@@ -28,11 +25,19 @@ PG_FUNCTION_INFO_V1(mtree_int8_decompress);
 
 PG_FUNCTION_INFO_V1(mtree_int8_distance);
 
+PG_FUNCTION_INFO_V1(mtree_int8_contains_operator);
+PG_FUNCTION_INFO_V1(mtree_int8_contained_operator);
+PG_FUNCTION_INFO_V1(mtree_int8_distance_operator);
+PG_FUNCTION_INFO_V1(mtree_int8_overlap_operator);
+
 Datum mtree_int8_input(PG_FUNCTION_ARGS) {
   char* input = PG_GETARG_CSTRING(0);
 
   mtree_int8* result = (mtree_int8*) palloc(MTREE_INT8_SIZE);
-  /* QUESTION: Covering radius? */
+  /* QUESTION: Covering radius?
+    - Az alap legyen 0, majd az union helyrerázza.
+    (tesztelni)
+   */
   result->coveringRadius = 0;
   result->parentDistance = 0;
 
@@ -69,7 +74,6 @@ Datum mtree_int8_consistent(PG_FUNCTION_ARGS) {
 
   bool returnValue;
   if (GIST_LEAF(entry)) {
-    /* QUESTION: Why recheck = false? */
     *recheck = false;
     switch(strategyNumber) {
       case SameStrategyNumber:
@@ -96,6 +100,10 @@ Datum mtree_int8_consistent(PG_FUNCTION_ARGS) {
         *recheck = true;
         break;
       case OverlapStrategyNumber:
+      /*
+        TL;DR
+        Akkor nem
+      */
         returnValue = mtree_int8_overlap_distance(key, query, &distance);
         *recheck = !mtree_int8_contained_distance(key, query, &distance);
         break;

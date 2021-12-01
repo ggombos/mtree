@@ -17,7 +17,7 @@ bool mtree_int8_overlap_distance(mtree_int8* first, mtree_int8* second, int* dis
   return *distance <= first->coveringRadius + second->coveringRadius;
 }
 
-bool mtree_int8_contains_distance(mtree_int8* first, mtree_int8* second, int* distance {
+bool mtree_int8_contains_distance(mtree_int8* first, mtree_int8* second, int* distance) {
   return first->coveringRadius >= *distance + second->coveringRadius;
 }
 
@@ -31,7 +31,7 @@ mtree_int8* mtree_int8_deep_copy(mtree_int8 *source) {
   return destination;
 }
 
-int get_distance(int size, mtree_text* entries[size], int distances[size][size], int i, int j) {
+int get_distance(int size, mtree_int8* entries[size], int distances[size][size], int i, int j) {
   if (distances[i][j] == -1) {
     distances[i][j] = mtree_int8_distance_internal(entries[i], entries[j]);
   }
