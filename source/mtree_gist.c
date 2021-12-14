@@ -3,5 +3,7 @@
  */
 #include "mtree_gist.h"
 
-const UnionStrategy UNION_STRATEGY = Best;
-const PicksplitStrategy PICKSPLIT_STRATEGY = SamplingMinOverlapArea;
+#include "postgres.h"
+#include "fmgr.h"
+
+PG_MODULE_MAGIC;

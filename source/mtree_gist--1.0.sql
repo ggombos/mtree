@@ -6,7 +6,7 @@
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 -- mtree_text (for text type)
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-/*
+
 -- Declaring data type
 CREATE TYPE mtree_text;
 
@@ -166,7 +166,7 @@ AS
   FUNCTION 6 mtree_text_picksplit (internal, internal),
   FUNCTION 7 mtree_text_equals_first (mtree_text, mtree_text, internal),
   FUNCTION 8 mtree_text_distance_float (internal, mtree_text, smallint, oid, internal);
-*/
+
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 -- int8 (for int8)
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
