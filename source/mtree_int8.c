@@ -6,9 +6,9 @@
 #include "mtree_int8_util.h"
 #include "mtree_util.h"
 
-#ifdef PG_MODULE_MAGIC
-PG_MODULE_MAGIC;
-#endif
+/* TODO: Strategy should be a parameter! */
+const UnionStrategy UNION_STRATEGY_INT8 = Best;
+const PicksplitStrategy PICKSPLIT_STRATEGY_INT8 = SamplingMinOverlapArea;
 
 PG_FUNCTION_INFO_V1(mtree_int8_input);
 PG_FUNCTION_INFO_V1(mtree_int8_output);
@@ -128,7 +128,7 @@ Datum mtree_int8_union(PG_FUNCTION_ARGS) {
 
   int searchRange;
 
-  switch(UNION_STRATEGY) {
+  switch(UNION_STRATEGY_INT8) {
     case First:
       searchRange = 1;
       break;
@@ -136,7 +136,7 @@ Datum mtree_int8_union(PG_FUNCTION_ARGS) {
       searchRange = ranges;
       break;
     default:
-      elog(ERROR, "Invalid union strategy: %d", UNION_STRATEGY);
+      elog(ERROR, "Invalid union strategy: %d", UNION_STRATEGY_INT8);
       break;
   }
 
@@ -222,7 +222,7 @@ Datum mtree_int8_picksplit(PG_FUNCTION_ARGS) {
   int minOverlapArea = -1;
   int minSumArea = -1;
 
-  switch (PICKSPLIT_STRATEGY) {
+  switch (PICKSPLIT_STRATEGY_INT8) {
     case Random:
       leftIndex = ((int) random()) % (maxOffset - 1);
       rightIndex = (leftIndex + 1) + (((int) random()) % (maxOffset - leftIndex - 1));
@@ -234,7 +234,7 @@ Datum mtree_int8_picksplit(PG_FUNCTION_ARGS) {
     case MaxDistanceFromFirst:
       maxDistance = -1;
       for (int r = 0; r < maxOffset; ++r) {
-        int distance = get_distance(maxOffset, entries, distances, 0, r);
+        int distance = get_int8_distance(maxOffset, entries, distances, 0, r);
         if (distance > maxDistance) {
           maxDistance = distance;
           rightCandidateIndex = r;
@@ -246,7 +246,7 @@ Datum mtree_int8_picksplit(PG_FUNCTION_ARGS) {
     case MaxDistancePair:
       for (OffsetNumber l = 0; l < maxOffset; ++l) {
         for (OffsetNumber r = l; r < maxOffset; ++r) {
-          int distance = get_distance(maxOffset, entries, distances, l, r);
+          int distance = get_int8_distance(maxOffset, entries, distances, l, r);
           if (distance > maxDistance) {
             maxDistance = distance;
             leftCandidateIndex = l;
@@ -264,8 +264,8 @@ Datum mtree_int8_picksplit(PG_FUNCTION_ARGS) {
         int leftRadius = 0, rightRadius = 0;
 
         for (int currentIndex = 0; currentIndex < maxOffset; currentIndex++) {
-          int leftDistance = get_distance(maxOffset, entries, distances, leftCandidateIndex, currentIndex);
-          int rightDistance = get_distance(maxOffset, entries, distances, rightCandidateIndex, currentIndex);
+          int leftDistance = get_int8_distance(maxOffset, entries, distances, leftCandidateIndex, currentIndex);
+          int rightDistance = get_int8_distance(maxOffset, entries, distances, rightCandidateIndex, currentIndex);
 
           if (leftDistance < rightDistance) {
             if (leftDistance + entries[currentIndex]->coveringRadius > leftRadius) {
@@ -293,8 +293,8 @@ Datum mtree_int8_picksplit(PG_FUNCTION_ARGS) {
         int leftRadius = 0, rightRadius = 0;
 
         for (int currentIndex = 0; currentIndex < maxOffset; ++currentIndex) {
-          int leftDistance = get_distance(maxOffset, entries, distances, leftCandidateIndex, currentIndex);
-          int rightDistance = get_distance(maxOffset, entries, distances, rightCandidateIndex, currentIndex);
+          int leftDistance = get_int8_distance(maxOffset, entries, distances, leftCandidateIndex, currentIndex);
+          int rightDistance = get_int8_distance(maxOffset, entries, distances, rightCandidateIndex, currentIndex);
 
           if (leftDistance < rightDistance) {
             if (leftDistance + entries[currentIndex]->coveringRadius > leftRadius) {
@@ -319,12 +319,12 @@ Datum mtree_int8_picksplit(PG_FUNCTION_ARGS) {
       for (int i = 0; i < trialCount; i++) {
         leftCandidateIndex = ((int) random()) % (maxOffset - 1);
         rightCandidateIndex = (leftCandidateIndex + 1) + (((int) random()) % (maxOffset - leftCandidateIndex - 1));
-        int distance = get_distance(maxOffset, entries, distances, leftCandidateIndex, rightCandidateIndex);
+        int distance = get_int8_distance(maxOffset, entries, distances, leftCandidateIndex, rightCandidateIndex);
         int leftRadius = 0, rightRadius = 0;
 
         for (int currentIndex = 0; currentIndex < maxOffset; currentIndex++) {
-          int leftDistance = get_distance(maxOffset, entries, distances, leftCandidateIndex, currentIndex);
-          int rightDistance = get_distance(maxOffset, entries, distances, rightCandidateIndex, currentIndex);
+          int leftDistance = get_int8_distance(maxOffset, entries, distances, leftCandidateIndex, currentIndex);
+          int rightDistance = get_int8_distance(maxOffset, entries, distances, rightCandidateIndex, currentIndex);
 
           if (leftDistance < rightDistance) {
             if (leftDistance + entries[currentIndex]->coveringRadius > leftRadius) {
@@ -353,8 +353,8 @@ Datum mtree_int8_picksplit(PG_FUNCTION_ARGS) {
         int leftRadius = 0, rightRadius = 0;
 
         for (int currentIndex = 0; currentIndex < maxOffset; currentIndex++) {
-          int leftDistance = get_distance(maxOffset, entries, distances, leftCandidateIndex, currentIndex);
-          int rightDistance = get_distance(maxOffset, entries, distances, rightCandidateIndex, currentIndex);
+          int leftDistance = get_int8_distance(maxOffset, entries, distances, leftCandidateIndex, currentIndex);
+          int rightDistance = get_int8_distance(maxOffset, entries, distances, rightCandidateIndex, currentIndex);
 
           if (leftDistance < rightDistance) {
             if (leftDistance + entries[currentIndex]->coveringRadius > leftRadius) {
@@ -377,7 +377,7 @@ Datum mtree_int8_picksplit(PG_FUNCTION_ARGS) {
       }
       break;
     default:
-      elog(ERROR, "Invalid picksplit strategy: %d", PICKSPLIT_STRATEGY);
+      elog(ERROR, "Invalid picksplit strategy: %d", PICKSPLIT_STRATEGY_INT8);
       break;
   }
 
@@ -386,8 +386,8 @@ Datum mtree_int8_picksplit(PG_FUNCTION_ARGS) {
   mtree_int8* current;
 
   for (OffsetNumber i = FirstOffsetNumber; i <= maxOffset; i = OffsetNumberNext(i)) {
-    int distanceLeft = get_distance(maxOffset, entries, distances, leftIndex, i - 1);
-    int distanceRight = get_distance(maxOffset, entries, distances, rightIndex, i - 1);
+    int distanceLeft = get_int8_distance(maxOffset, entries, distances, leftIndex, i - 1);
+    int distanceRight = get_int8_distance(maxOffset, entries, distances, rightIndex, i - 1);
     current = entries[i - 1];
 
     if (distanceLeft < distanceRight) {

@@ -7,9 +7,9 @@
 #include "mtree_text_util.h"
 #include "mtree_util.h"
 
-#ifdef PG_MODULE_MAGIC
-PG_MODULE_MAGIC;
-#endif
+/* TODO: Strategy should be a parameter! */
+const UnionStrategy UNION_STRATEGY_TEXT = Best;
+const PicksplitStrategy PICKSPLIT_STRATEGY_TEXT = SamplingMinOverlapArea;
 
 PG_FUNCTION_INFO_V1(mtree_text_input);
 PG_FUNCTION_INFO_V1(mtree_text_output);
@@ -33,27 +33,16 @@ PG_FUNCTION_INFO_V1(mtree_text_equals_first);
 
 Datum mtree_text_input(PG_FUNCTION_ARGS) {
   /* elog(INFO, "mtree_text_input"); */
-  char* string = PG_GETARG_CSTRING(0);
-  int coveringRadius = 0;
+  char* input = PG_GETARG_CSTRING(0);
 
-  if (isdigit(string[0])) {
-    char* number = string;
-    while (isdigit(string[0])) {
-      ++string;
-    }
-    string[0] = '\0';
-    ++string;
-    coveringRadius = atoi(number);
-  }
-
-  size_t stringLength = strlen(string);
+  size_t stringLength = strlen(input);
   mtree_text* result = (mtree_text*) palloc(OWNHDRSZ + stringLength * sizeof(char) + 1);
-  result->coveringRadius = coveringRadius;
+  result->coveringRadius = 0;
   result->parentDistance = 0;
 
   SET_VARSIZE(result, OWNHDRSZ + stringLength * sizeof(char) + 1);
 
-  strcpy(result->vl_data, string);
+  strcpy(result->vl_data, input);
   result->vl_data[stringLength] = '\0';
 
   PG_RETURN_POINTER(result);
@@ -143,7 +132,7 @@ Datum mtree_text_union(PG_FUNCTION_ARGS) {
 
   int searchRange;
 
-  switch(UNION_STRATEGY) {
+  switch(UNION_STRATEGY_TEXT) {
     case First:
       searchRange = 1;
       break;
@@ -151,7 +140,7 @@ Datum mtree_text_union(PG_FUNCTION_ARGS) {
       searchRange = ranges;
       break;
     default:
-      elog(ERROR, "Invalid union strategy: %d", UNION_STRATEGY);
+      elog(ERROR, "Invalid union strategy: %d", UNION_STRATEGY_TEXT);
       break;
   }
 
@@ -240,7 +229,7 @@ Datum mtree_text_picksplit(PG_FUNCTION_ARGS) {
   int minOverlapArea = -1;
   int minSumArea = -1;
 
-  switch (PICKSPLIT_STRATEGY) {
+  switch (PICKSPLIT_STRATEGY_TEXT) {
     case Random:
       leftIndex = ((int) random()) % (maxOffset - 1);
       rightIndex = (leftIndex + 1) + (((int) random()) % (maxOffset - leftIndex - 1));
@@ -395,7 +384,7 @@ Datum mtree_text_picksplit(PG_FUNCTION_ARGS) {
       }
       break;
     default:
-      elog(ERROR, "Invalid picksplit strategy: %distance", PICKSPLIT_STRATEGY);
+      elog(ERROR, "Invalid picksplit strategy: %distance", PICKSPLIT_STRATEGY_TEXT);
       break;
   }
 

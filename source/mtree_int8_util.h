@@ -13,6 +13,6 @@ bool mtree_int8_overlap_distance(mtree_int8* first, mtree_int8* second, int* dis
 bool mtree_int8_contains_distance(mtree_int8* first, mtree_int8* second, int* distance);
 bool mtree_int8_contained_distance(mtree_int8* first, mtree_int8* second, int* distance);
 mtree_int8* mtree_int8_deep_copy(mtree_int8 *source);
-int get_distance(int size, mtree_int8* entries[size], int distances[size][size], int i, int j);
+int get_int8_distance(int size, mtree_int8* entries[size], int distances[size][size], int i, int j);
 
 #endif
