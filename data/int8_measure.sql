@@ -13,7 +13,7 @@ CREATE INDEX INT8_2000_GiST_Mtree ON INT8_2000 USING GiST (num mtree_int8_opclas
 
 SET enable_seqscan = OFF;
 
---SELECT id, num, (num <-> '927735564') AS dst FROM INT8_2000 ORDER BY (num <-> '927735564');
+SELECT id, num, (num <-> '0') AS dst FROM INT8_2000 ORDER BY (num <-> '0');
 
 EXPLAIN ANALYZE SELECT * FROM INT8_2000 WHERE num #<# '0';
 SELECT * FROM INT8_2000 WHERE num #<# '0';

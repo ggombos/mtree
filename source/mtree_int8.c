@@ -34,16 +34,13 @@ Datum mtree_int8_input(PG_FUNCTION_ARGS) {
   char* input = PG_GETARG_CSTRING(0);
 
   mtree_int8* result = (mtree_int8*) palloc(MTREE_INT8_SIZE);
-  /* QUESTION: Covering radius?
-    - Az alap legyen 0, majd az union helyrerázza.
-    (tesztelni)
-   */
   result->coveringRadius = 0;
   result->parentDistance = 0;
 
   SET_VARSIZE(result, MTREE_INT8_SIZE);
 
-  strtoul(input, result->data, 0);
+  char* tmp;
+  result->data = strtoul(input, &tmp, 10);
 
   PG_RETURN_POINTER(result);
 }
@@ -93,17 +90,12 @@ Datum mtree_int8_consistent(PG_FUNCTION_ARGS) {
         break;
     }
   } else {
-    /* QUESTION: Why recheck isn't obvious? */
     switch(strategyNumber) {
       case SameStrategyNumber:
         returnValue = mtree_int8_contains_distance(key, query, &distance);
         *recheck = true;
         break;
       case OverlapStrategyNumber:
-      /*
-        TL;DR
-        Akkor nem
-      */
         returnValue = mtree_int8_overlap_distance(key, query, &distance);
         *recheck = !mtree_int8_contained_distance(key, query, &distance);
         break;
