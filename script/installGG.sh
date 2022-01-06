@@ -11,30 +11,34 @@ readonly POSTGRESQL_EXTENSION_DIRECTORY="/home/ggombos/mtree/mtree_gist/postgre/
 # PostgreSQL home of shared object libraries
 readonly POSTGRESQL_LIBRARY_DIRECTORY="/home/ggombos/mtree/mtree_gist/postgre"
 
-#
-# Creates shared object library from the generic source code
-#
 function create_and_copy_so() {
   cp "${SOURCE_DIRECTORY}/mtree_text.c" "${SOURCE_DIRECTORY}/mtree_text_tmp.c"
   cc -fPIC -c -I "${POSTGRESQL_INCLUDE_DIRECTORY}" "${SOURCE_DIRECTORY}/mtree_text_tmp.c" -o "${SOURCE_DIRECTORY}/mtree_text.o"
   cp "${SOURCE_DIRECTORY}/mtree_text_util.c" "${SOURCE_DIRECTORY}/mtree_text_util_tmp.c"
   cc -fPIC -c -I "${POSTGRESQL_INCLUDE_DIRECTORY}" "${SOURCE_DIRECTORY}/mtree_text_util_tmp.c" -o "${SOURCE_DIRECTORY}/mtree_text_util.o"
+  cp "${SOURCE_DIRECTORY}/mtree_int8.c" "${SOURCE_DIRECTORY}/mtree_int8_tmp.c"
+  cc -fPIC -c -I "${POSTGRESQL_INCLUDE_DIRECTORY}" "${SOURCE_DIRECTORY}/mtree_int8_tmp.c" -o "${SOURCE_DIRECTORY}/mtree_int8.o"
+  cp "${SOURCE_DIRECTORY}/mtree_int8_util.c" "${SOURCE_DIRECTORY}/mtree_int8_util_tmp.c"
+  cc -fPIC -c -I "${POSTGRESQL_INCLUDE_DIRECTORY}" "${SOURCE_DIRECTORY}/mtree_int8_util_tmp.c" -o "${SOURCE_DIRECTORY}/mtree_int8_util.o"
   cp "${SOURCE_DIRECTORY}/mtree_util.c" "${SOURCE_DIRECTORY}/mtree_util_tmp.c"
   cc -fPIC -c -I "${POSTGRESQL_INCLUDE_DIRECTORY}" "${SOURCE_DIRECTORY}/mtree_util_tmp.c" -o "${SOURCE_DIRECTORY}/mtree_util.o"
-  cc -shared -o "${SOURCE_DIRECTORY}/mtree_text.so" "${SOURCE_DIRECTORY}/mtree_text.o" "${SOURCE_DIRECTORY}/mtree_text_util.o" "${SOURCE_DIRECTORY}/mtree_util.o"
+  cp "${SOURCE_DIRECTORY}/mtree_gist.c" "${SOURCE_DIRECTORY}/mtree_gist_tmp.c"
+  cc -fPIC -c -I "${POSTGRESQL_INCLUDE_DIRECTORY}" "${SOURCE_DIRECTORY}/mtree_gist_tmp.c" -o "${SOURCE_DIRECTORY}/mtree_gist.o"
+  cc -shared -o "${SOURCE_DIRECTORY}/mtree_text.so" "${SOURCE_DIRECTORY}/mtree_gist.o" "${SOURCE_DIRECTORY}/mtree_text.o" "${SOURCE_DIRECTORY}/mtree_text_util.o" "${SOURCE_DIRECTORY}/mtree_int8.o" "${SOURCE_DIRECTORY}/mtree_int8_util.o" "${SOURCE_DIRECTORY}/mtree_util.o"
   cp "${SOURCE_DIRECTORY}/mtree_text.so" "${POSTGRESQL_LIBRARY_DIRECTORY}/mtree_gist.so"
   rm "${SOURCE_DIRECTORY}/mtree_text_tmp.c"
   rm "${SOURCE_DIRECTORY}/mtree_text_util_tmp.c"
-  rm "${SOURCE_DIRECTORY}/mtree_util_tmp.c"  
+  rm "${SOURCE_DIRECTORY}/mtree_int8_tmp.c"
+  rm "${SOURCE_DIRECTORY}/mtree_int8_util_tmp.c"
+  rm "${SOURCE_DIRECTORY}/mtree_util_tmp.c"
   rm "${SOURCE_DIRECTORY}/mtree_text.o"
   rm "${SOURCE_DIRECTORY}/mtree_text_util.o"
-  rm "${SOURCE_DIRECTORY}/mtree_util.o"  
+  rm "${SOURCE_DIRECTORY}/mtree_int8.o"
+  rm "${SOURCE_DIRECTORY}/mtree_int8_util.o"
+  rm "${SOURCE_DIRECTORY}/mtree_util.o"
   rm "${SOURCE_DIRECTORY}/mtree_text.so"
 }
 
-#
-#
-#
 function copy_sql_and_control() {
   cp "${SOURCE_DIRECTORY}/mtree_gist--1.0.sql" "${POSTGRESQL_EXTENSION_DIRECTORY}/mtree_gist--1.0.sql"
   cp "${SOURCE_DIRECTORY}/mtree_gist.control" "${SOURCE_DIRECTORY}/mtree_gist_tmp.control"
