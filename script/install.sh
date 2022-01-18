@@ -33,6 +33,8 @@ function create_and_copy_so() {
   rm "${SOURCE_DIRECTORY}/mtree_int8_util.o"
   rm "${SOURCE_DIRECTORY}/mtree_util.o"
   rm "${SOURCE_DIRECTORY}/mtree_text.so"
+  rm "${SOURCE_DIRECTORY}/mtree_gist.o"
+  rm "${SOURCE_DIRECTORY}/"
 }
 
 function copy_sql_and_control() {
