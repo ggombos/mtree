@@ -55,3 +55,21 @@ double overlap_area(int radiusOne, int radiusTwo, int distance) {
 
   return a1 + a2;
 }
+
+unsigned char get_array_length(const char* arrayString) {
+  char copyOfArrayString[strlen(arrayString)];
+  strcpy(copyOfArrayString, arrayString);
+
+  unsigned char numberOfCommas = 0;
+  for (unsigned short int i = 0; copyOfArrayString[i]; ++i) {
+    if (copyOfArrayString[i] == ',') {
+      numberOfCommas += 1;
+    }
+  }
+
+  if (numberOfCommas != 0) {
+    numberOfCommas += 1;
+  }
+
+  return numberOfCommas;
+}

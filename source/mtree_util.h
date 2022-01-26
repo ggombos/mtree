@@ -14,4 +14,6 @@ int string_distance(char* a, char* b);
 void init_distances(int size, int* distances);
 double overlap_area(int radiusOne, int radiusTwo, int distance);
 
+unsigned char get_array_length(const char* array_string);
+
 #endif
