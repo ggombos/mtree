@@ -1,6 +1,7 @@
 /*
  * contrib/mtree_gist/mtree_int8.c
  */
+
 #include "mtree_int8.h"
 
 #include "mtree_int8_util.h"
