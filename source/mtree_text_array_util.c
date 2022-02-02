@@ -3,11 +3,21 @@
  */
 
 #include "mtree_text_array_util.h"
+#include "mtree_util.h"
 
 int mtree_text_array_distance_internal(mtree_text_array* first, mtree_text_array* second) {
-	elog(ERROR, "mtree_text_array_distance_internal not implemented yet");
-  // TODO: Implement distance
-  return 0;
+	int sum = 0;
+	int length = (int) sizeof(first);
+	if ((int) sizeof(second) < length) {
+		length = (int) sizeof(second);
+	}
+    for (int x = 0; x < length; ++x) {
+		if (string_distance(first->data[x], second->data[x]) == 0) {
+			sum++;
+		}
+	}
+	
+  return length-sum;
 }
 
 bool mtree_text_array_equals(mtree_text_array* first, mtree_text_array* second) {
@@ -25,15 +35,13 @@ bool mtree_text_array_equals(mtree_text_array* first, mtree_text_array* second) 
 }
 
 bool mtree_text_array_overlap_distance(mtree_text_array* first, mtree_text_array* second, int* distance) {
-	elog(ERROR, "mtree_text_array_overlap_distance not implemented yet");
-  // TODO: Implement overlap distance
-  return false;
+	elog(INFO, "mtree_text_array_overlap_distance is it true?");
+	return *distance <= first->coveringRadius + second->coveringRadius;
 }
 
 bool mtree_text_array_contains_distance(mtree_text_array* first, mtree_text_array* second, int* distance) {
-	elog(ERROR, "mtree_text_array_contains_distance not implemented yet");
-  // TODO: Implement contains distance
-  return false;
+	elog(INFO, "mtree_text_array_contains_distance is it true?");
+	return first->coveringRadius >= *distance + second->coveringRadius;
 }
 
 bool mtree_text_array_contained_distance(mtree_text_array* first, mtree_text_array* second, int* distance) {

@@ -28,11 +28,13 @@
 
 #include "mtree_gist.h"
 
+#define MTREE_TEXT_ARRAY_MAX_STRINGLENGTH 10
+
 typedef struct {
   int parentDistance;
   int coveringRadius;
   unsigned char arrayLength;
-  char data[FLEXIBLE_ARRAY_MEMBER][100];
+  char data[FLEXIBLE_ARRAY_MEMBER][MTREE_TEXT_ARRAY_MAX_STRINGLENGTH];
 } mtree_text_array;
 
 #define MTREE_TEXT_ARRAY_SIZE (2 * sizeof(int) + sizeof(unsigned char))
