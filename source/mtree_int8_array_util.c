@@ -6,6 +6,16 @@
 
 int mtree_int8_array_distance_internal(mtree_int8_array* first, mtree_int8_array* second) {
   // TODO: Implement distance
+  // Hasonlítsunk össze minden elemet minden elemmel és adjuk vissza, hogy hány helyen
+  // egyeznek ezek a tömbök.
+  // UPDATE: Csak pozíciónként! Elsőt az elsővel, másodikat a másodikkal!
+  // INT8:
+  // - SZUMMA: (f1 - f2) ^ 2 / f1 + f2
+  // - Kullback-Leibler távolság (ha hisztogrammok a tömbök) : SZUMMA: (f1 - f2) * ln(f1 / f2)
+  // - Hamming-távolság
+  // Jellegzetesség-leírók: pontfelhőket tárolunk
+  // TEXT:
+  // - Pozíciónként, hány helyen egyeznek
   return 0;
 }
 
