@@ -22,11 +22,11 @@ SET enable_seqscan = off;
 
 -- range query  fingerprint_data_10
 
-SELECT * FROM fingerprints2 WHERE hash_gist #<# 'xxx,472,171,300,000,000,0000';
+SELECT * FROM fingerprints2 ;
 
 -- SELECT song_fk, hash, (hash_gist <-> 'xxx1096972600000000000') AS dst FROM fingerprints2 WHERE hash_gist <-> 'xxx1096972600000000000' <= 7;
 
--- SELECT song_fk, hash, offset2, (hash_gist <-> 'xxx1096972600000000000') AS dst FROM fingerprints2 ORDER BY (hash_gist <-> mtree_text('xxx1096972600000000000'));
+SELECT song_fk, hash, offset2, hash_gist, (hash_gist <-> 'xxx,472,171,300,000,000,0000') AS dst FROM fingerprints2 ORDER BY (hash_gist <-> 'xxx,472,171,300,000,000,0000');
 
  -- song_fk |        hash         | offset2 | dst
 -------+---------------------+---------+-----

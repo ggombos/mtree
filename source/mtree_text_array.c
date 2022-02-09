@@ -34,10 +34,11 @@ Datum mtree_text_array_input(PG_FUNCTION_ARGS) {
   char* input = PG_GETARG_CSTRING(0);
 
   // TODO: Validate input string syntax
+  // TODO: I
 
-  unsigned char arrayLength = get_array_length(input);
+  unsigned char arrayLength = get_array_length(input); //sizeof(input)/sizeof(input[0]); //get_array_length(input);
 
-  size_t size = MTREE_TEXT_ARRAY_SIZE + arrayLength * sizeof(char) + 1;
+  size_t size = MTREE_TEXT_ARRAY_SIZE + arrayLength * MTREE_TEXT_ARRAY_MAX_STRINGLENGTH * sizeof(char) + 1;
   mtree_text_array* result = (mtree_text_array*) palloc(size);
 
   char* tmp;
@@ -52,7 +53,6 @@ Datum mtree_text_array_input(PG_FUNCTION_ARGS) {
   result->arrayLength = arrayLength;
 
   SET_VARSIZE(result, size);
-
   PG_RETURN_POINTER(result);
 }
 
@@ -65,13 +65,13 @@ Datum mtree_text_array_output(PG_FUNCTION_ARGS) {
   initStringInfo(&stringInfo);
 
   // TODO: Fix this, strange shit
-  char tmp[20];
+  char tmp[MTREE_TEXT_ARRAY_MAX_STRINGLENGTH];
   for (unsigned char i = 0; i < arrayLength; ++i) {
-    sprintf(tmp, "%s", output->data[i]);
-    appendStringInfoString(&stringInfo, tmp);
-    if (i != arrayLength - 1) {
-      appendStringInfoChar(&stringInfo, ',');
-    }
+		sprintf(tmp, "%s", output->data[i]);
+		appendStringInfoString(&stringInfo, tmp);
+		if (i != arrayLength - 1) {
+			appendStringInfoChar(&stringInfo, ',');
+		}
   }
 
   PG_RETURN_CSTRING(stringInfo.data);
@@ -462,7 +462,8 @@ Datum mtree_text_array_distance_operator(PG_FUNCTION_ARGS) {
 Datum mtree_text_array_overlap_operator(PG_FUNCTION_ARGS) {
   mtree_text_array* first = PG_GETARG_MTREE_TEXT_ARRAY_P(0);
   mtree_text_array* second = PG_GETARG_MTREE_TEXT_ARRAY_P(1);
-  bool result = mtree_text_array_overlap_distance(first, second, mtree_text_array_distance_internal(first, second));
+  int tmp = mtree_text_array_distance_internal(first, second);
+  bool result = mtree_text_array_overlap_distance(first, second, &tmp);
 
   PG_RETURN_BOOL(result);
 }
@@ -470,7 +471,8 @@ Datum mtree_text_array_overlap_operator(PG_FUNCTION_ARGS) {
 Datum mtree_text_array_contains_operator(PG_FUNCTION_ARGS) {
   mtree_text_array* first = PG_GETARG_MTREE_TEXT_ARRAY_P(0);
   mtree_text_array* second = PG_GETARG_MTREE_TEXT_ARRAY_P(1);
-  bool result = mtree_text_array_contains_distance(first, second, mtree_text_array_distance_internal(first, second));
+  int tmp = mtree_text_array_distance_internal(first, second);
+  bool result = mtree_text_array_contains_distance(first, second, &tmp);
 
   PG_RETURN_BOOL(result);
 }
@@ -478,7 +480,8 @@ Datum mtree_text_array_contains_operator(PG_FUNCTION_ARGS) {
 Datum mtree_text_array_contained_operator(PG_FUNCTION_ARGS) {
   mtree_text_array* first = PG_GETARG_MTREE_TEXT_ARRAY_P(0);
   mtree_text_array* second = PG_GETARG_MTREE_TEXT_ARRAY_P(1);
-  bool result = mtree_text_array_contains_distance(second, first, mtree_text_array_distance_internal(second, first));
+  int tmp = mtree_text_array_distance_internal(second, first);
+  bool result = mtree_text_array_contains_distance(second, first, &tmp);
 
   PG_RETURN_BOOL(result);
 }
