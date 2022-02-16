@@ -15,4 +15,7 @@ bool mtree_int8_array_contained_distance(mtree_int8_array* first, mtree_int8_arr
 mtree_int8_array* mtree_int8_array_deep_copy(mtree_int8_array *source);
 int get_int8_array_distance(int size, mtree_int8_array* entries[size], int distances[size][size], int i, int j);
 
+int int8_array_sum_distance(mtree_int8_array* first, mtree_int8_array* second);
+int int8_array_kullback_leibler_distance(mtree_int8_array* first, mtree_int8_array* second);
+
 #endif

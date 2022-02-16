@@ -5,18 +5,7 @@
 #include "mtree_int8_array_util.h"
 
 int mtree_int8_array_distance_internal(mtree_int8_array* first, mtree_int8_array* second) {
-  // TODO: Implement distance
-  // Hasonlítsunk össze minden elemet minden elemmel és adjuk vissza, hogy hány helyen
-  // egyeznek ezek a tömbök.
-  // UPDATE: Csak pozíciónként! Elsőt az elsővel, másodikat a másodikkal!
-  // INT8:
-  // - SZUMMA: (f1 - f2) ^ 2 / f1 + f2
-  // - Kullback-Leibler távolság (ha hisztogrammok a tömbök) : SZUMMA: (f1 - f2) * ln(f1 / f2)
-  // - Hamming-távolság
-  // Jellegzetesség-leírók: pontfelhőket tárolunk
-  // TEXT:
-  // - Pozíciónként, hány helyen egyeznek
-  return 0;
+  return int8_array_kullback_leibler_distance(first, second);
 }
 
 bool mtree_int8_array_equals(mtree_int8_array* first, mtree_int8_array* second) {
@@ -58,4 +47,64 @@ int get_int8_array_distance(int size, mtree_int8_array* entries[size], int dista
     distances[i][j] = mtree_int8_array_distance_internal(entries[i], entries[j]);
   }
   return distances[i][j];
+}
+
+int int8_array_sum_distance(mtree_int8_array* first, mtree_int8_array* second) {
+  int distance = 0;
+  unsigned char minimumLength, maximumLength;
+  mtree_int8_array* longer;
+
+  if (first->arrayLength <= second->arrayLength) {
+    minimumLength = first->arrayLength;
+    maximumLength = second->arrayLength;
+    longer = second;
+  } else {
+    minimumLength = second->arrayLength;
+    maximumLength = first->arrayLength;
+    longer = first;
+  }
+
+  for (unsigned char i = 0; i < minimumLength; ++i) {
+    if (first->data[i] != 0 || second->data[i] != 0) {
+      distance += (((first->data[i] - second->data[i]) * (first->data[i] - second->data[i])) / (first->data[i] + second->data[i]));
+    } else {
+      distance += (((first->data[i] - second->data[i]) * (first->data[i] - second->data[i])));
+    }
+  }
+
+  for (unsigned char i = minimumLength; i < maximumLength; ++i) {
+    distance += longer->data[i];
+  }
+
+  return distance;
+}
+
+int int8_array_kullback_leibler_distance(mtree_int8_array* first, mtree_int8_array* second) {
+  int distance = 0;
+  unsigned char minimumLength, maximumLength;
+  mtree_int8_array* longer;
+
+  if (first->arrayLength <= second->arrayLength) {
+    minimumLength = first->arrayLength;
+    maximumLength = second->arrayLength;
+    longer = second;
+  } else {
+    minimumLength = second->arrayLength;
+    maximumLength = first->arrayLength;
+    longer = first;
+  }
+
+  for (unsigned char i = 0; i < minimumLength; ++i) {
+    if (second->data[i] != 0) {
+      distance += ((first->data[i] - second->data[i]) * log(first->data[i] / second->data[i]));
+    } else {
+      distance += ((first->data[i] - second->data[i]) * log(first->data[i]));
+    }
+  }
+
+  for (unsigned char i = minimumLength; i < maximumLength; ++i) {
+    distance += longer->data[i];
+  }
+
+  return distance;
 }
