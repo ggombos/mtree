@@ -489,9 +489,8 @@ AS
   FUNCTION 8 mtree_int8_array_distance (internal, mtree_int8_array, smallint, oid, internal)
 ;
 
-
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
--- int8 array (for int8 arrays)
+-- text array (for text arrays)
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 -- Declaring data type
@@ -650,4 +649,3 @@ AS
   FUNCTION 7 mtree_text_array_same (mtree_text_array, mtree_text_array),
   FUNCTION 8 mtree_text_array_distance (internal, mtree_text_array, smallint, oid, internal)
 ;
-
