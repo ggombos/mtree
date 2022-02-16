@@ -478,8 +478,7 @@ Datum mtree_int8_distance_operator(PG_FUNCTION_ARGS) {
 Datum mtree_int8_overlap_operator(PG_FUNCTION_ARGS) {
   mtree_int8 *first = PG_GETARG_MTREE_INT8_P(0);
   mtree_int8 *second = PG_GETARG_MTREE_INT8_P(1);
-  bool result = mtree_int8_overlap_distance(
-      first, second, mtree_int8_distance_internal(first, second));
+  bool result = mtree_int8_overlap_distance(first, second, mtree_int8_distance_internal(first, second));
 
   PG_RETURN_BOOL(result);
 }
