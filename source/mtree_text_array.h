@@ -28,7 +28,7 @@
 
 #include "mtree_gist.h"
 
-#define MTREE_TEXT_ARRAY_MAX_STRINGLENGTH 10
+#define MTREE_TEXT_ARRAY_MAX_STRINGLENGTH 100
 
 typedef struct {
   int parentDistance;

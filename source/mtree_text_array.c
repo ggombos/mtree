@@ -45,6 +45,8 @@ Datum mtree_text_array_input(PG_FUNCTION_ARGS) {
   char* arrayElement = strtok(input, ",");
   for (unsigned char i = 0; i < arrayLength; ++i) {
     strcpy(result->data[i],arrayElement);
+	result->data[i][strlen(result->data[i])] = '\0';
+	// elog(INFO, "%s", result->data[i]);
     arrayElement = strtok(NULL, ",");
   }
 
@@ -64,10 +66,20 @@ Datum mtree_text_array_output(PG_FUNCTION_ARGS) {
   StringInfoData stringInfo;
   initStringInfo(&stringInfo);
 
+  int maxChar = 0;
+  for (unsigned char i = 0; i < arrayLength; ++i) {
+	  maxChar += strlen(output->data[i]);
+  }
+
+  
   // TODO: Fix this, strange shit
-  char tmp[MTREE_TEXT_ARRAY_MAX_STRINGLENGTH];
+  // char tmp[MTREE_TEXT_ARRAY_MAX_STRINGLENGTH];
+	// elog(INFO, "-----------");
+  char tmp[maxChar];
   for (unsigned char i = 0; i < arrayLength; ++i) {
 		sprintf(tmp, "%s", output->data[i]);
+		// elog(INFO, "T  %s", tmp);
+		// elog(INFO, "%s", output->data[i]);
 		appendStringInfoString(&stringInfo, tmp);
 		if (i != arrayLength - 1) {
 			appendStringInfoChar(&stringInfo, ',');
@@ -75,6 +87,7 @@ Datum mtree_text_array_output(PG_FUNCTION_ARGS) {
   }
 
   PG_RETURN_CSTRING(stringInfo.data);
+  // PG_RETURN_CSTRING("");
 }
 
 Datum mtree_text_array_consistent(PG_FUNCTION_ARGS) {
@@ -83,7 +96,7 @@ Datum mtree_text_array_consistent(PG_FUNCTION_ARGS) {
   StrategyNumber strategyNumber = (StrategyNumber) PG_GETARG_UINT16(2);
   bool *recheck = (bool *) PG_GETARG_POINTER(4);
   mtree_text_array* key = DatumGetMtreeTextArray(entry->key);
-  int distance = mtree_text_array_distance_internal(key, query);
+  float distance = mtree_text_array_distance_internal(key, query);
 
   bool returnValue;
   if (GIST_LEAF(entry)) {
@@ -462,7 +475,7 @@ Datum mtree_text_array_distance_operator(PG_FUNCTION_ARGS) {
 Datum mtree_text_array_overlap_operator(PG_FUNCTION_ARGS) {
   mtree_text_array* first = PG_GETARG_MTREE_TEXT_ARRAY_P(0);
   mtree_text_array* second = PG_GETARG_MTREE_TEXT_ARRAY_P(1);
-  int tmp = mtree_text_array_distance_internal(first, second);
+  float tmp = mtree_text_array_distance_internal(first, second);
   bool result = mtree_text_array_overlap_distance(first, second, &tmp);
 
   PG_RETURN_BOOL(result);
@@ -471,7 +484,7 @@ Datum mtree_text_array_overlap_operator(PG_FUNCTION_ARGS) {
 Datum mtree_text_array_contains_operator(PG_FUNCTION_ARGS) {
   mtree_text_array* first = PG_GETARG_MTREE_TEXT_ARRAY_P(0);
   mtree_text_array* second = PG_GETARG_MTREE_TEXT_ARRAY_P(1);
-  int tmp = mtree_text_array_distance_internal(first, second);
+  float tmp = mtree_text_array_distance_internal(first, second);
   bool result = mtree_text_array_contains_distance(first, second, &tmp);
 
   PG_RETURN_BOOL(result);
@@ -480,7 +493,7 @@ Datum mtree_text_array_contains_operator(PG_FUNCTION_ARGS) {
 Datum mtree_text_array_contained_operator(PG_FUNCTION_ARGS) {
   mtree_text_array* first = PG_GETARG_MTREE_TEXT_ARRAY_P(0);
   mtree_text_array* second = PG_GETARG_MTREE_TEXT_ARRAY_P(1);
-  int tmp = mtree_text_array_distance_internal(second, first);
+  float tmp = mtree_text_array_distance_internal(second, first);
   bool result = mtree_text_array_contains_distance(second, first, &tmp);
 
   PG_RETURN_BOOL(result);
