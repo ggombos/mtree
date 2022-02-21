@@ -26,8 +26,7 @@ SET enable_seqscan = off;
 
 SELECT * FROM millionSong ;
 
-SELECT artist, title, (tags <-> 'alternative###100,pop###75,electronic###50,vocal###50,rock###25') AS dst FROM millionSong;
--- order by tags <-> 'alternative###100,pop###75,electronic###50,vocal###50,rock###25';
+SELECT artist, title, (tags <-> 'alternative###100,pop###75,electronic###50,vocal###50,rock###25') AS dst FROM millionSong order by tags <-> 'alternative###100,pop###75,electronic###50,vocal###50,rock###25';
 
 --SELECT song_fk, hash, offset2, hash_gist, (hash_gist <-> 'xxx,472,171,300,000,000,0000') AS dst FROM fingerprints2 ORDER BY (hash_gist <-> 'xxx,472,171,300,000,000,0000');
 
