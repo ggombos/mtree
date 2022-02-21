@@ -33,10 +33,10 @@ function create_and_copy_so() {
   cc -fPIC -c -I "${POSTGRESQL_INCLUDE_DIRECTORY}" "${SOURCE_DIRECTORY}/mtree_gist_tmp.c" -o "${SOURCE_DIRECTORY}/mtree_gist.o"
   
   #int8 array
-  # cp "${SOURCE_DIRECTORY}/mtree_int8_array.c" "${SOURCE_DIRECTORY}/mtree_int8_array_tmp.c"
-  # cc -fPIC -c -I "${POSTGRESQL_INCLUDE_DIRECTORY}" "${SOURCE_DIRECTORY}/mtree_int8_array_tmp.c" -o "${SOURCE_DIRECTORY}/mtree_int8_array.o"
-  # cp "${SOURCE_DIRECTORY}/mtree_int8_array_util.c" "${SOURCE_DIRECTORY}/mtree_int8_array_util_tmp.c"
-  # cc -fPIC -c -I "${POSTGRESQL_INCLUDE_DIRECTORY}" "${SOURCE_DIRECTORY}/mtree_int8_array_util_tmp.c" -o "${SOURCE_DIRECTORY}/mtree_int8_array_util.o"
+  cp "${SOURCE_DIRECTORY}/mtree_int8_array.c" "${SOURCE_DIRECTORY}/mtree_int8_array_tmp.c"
+  cc -fPIC -c -I "${POSTGRESQL_INCLUDE_DIRECTORY}" "${SOURCE_DIRECTORY}/mtree_int8_array_tmp.c" -o "${SOURCE_DIRECTORY}/mtree_int8_array.o"
+  cp "${SOURCE_DIRECTORY}/mtree_int8_array_util.c" "${SOURCE_DIRECTORY}/mtree_int8_array_util_tmp.c"
+  cc -fPIC -c -I "${POSTGRESQL_INCLUDE_DIRECTORY}" "${SOURCE_DIRECTORY}/mtree_int8_array_util_tmp.c" -o "${SOURCE_DIRECTORY}/mtree_int8_array_util.o"
   
   #text array
   cp "${SOURCE_DIRECTORY}/mtree_text_array.c" "${SOURCE_DIRECTORY}/mtree_text_array_tmp.c"
@@ -44,11 +44,17 @@ function create_and_copy_so() {
   cp "${SOURCE_DIRECTORY}/mtree_text_array_util.c" "${SOURCE_DIRECTORY}/mtree_text_array_util_tmp.c"
   cc -fPIC -c -I "${POSTGRESQL_INCLUDE_DIRECTORY}" "${SOURCE_DIRECTORY}/mtree_text_array_util_tmp.c" -o "${SOURCE_DIRECTORY}/mtree_text_array_util.o"
   
+  #float array
+  cp "${SOURCE_DIRECTORY}/mtree_float_array.c" "${SOURCE_DIRECTORY}/mtree_float_array_tmp.c"
+  cc -fPIC -c -I "${POSTGRESQL_INCLUDE_DIRECTORY}" "${SOURCE_DIRECTORY}/mtree_float_array_tmp.c" -o "${SOURCE_DIRECTORY}/mtree_float_array.o"
+  cp "${SOURCE_DIRECTORY}/mtree_float_array_util.c" "${SOURCE_DIRECTORY}/mtree_float_array_util_tmp.c"
+  cc -fPIC -c -I "${POSTGRESQL_INCLUDE_DIRECTORY}" "${SOURCE_DIRECTORY}/mtree_float_array_util_tmp.c" -o "${SOURCE_DIRECTORY}/mtree_float_array_util.o"
+
   # cc -shared -o "${SOURCE_DIRECTORY}/mtree_text.so" "${SOURCE_DIRECTORY}/mtree_gist.o" "${SOURCE_DIRECTORY}/mtree_text.o" "${SOURCE_DIRECTORY}/mtree_text_util.o" "${SOURCE_DIRECTORY}/mtree_int8.o" "${SOURCE_DIRECTORY}/mtree_int8_util.o" "${SOURCE_DIRECTORY}/mtree_util.o"
   # cp "${SOURCE_DIRECTORY}/mtree_text.so" "${POSTGRESQL_LIBRARY_DIRECTORY}/mtree_gist.so"
   
     # cc -shared -o "${SOURCE_DIRECTORY}/mtree.so" "${SOURCE_DIRECTORY}/mtree_text_array.o" "${SOURCE_DIRECTORY}/mtree_text_array_util.o" "${SOURCE_DIRECTORY}/mtree_gist.o" "${SOURCE_DIRECTORY}/mtree_text.o" "${SOURCE_DIRECTORY}/mtree_text_util.o" "${SOURCE_DIRECTORY}/mtree_int8.o" "${SOURCE_DIRECTORY}/mtree_int8_util.o" "${SOURCE_DIRECTORY}/mtree_util.o"
-    cc -shared -o "${SOURCE_DIRECTORY}/mtree.so" "${SOURCE_DIRECTORY}/mtree_int8_array.o" "${SOURCE_DIRECTORY}/mtree_int8_array_util.o" "${SOURCE_DIRECTORY}/mtree_text_array.o" "${SOURCE_DIRECTORY}/mtree_text_array_util.o" "${SOURCE_DIRECTORY}/mtree_gist.o" "${SOURCE_DIRECTORY}/mtree_text.o" "${SOURCE_DIRECTORY}/mtree_text_util.o" "${SOURCE_DIRECTORY}/mtree_int8.o" "${SOURCE_DIRECTORY}/mtree_int8_util.o" "${SOURCE_DIRECTORY}/mtree_util.o"
+    cc -shared -o "${SOURCE_DIRECTORY}/mtree.so" "${SOURCE_DIRECTORY}/mtree_int8_array.o" "${SOURCE_DIRECTORY}/mtree_int8_array_util.o"  "${SOURCE_DIRECTORY}/mtree_float_array.o" "${SOURCE_DIRECTORY}/mtree_float_array_util.o" "${SOURCE_DIRECTORY}/mtree_text_array.o" "${SOURCE_DIRECTORY}/mtree_text_array_util.o" "${SOURCE_DIRECTORY}/mtree_gist.o" "${SOURCE_DIRECTORY}/mtree_text.o" "${SOURCE_DIRECTORY}/mtree_text_util.o" "${SOURCE_DIRECTORY}/mtree_int8.o" "${SOURCE_DIRECTORY}/mtree_int8_util.o" "${SOURCE_DIRECTORY}/mtree_util.o"
 	cp "${SOURCE_DIRECTORY}/mtree.so" "${POSTGRESQL_LIBRARY_DIRECTORY}/mtree_gist.so"
 	
   rm "${SOURCE_DIRECTORY}/mtree_text_tmp.c"
@@ -61,7 +67,7 @@ function create_and_copy_so() {
   rm "${SOURCE_DIRECTORY}/mtree_int8.o"
   rm "${SOURCE_DIRECTORY}/mtree_int8_util.o"
   rm "${SOURCE_DIRECTORY}/mtree_util.o"
-  rm "${SOURCE_DIRECTORY}/mtree_text.so"
+  # rm "${SOURCE_DIRECTORY}/mtree_text.so"
   rm "${SOURCE_DIRECTORY}/mtree.so"
 }
 
