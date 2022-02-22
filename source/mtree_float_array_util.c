@@ -67,7 +67,7 @@ float float_array_sum_distance(mtree_float_array* first, mtree_float_array* seco
   }
 
   for (unsigned char i = 0; i < minimumLength; ++i) {
-    if (first->data[i] + second->data[i] != 0) {
+    if (first->data[i] + second->data[i] != 0.0) {
       distance += (((first->data[i] - second->data[i]) * (first->data[i] - second->data[i])) / (first->data[i] + second->data[i]));
     } else {
       distance += (((first->data[i] - second->data[i]) * (first->data[i] - second->data[i])));
@@ -78,7 +78,7 @@ float float_array_sum_distance(mtree_float_array* first, mtree_float_array* seco
     distance += longer->data[i];
   }
   // TODO: EZ ITT KERDES: a tavolsag nem lehet negativ, jo ez igy?
-  return abs(distance);
+  return fabs(distance);
 }
 
 float float_array_kullback_leibler_distance(mtree_float_array* first, mtree_float_array* second) {

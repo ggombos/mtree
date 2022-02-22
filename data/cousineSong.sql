@@ -14,7 +14,7 @@ CREATE TABLE cousineSong (
   tags mtree_float_array
 );
 
-\copy cousineSong FROM '/home/ggombos/mtree/mtree_gist/data/cosineSrc/minimalcosine2mainComponent.csv' DELIMITER ';' CSV HEADER;
+\copy cousineSong FROM '/home/ggombos/mtree/mtree_gist/data/cosineSrc/cosine2mainComponent.csv' DELIMITER ';' CSV HEADER;
 
 CREATE INDEX cousineSong_gist_index ON cousineSong USING gist (tags mtree_float_array_opclass) ;
 
@@ -22,9 +22,18 @@ SET enable_seqscan = off;
 
 -- range query  fingerprint_data_10
 
-SELECT * FROM cousineSong ;
+SELECT * FROM cousineSong Limit 10;
 
-SELECT songname, (tags <-> '15.754852,2.485053') AS dst FROM cousineSong ORDER BY (tags <-> '15.754852,2.485053')  limit 10;
+EXPLAIN ANALYZE SELECT songname, (tags <-> '-2.175872184040981,-6.5717326280687') AS dst FROM cousineSong ORDER BY (tags <-> '-2.175872184040981,-6.5717326280687')  limit 10;
+
+
+-- deut2020
+SELECT songname, (tags <-> '-2.175872184040981,-6.5717326280687') AS dst FROM cousineSong ORDER BY (tags <-> '-2.175872184040981,-6.5717326280687')  limit 10;
+
+-- han0014
+SELECT songname, (tags <-> '32.202106621300764,9.265058832214397') AS dst FROM cousineSong ORDER BY (tags <-> '32.202106621300764,9.265058832214397')  limit 10;
+
+
 
 -- SELECT song_fk, hash, offset2, hash_gist, (hash_gist <-> 'xxx,472,171,300,000,000,0000') AS dst FROM fingerprints2 ORDER BY (hash_gist <-> 'xxx,472,171,300,000,000,0000');
 
