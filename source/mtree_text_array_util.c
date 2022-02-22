@@ -21,27 +21,41 @@ float weighted_text_distance(mtree_text_array* first, mtree_text_array* second) 
 		
 		//copy because the strtok kill the original string
 		char *rest = calloc(strlen(first->data[xF])+1, sizeof(char)); 
+		char* restPtr = rest;	//csak hogy fel tudjuk szabaditani
 		strcpy(rest, first->data[xF]);
+		// elog(INFO,"11  %s",rest);
 		
 		char* tagF = strtok_r(rest, "###", &rest);
 		int tagNumF = atoi(strtok_r(rest, "###", &rest));		//repr: % of the tag
-
+		strtok_r(rest, "###", &rest);
+		// elog(INFO,"12  %s",rest);
+		
 		bool found = false;
 		int tagNumS;
 		for (int xS = 0; xS < lengthS; ++xS) {
 			char *rest2 = calloc(strlen(second->data[xS])+1, sizeof(char)); 
+			char* rest2Ptr = rest2;	//csak hogy fel tudjuk szabaditani
 			strcpy(rest2, second->data[xS]);
+
+			// elog(INFO,"22  %s",rest2);
 			
 			char* tagS = strtok_r(rest2, "###", &rest2);
 			tagNumS = atoi(strtok_r(rest2, "###", &rest2));		//repr: % of the tag
+			strtok_r(rest2, "###", &rest2);
+			// elog(INFO,"23  %s",rest2);
 
 			if (strcmp(tagF,tagS) == 0) {
 				// elog(INFO, "FOUND");
 				found = true;
 				sameTagCount++;
+				free(rest2Ptr);
+				// elog(INFO,"24  ");
 				continue;
 			}
+			free(rest2Ptr);
 		}
+		// elog(INFO,"24  ");
+		free(restPtr);
 		if (found) {
 			sum += 100.0 - abs( tagNumF-tagNumS );
 		// } else {
