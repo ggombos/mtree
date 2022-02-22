@@ -16,7 +16,8 @@ CREATE TABLE millionSong (
   tags mtree_text_array
 );
 
-\copy millionSong FROM '/home/ggombos/mtree/mtree_gist/data/millionSongSrc/minimalmillionSongTags.csv' DELIMITER ';' CSV HEADER;
+-- \copy millionSong FROM '/home/ggombos/mtree/mtree_gist/data/millionSongSrc/millionSongTags.csv' DELIMITER ';' CSV HEADER;
+\copy millionSong FROM '/home/ggombos/mtree/mtree_gist/data/millionSongSrc/million100e.csv' DELIMITER ';' CSV HEADER;
 
 CREATE INDEX millionSong_gist_index ON millionSong USING gist (tags mtree_text_array_opclass) ;
 
@@ -24,9 +25,21 @@ SET enable_seqscan = off;
 
 -- range query  fingerprint_data_10
 
-SELECT * FROM millionSong ;
+SELECT * FROM millionSong limit 10;
 
-SELECT artist, title, (tags <-> 'alternative###100,pop###75,electronic###50,vocal###50,rock###25') AS dst FROM millionSong order by tags <-> 'alternative###100,pop###75,electronic###50,vocal###50,rock###25';
+-- SELECT artist, title, (tags <-> 'alternative###100,pop###75,electronic###50,vocal###50,rock###25') AS dst FROM millionSong order by tags <-> 'alternative###100,pop###75,electronic###50,vocal###50,rock###25' LIMIT 10;
+
+
+EXPLAIN ANALYZE SELECT artist, title, (tags <-> 'classic rock###100,rock###100,80s###100') AS dst, tags FROM millionSong order by tags <-> 'classic rock###100,rock###100,80s###100' LIMIT 10;
+
+SELECT artist, title, (tags <-> 'classic rock###100,rock###100,80s###100') AS dst, tags FROM millionSong order by tags <-> 'classic rock###100,rock###100,80s###100' LIMIT 10;
+
+SELECT artist, title, (tags <-> 'pop###100,latin###100,female vocalists###100') AS dst, tags FROM millionSong order by tags <-> 'pop###100,latin###100,female vocalists###100' LIMIT 10;
+
+
+	
+	
+	
 
 --SELECT song_fk, hash, offset2, hash_gist, (hash_gist <-> 'xxx,472,171,300,000,000,0000') AS dst FROM fingerprints2 ORDER BY (hash_gist <-> 'xxx,472,171,300,000,000,0000');
 
