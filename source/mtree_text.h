@@ -29,10 +29,10 @@
 #include "mtree_gist.h"
 
 typedef struct {
-  int parentDistance;
-  int coveringRadius;
-  char vl_length[4];
-  char vl_data[FLEXIBLE_ARRAY_MEMBER];
+	int parentDistance;
+	int coveringRadius;
+	char vl_length[4];
+	char vl_data[FLEXIBLE_ARRAY_MEMBER];
 } mtree_text;
 
 /* TODO: Some of these can be simplified */

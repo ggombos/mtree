@@ -29,9 +29,9 @@
 #include "mtree_gist.h"
 
 typedef struct {
-  int parentDistance;
-  int coveringRadius;
-  int64 data;
+	int parentDistance;
+	int coveringRadius;
+	int64 data;
 } mtree_int8;
 
 #define MTREE_INT8_SIZE (2 * sizeof(int) + sizeof(int64))

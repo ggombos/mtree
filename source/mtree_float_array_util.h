@@ -12,7 +12,7 @@ bool mtree_float_array_equals(mtree_float_array* first, mtree_float_array* secon
 bool mtree_float_array_overlap_distance(mtree_float_array* first, mtree_float_array* second, float* distance);
 bool mtree_float_array_contains_distance(mtree_float_array* first, mtree_float_array* second, float* distance);
 bool mtree_float_array_contained_distance(mtree_float_array* first, mtree_float_array* second, float* distance);
-mtree_float_array* mtree_float_array_deep_copy(mtree_float_array *source);
+mtree_float_array* mtree_float_array_deep_copy(mtree_float_array* source);
 int get_float_array_distance(int size, mtree_float_array* entries[size], int distances[size][size], int i, int j);
 
 float float_array_sum_distance(mtree_float_array* first, mtree_float_array* second);

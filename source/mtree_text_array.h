@@ -31,10 +31,10 @@
 #define MTREE_TEXT_ARRAY_MAX_STRINGLENGTH 100
 
 typedef struct {
-  int parentDistance;
-  int coveringRadius;
-  unsigned char arrayLength;
-  char data[FLEXIBLE_ARRAY_MEMBER][MTREE_TEXT_ARRAY_MAX_STRINGLENGTH];
+	int parentDistance;
+	int coveringRadius;
+	unsigned char arrayLength;
+	char data[FLEXIBLE_ARRAY_MEMBER][MTREE_TEXT_ARRAY_MAX_STRINGLENGTH];
 } mtree_text_array;
 
 #define MTREE_TEXT_ARRAY_SIZE (2 * sizeof(int) + sizeof(unsigned char))

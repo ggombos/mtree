@@ -5,19 +5,19 @@
 #define __MTREE_GIST_H__
 
 typedef enum {
-  First,
-  Best
+	First,
+	Best
 } UnionStrategy;
 
 typedef enum {
-  Random,
-  FirstTwo,
-  MaxDistanceFromFirst,
-  MaxDistancePair,
-  SamplingMinCoveringSum,
-  SamplingMinCoveringMax,
-  SamplingMinOverlapArea,
-  SamplingMinAreaSum
+	Random,
+	FirstTwo,
+	MaxDistanceFromFirst,
+	MaxDistancePair,
+	SamplingMinCoveringSum,
+	SamplingMinCoveringMax,
+	SamplingMinOverlapArea,
+	SamplingMinAreaSum
 } PicksplitStrategy;
 
 /* TODO: Some of these can be simplified */

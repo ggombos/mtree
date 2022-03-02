@@ -29,30 +29,15 @@
 #include "mtree_gist.h"
 
 typedef struct {
-  int parentDistance;
-  int coveringRadius;
-  unsigned char arrayLength;
-  float data[FLEXIBLE_ARRAY_MEMBER];
+	int parentDistance;
+	int coveringRadius;
+	unsigned char arrayLength;
+	float data[FLEXIBLE_ARRAY_MEMBER];
 } mtree_float_array;
 
 #define MTREE_FLOAT_ARRAY_SIZE (2 * sizeof(int) + sizeof(unsigned char))
-#define DatumGetMtreeInt8Array(x) ((mtree_float_array *) PG_DETOAST_DATUM(x))
+#define DatumGetMtreeInt8Array(x) ((mtree_float_array*) PG_DETOAST_DATUM(x))
 #define PG_GETARG_MTREE_FLOAT_ARRAY_P(x) DatumGetMtreeInt8Array(PG_GETARG_DATUM(x))
 #define PG_RETURN_MTREE_FLOAT_ARRAY_P(x) PG_RETURN_POINTER(x)
-
-Datum mtree_float_array_input(PG_FUNCTION_ARGS);
-Datum mtree_float_array_output(PG_FUNCTION_ARGS);
-Datum mtree_float_array_consistent(PG_FUNCTION_ARGS);
-Datum mtree_float_array_union(PG_FUNCTION_ARGS);
-Datum mtree_float_array_same(PG_FUNCTION_ARGS);
-Datum mtree_float_array_penalty(PG_FUNCTION_ARGS);
-Datum mtree_float_array_picksplit(PG_FUNCTION_ARGS);
-Datum mtree_float_array_compress(PG_FUNCTION_ARGS);
-Datum mtree_float_array_decompress(PG_FUNCTION_ARGS);
-Datum mtree_float_array_distance(PG_FUNCTION_ARGS);
-Datum mtree_float_array_distance_operator(PG_FUNCTION_ARGS);
-Datum mtree_float_array_overlap_operator(PG_FUNCTION_ARGS);
-Datum mtree_float_array_contains_operator(PG_FUNCTION_ARGS);
-Datum mtree_float_array_contained_operator(PG_FUNCTION_ARGS);
 
 #endif
