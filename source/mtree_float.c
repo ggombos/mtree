@@ -34,6 +34,8 @@ PG_FUNCTION_INFO_V1(mtree_float_overlap_operator);
 Datum mtree_float_input(PG_FUNCTION_ARGS) {
   char *input = PG_GETARG_CSTRING(0);
 
+  elog(INFO, "input [char*]: %s", input);
+
   mtree_float *result = (mtree_float *)palloc(MTREE_FLOAT_SIZE);
   result->coveringRadius = 0;
   result->parentDistance = 0;
@@ -43,6 +45,8 @@ Datum mtree_float_input(PG_FUNCTION_ARGS) {
   char *tmp;
   result->data = atof(input);
 
+  elog(INFO, "input [float]: %f", result->data);
+
   PG_RETURN_POINTER(result);
 }
 
@@ -50,13 +54,17 @@ Datum mtree_float_output(PG_FUNCTION_ARGS) {
   mtree_float *output = PG_GETARG_MTREE_FLOAT_P(0);
   char *result;
 
+  elog(INFO, "output [float]: %f", output->data);
+
   if (output->coveringRadius == 0) {
-    result = psprintf("%ld", output->data);
+    result = psprintf("%f", output->data);
   } else {
     result =
-        psprintf("coveringRadius|%d parentDistance|%d data|%ld",
+        psprintf("coveringRadius|%d parentDistance|%d data|%f",
                  output->coveringRadius, output->parentDistance, output->data);
   }
+
+  elog(INFO, "output [char*]: %s", result);
 
   PG_RETURN_CSTRING(result);
 }
@@ -478,7 +486,8 @@ Datum mtree_float_distance_operator(PG_FUNCTION_ARGS) {
 Datum mtree_float_overlap_operator(PG_FUNCTION_ARGS) {
   mtree_float *first = PG_GETARG_MTREE_FLOAT_P(0);
   mtree_float *second = PG_GETARG_MTREE_FLOAT_P(1);
-  bool result = mtree_float_overlap_distance(first, second, mtree_float_distance_internal(first, second));
+  float res =  mtree_float_distance_internal(first, second);
+  bool result = mtree_float_contains_distance(first, second, &res);
 
   PG_RETURN_BOOL(result);
 }
@@ -486,8 +495,8 @@ Datum mtree_float_overlap_operator(PG_FUNCTION_ARGS) {
 Datum mtree_float_contains_operator(PG_FUNCTION_ARGS) {
   mtree_float *first = PG_GETARG_MTREE_FLOAT_P(0);
   mtree_float *second = PG_GETARG_MTREE_FLOAT_P(1);
-  bool result = mtree_float_contains_distance(
-      first, second, mtree_float_distance_internal(first, second));
+  float res =  mtree_float_distance_internal(first, second);
+  bool result = mtree_float_contains_distance(first, second, &res);
 
   PG_RETURN_BOOL(result);
 }
@@ -495,8 +504,8 @@ Datum mtree_float_contains_operator(PG_FUNCTION_ARGS) {
 Datum mtree_float_contained_operator(PG_FUNCTION_ARGS) {
   mtree_float *first = PG_GETARG_MTREE_FLOAT_P(0);
   mtree_float *second = PG_GETARG_MTREE_FLOAT_P(1);
-  bool result = mtree_float_contains_distance(
-      second, first, mtree_float_distance_internal(second, first));
+  float res =  mtree_float_distance_internal(second, first);
+  bool result = mtree_float_contains_distance(second, first, &res);
 
   PG_RETURN_BOOL(result);
 }

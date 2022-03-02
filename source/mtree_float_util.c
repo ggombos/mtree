@@ -4,23 +4,23 @@
 
 #include "mtree_float_util.h"
 
-int mtree_float_distance_internal(mtree_float* first, mtree_float* second) {
-  return abs(first->data - second->data);
+float mtree_float_distance_internal(mtree_float* first, mtree_float* second) {
+  return fabs(first->data - second->data);
 }
 
 bool mtree_float_equals(mtree_float* first, mtree_float* second) {
   return (first->data - second->data) == 0;
 }
 
-bool mtree_float_overlap_distance(mtree_float* first, mtree_float* second, int* distance) {
+bool mtree_float_overlap_distance(mtree_float* first, mtree_float* second, float* distance) {
   return *distance <= first->coveringRadius + second->coveringRadius;
 }
 
-bool mtree_float_contains_distance(mtree_float* first, mtree_float* second, int* distance) {
+bool mtree_float_contains_distance(mtree_float* first, mtree_float* second, float* distance) {
   return first->coveringRadius >= *distance + second->coveringRadius;
 }
 
-bool mtree_float_contained_distance(mtree_float* first, mtree_float* second, int* distance) {
+bool mtree_float_contained_distance(mtree_float* first, mtree_float* second, float* distance) {
   return mtree_float_contains_distance(second, first, distance);
 }
 
