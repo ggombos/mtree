@@ -811,3 +811,164 @@ AS
   FUNCTION 7 mtree_float_array_same (mtree_float_array, mtree_float_array),
   FUNCTION 8 mtree_float_array_distance (internal, mtree_float_array, smallint, oid, internal)
 ;
+
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+-- float (for float)
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
+-- Declaring data type
+CREATE TYPE mtree_float;
+
+-- Input function
+CREATE OR REPLACE FUNCTION mtree_float_input(cstring)
+RETURNS mtree_float
+AS 'MODULE_PATHNAME', 'mtree_float_input'
+LANGUAGE C STRICT IMMUTABLE PARALLEL SAFE;
+
+-- Output function
+CREATE OR REPLACE FUNCTION mtree_float_output(mtree_float)
+RETURNS cstring
+AS 'MODULE_PATHNAME', 'mtree_float_output'
+LANGUAGE C STRICT IMMUTABLE PARALLEL SAFE;
+
+-- Data type definition
+CREATE TYPE mtree_float (
+  INTERNALLENGTH = VARIABLE,
+  INPUT = mtree_float_input,
+  OUTPUT = mtree_float_output,
+  STORAGE = extended
+);
+
+-- [Correctness] Consistent function
+CREATE OR REPLACE FUNCTION mtree_float_consistent(internal, mtree_float, smallint, oid, internal)
+RETURNS bool
+AS 'MODULE_PATHNAME', 'mtree_float_consistent'
+LANGUAGE C STRICT;
+
+-- [Correctness] Union function
+CREATE OR REPLACE FUNCTION mtree_float_union(internal, internal)
+RETURNS mtree_float
+AS 'MODULE_PATHNAME', 'mtree_float_union'
+LANGUAGE C STRICT IMMUTABLE PARALLEL SAFE;
+
+-- [Correctness] Same function
+CREATE OR REPLACE FUNCTION mtree_float_same(mtree_float, mtree_float)
+RETURNS bool
+AS 'MODULE_PATHNAME', 'mtree_float_same'
+LANGUAGE C STRICT IMMUTABLE PARALLEL SAFE;
+
+-- [Efficiency] Penalty function
+CREATE OR REPLACE FUNCTION mtree_float_penalty(internal, internal, internal)
+RETURNS internal
+AS 'MODULE_PATHNAME', 'mtree_float_penalty'
+LANGUAGE C STRICT IMMUTABLE PARALLEL SAFE;
+
+-- [Efficiency] Picksplit function
+CREATE OR REPLACE FUNCTION mtree_float_picksplit(internal, internal)
+RETURNS internal
+AS 'MODULE_PATHNAME', 'mtree_float_picksplit'
+LANGUAGE C STRICT IMMUTABLE PARALLEL SAFE;
+
+-- [Optional] Compress function
+CREATE OR REPLACE FUNCTION mtree_float_compress(internal)
+RETURNS internal
+AS 'MODULE_PATHNAME', 'mtree_float_compress'
+LANGUAGE C STRICT IMMUTABLE PARALLEL SAFE;
+
+-- [Optional] Decompress function
+CREATE OR REPLACE FUNCTION mtree_float_decompress(internal)
+RETURNS internal
+AS 'MODULE_PATHNAME', 'mtree_float_decompress'
+LANGUAGE C STRICT IMMUTABLE PARALLEL SAFE;
+
+-- [Optional] Distance function
+CREATE OR REPLACE FUNCTION mtree_float_distance(internal, mtree_float, smallint, oid, internal)
+RETURNS float4
+AS 'MODULE_PATHNAME', 'mtree_float_distance'
+LANGUAGE C STRICT IMMUTABLE PARALLEL SAFE;
+
+-- [Operator] Overlap function
+CREATE OR REPLACE FUNCTION mtree_float_overlap_operator(mtree_float, mtree_float)
+RETURNS bool
+AS 'MODULE_PATHNAME', 'mtree_float_overlap_operator'
+LANGUAGE C STRICT IMMUTABLE PARALLEL SAFE;
+
+-- [Operator] Contains function
+CREATE OR REPLACE FUNCTION mtree_float_contains_operator(mtree_float, mtree_float)
+RETURNS bool
+AS 'MODULE_PATHNAME', 'mtree_float_contains_operator'
+LANGUAGE C STRICT IMMUTABLE PARALLEL SAFE;
+
+-- [Operator] Contained function
+CREATE OR REPLACE FUNCTION mtree_float_contained_operator(mtree_float, mtree_float)
+RETURNS bool
+AS 'MODULE_PATHNAME', 'mtree_float_contained_operator'
+LANGUAGE C STRICT IMMUTABLE PARALLEL SAFE;
+
+-- [Operator] Distance function (Ordering operator)
+CREATE OR REPLACE FUNCTION mtree_float_distance_operator(mtree_float, mtree_float)
+RETURNS float4
+AS 'MODULE_PATHNAME', 'mtree_float_distance_operator'
+LANGUAGE C STRICT IMMUTABLE PARALLEL SAFE;
+
+-- Equals operator
+CREATE OPERATOR = (
+  COMMUTATOR = =,
+  LEFTARG = mtree_float,
+  RIGHTARG = mtree_float,
+  PROCEDURE = mtree_float_same
+);
+
+-- Overlap operator
+CREATE OPERATOR #&# (
+  COMMUTATOR = #&#,
+  LEFTARG = mtree_float,
+  RIGHTARG = mtree_float,
+  PROCEDURE = mtree_float_overlap_operator
+);
+
+-- Contains operator
+CREATE OPERATOR #># (
+  COMMUTATOR = #<#,
+  LEFTARG = mtree_float,
+  RIGHTARG = mtree_float,
+  PROCEDURE = mtree_float_contains_operator
+);
+
+-- Contained operator
+CREATE OPERATOR #<# (
+  COMMUTATOR = #>#,
+  LEFTARG = mtree_float,
+  RIGHTARG = mtree_float,
+  PROCEDURE = mtree_float_contained_operator
+);
+
+-- Distance operator
+CREATE OPERATOR <-> (
+  COMMUTATOR = <->,
+  LEFTARG = mtree_float,
+  RIGHTARG = mtree_float,
+  PROCEDURE = mtree_float_distance_operator
+);
+
+-- Operator class
+CREATE OPERATOR CLASS mtree_float_opclass
+DEFAULT FOR TYPE mtree_float
+USING GiST
+AS
+  -- Operators
+  OPERATOR 1 = ,
+  OPERATOR 2 #&# ,
+  OPERATOR 3 #># ,
+  OPERATOR 4 #<# ,
+  OPERATOR 15 <-> (mtree_float, mtree_float) FOR ORDER BY float_ops,
+  -- Functions
+  FUNCTION 1 mtree_float_consistent (internal, mtree_float, smallint, oid, internal),
+  FUNCTION 2 mtree_float_union (internal, internal),
+  FUNCTION 3 mtree_float_compress (internal),
+  FUNCTION 4 mtree_float_decompress (internal),
+  FUNCTION 5 mtree_float_penalty (internal, internal, internal),
+  FUNCTION 6 mtree_float_picksplit (internal, internal),
+  FUNCTION 7 mtree_float_same (mtree_float, mtree_float),
+  FUNCTION 8 mtree_float_distance (internal, mtree_float, smallint, oid, internal)
+;

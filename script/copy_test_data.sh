@@ -4,13 +4,14 @@ set -e
 
 readonly SOURCE_SCRIPT_DIRECTORY="/home/zsolt/DATA/Development/mtree_gist/script"
 readonly SOURCE_DATA_DIRECTORY="/home/zsolt/DATA/Development/mtree_gist/data"
-readonly TARGET_DATA_DIRECTORY="/home/postgres"
+readonly TARGET_DATA_DIRECTORY="/home/postgres/test_files"
 
 readonly DATA_FILENAMES=(
   "1000_create_indexes.sql"
   "1000_create_tables.sql"
   "1000_measure.sql"
   "1000.csv"
+  "1000_float.csv"
   "2000_int.csv"
   "fingerprint_create_indexes.sql"
   "fingerprint_create_tables.sql"
@@ -20,6 +21,7 @@ readonly DATA_FILENAMES=(
   "fingerprint_data_1002156"
   "fingerprint_measure.sql"
   "int8_measure.sql"
+  "float_measure.sql"
   "mtreeOrderbyhiba.sql"
 )
 
