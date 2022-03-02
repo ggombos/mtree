@@ -8,14 +8,14 @@ readonly POSTGRESQL_EXTENSION_DIRECTORY="/usr/share/postgresql/extension"
 readonly POSTGRESQL_LIBRARY_DIRECTORY="/usr/lib/postgresql"
 
 readonly FILENAMES=(
-  "mtree_text"
-  "mtree_text_util"
-  "mtree_text_array"
-  "mtree_text_array_util"
-  "mtree_int8"
-  "mtree_int8_util"
-  "mtree_int8_array"
-  "mtree_int8_array_util"
+#  "mtree_text"
+#  "mtree_text_util"
+#  "mtree_text_array"
+#  "mtree_text_array_util"
+#  "mtree_int8"
+#  "mtree_int8_util"
+#  "mtree_int8_array"
+#  "mtree_int8_array_util"
 #  "mtree_float"
 #  "mtree_float_util"
   "mtree_float_array"
@@ -32,8 +32,17 @@ function remove_file() {
   rm "${SOURCE_DIRECTORY}/$1.o"
 }
 
+function create_parameter_list() {
+  local parameter_list=""
+  for filename in "${FILENAMES[@]}";
+  do
+    parameter_list+=" ${SOURCE_DIRECTORY}/${filename}.o"
+  done
+  echo "${parameter_list}"
+}
+
 function create_and_copy_so() {
-  cc -shared -o "${SOURCE_DIRECTORY}/mtree_gist.so" "${SOURCE_DIRECTORY}/mtree_gist.o" "${SOURCE_DIRECTORY}/mtree_text.o" "${SOURCE_DIRECTORY}/mtree_text_util.o" "${SOURCE_DIRECTORY}/mtree_int8.o" "${SOURCE_DIRECTORY}/mtree_int8_util.o" "${SOURCE_DIRECTORY}/mtree_util.o"
+  cc -shared -o "${SOURCE_DIRECTORY}/mtree_gist.so" $(create_parameter_list)
   cp "${SOURCE_DIRECTORY}/mtree_gist.so" "${POSTGRESQL_LIBRARY_DIRECTORY}/mtree_gist.so"
   rm "${SOURCE_DIRECTORY}/mtree_gist.so"
 }
