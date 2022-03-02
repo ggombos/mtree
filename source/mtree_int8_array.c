@@ -38,7 +38,7 @@ Datum mtree_int8_array_input(PG_FUNCTION_ARGS) {
 	unsigned int squareBracketCounter = 0;
 	for (unsigned int i = 0; i < inputLength; ++i) {
 		if (squareBracketCounter < 0) {
-			elog(ERROR, "SQUARE_BRACKETS_1");
+			elog(INFO, "SQUARE_BRACKETS_1");
 		}
 		else if (input[i] == '[') {
 			++squareBracketCounter;
@@ -51,8 +51,11 @@ Datum mtree_int8_array_input(PG_FUNCTION_ARGS) {
 		}
 	}
 	if (squareBracketCounter != 0) {
-		elog(ERROR, "SQUARE_BRACKETS_2");
+		elog(INFO, "SQUARE_BRACKETS_2");
 	}
+	++arrayLength;
+
+	elog(INFO, "{ \"input\": \"%s\", \"arrayLength\": %hhu, \"squareBracketCounter\": %u }", input, arrayLength, squareBracketCounter);
 
 	size_t size = MTREE_INT8_ARRAY_SIZE + arrayLength * sizeof(int64) + 1;
 	mtree_int8_array* result = (mtree_int8_array*)palloc(size);

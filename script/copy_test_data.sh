@@ -23,6 +23,8 @@ readonly DATA_FILENAMES=(
   "int8_measure.sql"
   "float_measure.sql"
   "mtreeOrderbyhiba.sql"
+  "int8_array_test.csv"
+  "int8_array_test.sql"
 )
 
 readonly SCRIPT_FILENAMES=(

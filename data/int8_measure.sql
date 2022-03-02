@@ -6,7 +6,7 @@ CREATE TABLE INT8_2000 (
   id  INTEGER,
   num mtree_int8
 );
-COPY INT8_2000(id, num) FROM '/home/postgres/2000_int.csv' DELIMITER ',' CSV HEADER;
+COPY INT8_2000(id, num) FROM '/home/postgres/test_files/2000_int.csv' DELIMITER ',' CSV HEADER;
 
 DROP INDEX IF EXISTS INT8_2000_GiST_Mtree CASCADE;
 CREATE INDEX INT8_2000_GiST_Mtree ON INT8_2000 USING GiST (num mtree_int8_opclass);
