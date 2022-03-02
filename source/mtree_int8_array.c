@@ -33,9 +33,26 @@ PG_FUNCTION_INFO_V1(mtree_int8_array_overlap_operator);
 Datum mtree_int8_array_input(PG_FUNCTION_ARGS) {
 	char* input = PG_GETARG_CSTRING(0);
 
-	// TODO: Validate input string syntax
-
-	unsigned char arrayLength = get_array_length(input);
+	size_t inputLength = strlen(input);
+	unsigned char arrayLength = 0;
+	unsigned int squareBracketCounter = 0;
+	for (unsigned int i = 0; i < inputLength; ++i) {
+		if (squareBracketCounter < 0) {
+			elog(ERROR, "SQUARE_BRACKETS_1");
+		}
+		else if (input[i] == '[') {
+			++squareBracketCounter;
+		}
+		else if (input[i] == ']') {
+			--squareBracketCounter;
+		}
+		else if (input[i] == ',') {
+			++arrayLength;
+		}
+	}
+	if (squareBracketCounter != 0) {
+		elog(ERROR, "SQUARE_BRACKETS_2");
+	}
 
 	size_t size = MTREE_INT8_ARRAY_SIZE + arrayLength * sizeof(int64) + 1;
 	mtree_int8_array* result = (mtree_int8_array*)palloc(size);
