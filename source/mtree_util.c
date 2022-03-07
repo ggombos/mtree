@@ -4,7 +4,7 @@
 
 #include "mtree_util.h"
 
-int string_distance(char* a, char* b) {
+int string_distance(const char* a, const char* b) {
 	int lengthOfA = (int)strlen(a);
 	int lengthOfB = (int)strlen(b);
 	int x, y, lastDiagonal, oldDiagonal;
@@ -31,7 +31,7 @@ int string_distance(char* a, char* b) {
 	return column[lengthOfA];
 }
 
-void init_distances(int size, int* distances) { /* TODO: int distances[size][size] -> int* distances */
+void init_distances(const int size, int* distances) {
 	for (int i = 0; i < size; ++i) {
 		for (int j = 0; j < size; ++j) {
 			distances[i * size + j] = -1;
@@ -39,7 +39,7 @@ void init_distances(int size, int* distances) { /* TODO: int distances[size][siz
 	}
 }
 
-double overlap_area(int radiusOne, int radiusTwo, int distance) {
+double overlap_area(const int radiusOne, const int radiusTwo, const int distance) {
 	if (radiusOne == 0 || radiusTwo == 0 || distance == 0) {
 		return 0;
 	}
@@ -72,4 +72,24 @@ unsigned char get_array_length(const char* arrayString) {
 	}
 
 	return numberOfCommas;
+}
+
+bool is_valid_string(const char* string, const char* regular_expression_string) {
+	regex_t regex;
+	bool is_valid;
+
+	if (regcomp(&regex, regular_expression_string, REG_EXTENDED)) {
+		is_valid = false;
+	}
+
+	if (!regexec(&regex, string, 0, NULL, 0)) {
+		is_valid = true;
+	}
+	else {
+		is_valid = false;
+	}
+
+	regfree(&regex);
+
+	return is_valid;
 }

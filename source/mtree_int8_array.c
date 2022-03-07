@@ -33,29 +33,13 @@ PG_FUNCTION_INFO_V1(mtree_int8_array_overlap_operator);
 Datum mtree_int8_array_input(PG_FUNCTION_ARGS) {
 	char* input = PG_GETARG_CSTRING(0);
 
-	size_t inputLength = strlen(input);
-	unsigned char arrayLength = 0;
-	unsigned int squareBracketCounter = 0;
-	for (unsigned int i = 0; i < inputLength; ++i) {
-		if (squareBracketCounter < 0) {
-			elog(INFO, "SQUARE_BRACKETS_1");
-		}
-		else if (input[i] == '[') {
-			++squareBracketCounter;
-		}
-		else if (input[i] == ']') {
-			--squareBracketCounter;
-		}
-		else if (input[i] == ',') {
-			++arrayLength;
-		}
+	if (!is_valid_string(&input, MTREE_INT8_ARRAY_REGEX)) {
+		ereport(ERROR,
+			errcode(ERRCODE_SYNTAX_ERROR),
+			errmsg("The following input is not a valid integer array: %s", input));
 	}
-	if (squareBracketCounter != 0) {
-		elog(INFO, "SQUARE_BRACKETS_2");
-	}
-	++arrayLength;
 
-	elog(INFO, "{ \"input\": \"%s\", \"arrayLength\": %hhu, \"squareBracketCounter\": %u }", input, arrayLength, squareBracketCounter);
+	unsigned char arrayLength = get_array_length(input);
 
 	size_t size = MTREE_INT8_ARRAY_SIZE + arrayLength * sizeof(int64) + 1;
 	mtree_int8_array* result = (mtree_int8_array*)palloc(size);

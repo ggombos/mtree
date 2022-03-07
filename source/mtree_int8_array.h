@@ -39,5 +39,6 @@ typedef struct {
 #define DatumGetMtreeInt8Array(x) ((mtree_int8_array*) PG_DETOAST_DATUM(x))
 #define PG_GETARG_MTREE_INT8_ARRAY_P(x) DatumGetMtreeInt8Array(PG_GETARG_DATUM(x))
 #define PG_RETURN_MTREE_INT8_ARRAY_P(x) PG_RETURN_POINTER(x)
+#define MTREE_INT8_ARRAY_REGEX "^[ ]*[0-9][0-9]*[ ]*([ ]*,[ ]*[0-9][0-9]*[ ]*)*$"
 
 #endif
