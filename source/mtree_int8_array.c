@@ -32,14 +32,37 @@ PG_FUNCTION_INFO_V1(mtree_int8_array_overlap_operator);
 
 Datum mtree_int8_array_input(PG_FUNCTION_ARGS) {
 	char* input = PG_GETARG_CSTRING(0);
+	unsigned char inputLength = strlen(input);
 
-	if (!is_valid_string(&input, MTREE_INT8_ARRAY_REGEX)) {
+	if (inputLength == 0) {
 		ereport(ERROR,
 			errcode(ERRCODE_SYNTAX_ERROR),
-			errmsg("The following input is not a valid integer array: %s", input));
+			errmsg("The input is an empty string."));
 	}
 
-	unsigned char arrayLength = get_array_length(input);
+	char previousInteger = NULL;
+	unsigned char arrayLength = 1;
+	for (unsigned char i = 0; i < inputLength; ++i) {
+		if (isblank(input[i])) {
+			ereport(ERROR,
+				errcode(ERRCODE_SYNTAX_ERROR),
+				errmsg("The array can not contain space or tab characters."));
+		}
+		else if (input[i] == ',' && previousInteger != NULL) {
+			++arrayLength;
+		}
+		else if (input[i] == '0' && previousInteger == NULL && (i + 1) < inputLength && isdigit(input[i + 1])) {
+			ereport(ERROR,
+				errcode(ERRCODE_SYNTAX_ERROR),
+				errmsg("The integers can not contain leading zeros [0]."));
+		}
+		else if (!isdigit(input[i])) {
+			ereport(ERROR,
+				errcode(ERRCODE_SYNTAX_ERROR),
+				errmsg("The array can only contain integers [0-9] and commas [,]."));
+		}
+		previousInteger = input[i];
+	}
 
 	size_t size = MTREE_INT8_ARRAY_SIZE + arrayLength * sizeof(int64) + 1;
 	mtree_int8_array* result = (mtree_int8_array*)palloc(size);
@@ -68,7 +91,6 @@ Datum mtree_int8_array_output(PG_FUNCTION_ARGS) {
 	StringInfoData stringInfo;
 	initStringInfo(&stringInfo);
 
-	// TODO: Fix this, strange shit
 	char tmp[20];
 	for (unsigned char i = 0; i < arrayLength; ++i) {
 		sprintf(tmp, "%lld", output->data[i]);

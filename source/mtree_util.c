@@ -73,23 +73,3 @@ unsigned char get_array_length(const char* arrayString) {
 
 	return numberOfCommas;
 }
-
-bool is_valid_string(const char* string, const char* regular_expression_string) {
-	regex_t regex;
-	bool is_valid;
-
-	if (regcomp(&regex, regular_expression_string, REG_EXTENDED)) {
-		is_valid = false;
-	}
-
-	if (!regexec(&regex, string, 0, NULL, 0)) {
-		is_valid = true;
-	}
-	else {
-		is_valid = false;
-	}
-
-	regfree(&regex);
-
-	return is_valid;
-}

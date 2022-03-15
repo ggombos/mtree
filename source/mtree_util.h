@@ -6,7 +6,6 @@
 #define __MTREE_UTIL_H__
 
 #include <math.h>
-#include <regex.h>
 #include <stdbool.h>
 #include <string.h>
 
@@ -17,7 +16,5 @@ void init_distances(const int, int*);
 double overlap_area(const int, const int, const int);
 
 unsigned char get_array_length(const char*);
-
-bool is_valid_string(const char*, const char*);
 
 #endif

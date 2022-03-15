@@ -4,16 +4,16 @@ CREATE EXTENSION mtree_gist;
 DROP TABLE IF EXISTS INT8_ARRAY_TEST CASCADE;
 CREATE TABLE INT8_ARRAY_TEST (
   id  INTEGER,
-  value mtree_int8_array
+  val mtree_int8_array
 );
-COPY INT8_ARRAY_TEST(id, value) FROM '/home/postgres/test_files/int8_array_test.csv' DELIMITER ';' CSV HEADER;
+COPY INT8_ARRAY_TEST(id, val) FROM '/home/postgres/test_files/int8_array_test.csv' DELIMITER ';' CSV HEADER;
 
 DROP INDEX IF EXISTS INT8_ARRAY_TEST_GiST_Mtree CASCADE;
-CREATE INDEX INT8_ARRAY_TEST_GiST_Mtree ON INT8_ARRAY_TEST USING GiST (value mtree_int8_array_opclass);
+CREATE INDEX INT8_ARRAY_TEST_GiST_Mtree ON INT8_ARRAY_TEST USING GiST (val mtree_int8_array_opclass);
 
 SET enable_seqscan = OFF;
 
-SELECT id, value, (value <-> '0') AS dst FROM INT8_ARRAY_TEST ORDER BY (value <-> '0');
+/*#SELECT id, val, (val <-> '0') AS dst FROM INT8_ARRAY_TEST ORDER BY (val <-> '0');*/
 
-EXPLAIN ANALYZE SELECT * FROM INT8_ARRAY_TEST WHERE value #<# '0';
-SELECT * FROM INT8_ARRAY_TEST WHERE value #<# '0';
+/*EXPLAIN ANALYZE SELECT * FROM INT8_ARRAY_TEST WHERE val #<# '0';*/
+/*SELECT * FROM INT8_ARRAY_TEST;*/
