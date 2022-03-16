@@ -12,22 +12,24 @@ The original VP-tree and BK-tree implementations can be found [HERE](https://git
 
 ## How to use
 
-To make life easier, I created several `bash` scripts to make build and installation faster. In the following I will explain how to use them.
+To make life easier, I created several `bash` scripts to make build and installation faster. In the following I will explain how to use them. You will have to go through the source code of the `install.sh`, `start.sh` and `stop.sh` scripts to change the hard coded absolute paths.
 
 ### How to try M-tree index
 
-Run the following commands with your default user:
+Run the following commands with your user:
 
 ```bash
-$ cd /
-$ sudo ./../script/install.sh
+$ git clone https://github.com/sajtizsolt/mtree_gist
+$ cd mtree_gist
+$ sudo bash script/install.sh
 ```
 
-Open another terminal window and run the following commands:
+Note, that to run the following commands, you will need a database user on your machine - I will call this user `postgres`. You will also need to have PostgreSQL installed. Open another terminal window and run the following commands:
 
 ```bash
 $ sudo -iu postgres
-$ sudo ./../script/start.sh
+$ sudo script/stop.sh
+$ sudo script/start.sh
 $ psql
 ```
 
@@ -41,8 +43,8 @@ At this point your terminal will change, because you will use the `PostgreSQL` i
 > exit
 ```
 
-Run the following command:
+## Development
 
-```bash
-$ sudo ./../script/stop.sh
-```
+Read [this](documentation/DEVELOPMENT.md) document for some development notes.
+
+Read [this](documentation/TODO.md) document for the to-do list.
