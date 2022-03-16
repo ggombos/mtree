@@ -33,10 +33,33 @@ PG_FUNCTION_INFO_V1(mtree_float_array_overlap_operator);
 
 Datum mtree_float_array_input(PG_FUNCTION_ARGS) {
 	char* input = PG_GETARG_CSTRING(0);
+	unsigned char inputLength = strlen(input);
 
-	// TODO: Validate input string syntax
+	if (inputLength == 0) {
+		ereport(ERROR,
+			errcode(ERRCODE_SYNTAX_ERROR),
+			errmsg("The input is an empty string."));
+	}
 
-	unsigned char arrayLength = get_array_length(input);
+	char previousInteger = '\0';
+	unsigned char arrayLength = 1;
+	for (unsigned char i = 0; i < inputLength; ++i) {
+		if (isblank(input[i])) {
+			ereport(ERROR,
+				errcode(ERRCODE_SYNTAX_ERROR),
+				errmsg("The array can not contain space or tab characters."));
+		}
+		else if (input[i] == ',' && previousInteger != '\0') {
+			++arrayLength;
+			previousInteger = '\0';
+		}
+		else if (!isdigit(input[i]) && input[i] != '-' && input[i] != '.') {
+			ereport(ERROR,
+				errcode(ERRCODE_SYNTAX_ERROR),
+				errmsg("The array can only contain integers [0-9] and commas [,]."));
+		}
+		previousInteger = input[i];
+	}
 
 	size_t size = MTREE_FLOAT_ARRAY_SIZE + arrayLength * sizeof(int64) + 1;
 	mtree_float_array* result = (mtree_float_array*)palloc(size);
@@ -44,7 +67,7 @@ Datum mtree_float_array_input(PG_FUNCTION_ARGS) {
 	char* tmp;
 	char* arrayElement = strtok(input, ",");
 	for (unsigned char i = 0; i < arrayLength; ++i) {
-		result->data[i] = atof(arrayElement); //, &tmp, 10);
+		result->data[i] = atof(arrayElement);
 		arrayElement = strtok(NULL, ",");
 	}
 
@@ -65,8 +88,7 @@ Datum mtree_float_array_output(PG_FUNCTION_ARGS) {
 	StringInfoData stringInfo;
 	initStringInfo(&stringInfo);
 
-	// TODO: Fix this, strange shit
-	char tmp[100];
+	char tmp[64];
 	for (unsigned char i = 0; i < arrayLength; ++i) {
 		sprintf(tmp, "%f", output->data[i]);
 		appendStringInfoString(&stringInfo, tmp);
@@ -76,7 +98,6 @@ Datum mtree_float_array_output(PG_FUNCTION_ARGS) {
 	}
 
 	PG_RETURN_CSTRING(stringInfo.data);
-	PG_RETURN_CSTRING("");
 }
 
 Datum mtree_float_array_consistent(PG_FUNCTION_ARGS) {

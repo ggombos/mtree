@@ -1,3 +1,9 @@
+# float4_array
+
+## 1
+
+Input size is maybe bad when allocating memory (int64 instead of float).
+
 # int8_array
 
 ## 1
