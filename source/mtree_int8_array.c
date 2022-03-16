@@ -66,7 +66,7 @@ Datum mtree_int8_array_input(PG_FUNCTION_ARGS) {
 		previousInteger = input[i];
 	}
 
-	size_t size = MTREE_INT8_ARRAY_SIZE + arrayLength * sizeof(long int) + 1;
+	size_t size = MTREE_INT8_ARRAY_SIZE + arrayLength * sizeof(int64) * 2 + 1;
 	mtree_int8_array* result = (mtree_int8_array*)palloc(size);
 
 	char* tmp;
@@ -95,11 +95,7 @@ Datum mtree_int8_array_output(PG_FUNCTION_ARGS) {
 
 	char tmp[512];
 	for (unsigned char i = 0; i < arrayLength; ++i) {
-		ereport(INFO,
-			errmsg("output->data[%hhu] == %ld", i, output->data[i]));
 		sprintf(tmp, "%ld", output->data[i]);
-		ereport(INFO,
-			errmsg("tmp == %s", tmp));
 		appendStringInfoString(&stringInfo, tmp);
 		if (i != arrayLength - 1) {
 			appendStringInfoChar(&stringInfo, ',');

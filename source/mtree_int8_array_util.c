@@ -107,6 +107,6 @@ int64 int8_array_kullback_leibler_distance(mtree_int8_array* first, mtree_int8_a
 	for (unsigned char i = minimumLength; i < maximumLength; ++i) {
 		distance += longer->data[i];
 	}
-	ereport(INFO, errmsg("distance == %ld", distance));
+
 	return distance;
 }

@@ -72,6 +72,7 @@ Datum mtree_text_array_input(PG_FUNCTION_ARGS) {
 	result->arrayLength = arrayLength;
 
 	SET_VARSIZE(result, size);
+
 	PG_RETURN_POINTER(result);
 }
 

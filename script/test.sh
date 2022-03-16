@@ -9,7 +9,7 @@ readonly TEST_TYPES=(
   "float4"
 #  "int8_array"
   "int8"
-#  "text_array"
+  "text_array"
   "text"
 )
 
