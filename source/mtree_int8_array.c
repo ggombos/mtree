@@ -71,11 +71,7 @@ Datum mtree_int8_array_input(PG_FUNCTION_ARGS) {
 	char* tmp;
 	char* arrayElement = strtok(input, ",");
 	for (unsigned char i = 0; i < arrayLength; ++i) {
-		ereport(INFO,
-			errmsg("arrayElement == %s", arrayElement));
 		result->data[i] = strtol(arrayElement, &tmp, 10);
-		ereport(INFO,
-			errmsg("result->data[%d] == %ld", i, result->data[i]));
 		arrayElement = strtok(NULL, ",");
 	}
 
@@ -98,18 +94,6 @@ Datum mtree_int8_array_output(PG_FUNCTION_ARGS) {
 
 	char tmp[64];
 	for (unsigned char i = 0; i < arrayLength; ++i) {
-		ereport(INFO,
-			errmsg("output->data[%hhu] == %li", i, output->data[i]));
-		ereport(INFO,
-			errmsg("output->data[%hhu] == %ld", i, output->data[i]));
-		ereport(INFO,
-			errmsg("output->data[%hhu] == %lu", i, output->data[i]));
-		ereport(INFO,
-			errmsg("output->data[%hhu] == %lli", i, output->data[i]));
-		ereport(INFO,
-			errmsg("output->data[%hhu] == %lld", i, output->data[i]));
-		ereport(INFO,
-			errmsg("output->data[%hhu] == %llu", i, output->data[i]));
 		sprintf(tmp, "%ld", output->data[i]);
 		appendStringInfoString(&stringInfo, tmp);
 		if (i != arrayLength - 1) {
@@ -145,7 +129,9 @@ Datum mtree_int8_array_consistent(PG_FUNCTION_ARGS) {
 			returnValue = mtree_int8_array_contained_distance(key, query, distance);
 			break;
 		default:
-			elog(ERROR, "Invalid consistent strategyNumber: %d", strategyNumber);
+			ereport(ERROR,
+				errcode(ERRCODE_SYNTAX_ERROR),
+				errmsg("Invalid StrategyNumber for consistent function: %u", strategyNumber));
 			break;
 		}
 	}
@@ -168,7 +154,9 @@ Datum mtree_int8_array_consistent(PG_FUNCTION_ARGS) {
 			*recheck = !mtree_int8_array_contained_distance(key, query, distance);
 			break;
 		default:
-			elog(ERROR, "Invalid consistent strategyNumber: %d", strategyNumber);
+			ereport(ERROR,
+				errcode(ERRCODE_SYNTAX_ERROR),
+				errmsg("Invalid StrategyNumber for consistent function: %u", strategyNumber));
 			break;
 		}
 	}
@@ -196,7 +184,9 @@ Datum mtree_int8_array_union(PG_FUNCTION_ARGS) {
 		searchRange = ranges;
 		break;
 	default:
-		elog(ERROR, "Invalid union strategy: %d", UNION_STRATEGY_INT8_ARRAY);
+		ereport(ERROR,
+			errcode(ERRCODE_SYNTAX_ERROR),
+			errmsg("Invalid StrategyNumber for union function: %u", UNION_STRATEGY_INT8_ARRAY));
 		break;
 	}
 
@@ -437,7 +427,9 @@ Datum mtree_int8_array_picksplit(PG_FUNCTION_ARGS) {
 		}
 		break;
 	default:
-		elog(ERROR, "Invalid picksplit strategy: %d", PICKSPLIT_STRATEGY_INT8_ARRAY);
+		ereport(ERROR,
+			errcode(ERRCODE_SYNTAX_ERROR),
+			errmsg("Invalid StrategyNumber for picksplit function: %u", PICKSPLIT_STRATEGY_INT8_ARRAY));
 		break;
 	}
 

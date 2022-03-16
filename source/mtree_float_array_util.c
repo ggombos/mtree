@@ -5,8 +5,6 @@
 #include "mtree_float_array_util.h"
 
 float mtree_float_array_distance_internal(mtree_float_array* first, mtree_float_array* second) {
-	// elog(INFO, "dist: %f %f %f %f", first->data, second->data, float_array_sum_distance(first, second), float_array_kullback_leibler_distance(first, second));
-	// return float_array_kullback_leibler_distance(first, second);
 	return float_array_sum_distance(first, second);
 }
 
@@ -79,7 +77,7 @@ float float_array_sum_distance(mtree_float_array* first, mtree_float_array* seco
 	for (unsigned char i = minimumLength; i < maximumLength; ++i) {
 		distance += longer->data[i];
 	}
-	// TODO: EZ ITT KERDES: a tavolsag nem lehet negativ, jo ez igy?
+
 	return fabs(distance);
 }
 

@@ -37,7 +37,7 @@ Datum mtree_text_array_input(PG_FUNCTION_ARGS) {
 	// TODO: Validate input string syntax
 	// TODO: I
 
-	unsigned char arrayLength = get_array_length(input); //sizeof(input)/sizeof(input[0]); //get_array_length(input);
+	unsigned char arrayLength = get_array_length(input);
 
 	size_t size = MTREE_TEXT_ARRAY_SIZE + arrayLength * MTREE_TEXT_ARRAY_MAX_STRINGLENGTH * sizeof(char) + 1;
 	mtree_text_array* result = (mtree_text_array*)palloc(size);
@@ -47,7 +47,6 @@ Datum mtree_text_array_input(PG_FUNCTION_ARGS) {
 	for (unsigned char i = 0; i < arrayLength; ++i) {
 		strcpy(result->data[i], arrayElement);
 		result->data[i][strlen(result->data[i])] = '\0';
-		// elog(INFO, "%s", result->data[i]);
 		arrayElement = strtok(NULL, ",");
 	}
 
@@ -72,15 +71,9 @@ Datum mtree_text_array_output(PG_FUNCTION_ARGS) {
 		maxChar += strlen(output->data[i]);
 	}
 
-
-	// TODO: Fix this, strange shit
-	// char tmp[MTREE_TEXT_ARRAY_MAX_STRINGLENGTH];
-	  // elog(INFO, "-----------");
 	char tmp[maxChar];
 	for (unsigned char i = 0; i < arrayLength; ++i) {
 		sprintf(tmp, "%s", output->data[i]);
-		// elog(INFO, "T  %s", tmp);
-		// elog(INFO, "%s", output->data[i]);
 		appendStringInfoString(&stringInfo, tmp);
 		if (i != arrayLength - 1) {
 			appendStringInfoChar(&stringInfo, ',');
@@ -88,7 +81,6 @@ Datum mtree_text_array_output(PG_FUNCTION_ARGS) {
 	}
 
 	PG_RETURN_CSTRING(stringInfo.data);
-	// PG_RETURN_CSTRING("");
 }
 
 Datum mtree_text_array_consistent(PG_FUNCTION_ARGS) {
@@ -116,7 +108,9 @@ Datum mtree_text_array_consistent(PG_FUNCTION_ARGS) {
 			returnValue = mtree_text_array_contained_distance(key, query, &distance);
 			break;
 		default:
-			elog(ERROR, "Invalid consistent strategyNumber: %d", strategyNumber);
+			ereport(ERROR,
+				errcode(ERRCODE_SYNTAX_ERROR),
+				errmsg("Invalid StrategyNumber for consistent function: %u", strategyNumber));
 			break;
 		}
 	}
@@ -139,7 +133,9 @@ Datum mtree_text_array_consistent(PG_FUNCTION_ARGS) {
 			*recheck = !mtree_text_array_contained_distance(key, query, &distance);
 			break;
 		default:
-			elog(ERROR, "Invalid consistent strategyNumber: %d", strategyNumber);
+			ereport(ERROR,
+				errcode(ERRCODE_SYNTAX_ERROR),
+				errmsg("Invalid StrategyNumber for consistent function: %u", strategyNumber));
 			break;
 		}
 	}
@@ -167,7 +163,9 @@ Datum mtree_text_array_union(PG_FUNCTION_ARGS) {
 		searchRange = ranges;
 		break;
 	default:
-		elog(ERROR, "Invalid union strategy: %d", UNION_STRATEGY_text_array);
+		ereport(ERROR,
+			errcode(ERRCODE_SYNTAX_ERROR),
+			errmsg("Invalid StrategyNumber for union function: %u", UNION_STRATEGY_text_array));
 		break;
 	}
 
@@ -408,7 +406,9 @@ Datum mtree_text_array_picksplit(PG_FUNCTION_ARGS) {
 		}
 		break;
 	default:
-		elog(ERROR, "Invalid picksplit strategy: %d", PICKSPLIT_STRATEGY_text_array);
+		ereport(ERROR,
+			errcode(ERRCODE_SYNTAX_ERROR),
+			errmsg("Invalid StrategyNumber for picksplit function: %u", PICKSPLIT_STRATEGY_text_array));
 		break;
 	}
 

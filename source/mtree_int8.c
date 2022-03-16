@@ -87,7 +87,9 @@ Datum mtree_int8_consistent(PG_FUNCTION_ARGS) {
 			returnValue = mtree_int8_contained_distance(key, query, distance);
 			break;
 		default:
-			elog(ERROR, "Invalid consistent strategyNumber: %d", strategyNumber);
+			ereport(ERROR,
+				errcode(ERRCODE_SYNTAX_ERROR),
+				errmsg("Invalid StrategyNumber for consistent function: %u", strategyNumber));
 			break;
 		}
 	}
@@ -110,7 +112,9 @@ Datum mtree_int8_consistent(PG_FUNCTION_ARGS) {
 			*recheck = !mtree_int8_contained_distance(key, query, distance);
 			break;
 		default:
-			elog(ERROR, "Invalid consistent strategyNumber: %d", strategyNumber);
+			ereport(ERROR,
+				errcode(ERRCODE_SYNTAX_ERROR),
+				errmsg("Invalid StrategyNumber for consistent function: %u", strategyNumber));
 			break;
 		}
 	}
@@ -138,7 +142,9 @@ Datum mtree_int8_union(PG_FUNCTION_ARGS) {
 		searchRange = ranges;
 		break;
 	default:
-		elog(ERROR, "Invalid union strategy: %d", UNION_STRATEGY_INT8);
+		ereport(ERROR,
+			errcode(ERRCODE_SYNTAX_ERROR),
+			errmsg("Invalid StrategyNumber for union function: %u", UNION_STRATEGY_INT8));
 		break;
 	}
 
@@ -412,7 +418,9 @@ Datum mtree_int8_picksplit(PG_FUNCTION_ARGS) {
 		}
 		break;
 	default:
-		elog(ERROR, "Invalid picksplit strategy: %d", PICKSPLIT_STRATEGY_INT8);
+		ereport(ERROR,
+			errcode(ERRCODE_SYNTAX_ERROR),
+			errmsg("Invalid StrategyNumber for picksplit function: %u", PICKSPLIT_STRATEGY_INT8));
 		break;
 	}
 

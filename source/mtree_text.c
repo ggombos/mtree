@@ -32,7 +32,6 @@ PG_FUNCTION_INFO_V1(mtree_text_contained);
 PG_FUNCTION_INFO_V1(mtree_text_equals_first);
 
 Datum mtree_text_input(PG_FUNCTION_ARGS) {
-	/* elog(INFO, "mtree_text_input"); */
 	char* input = PG_GETARG_CSTRING(0);
 
 	size_t stringLength = strlen(input);
@@ -49,7 +48,6 @@ Datum mtree_text_input(PG_FUNCTION_ARGS) {
 }
 
 Datum mtree_text_output(PG_FUNCTION_ARGS) {
-	/* elog(INFO, "mtree_text_output"); */
 	mtree_text* text = PG_GETARG_MTREE_TEXT_P(0);
 	char* result;
 
@@ -64,8 +62,6 @@ Datum mtree_text_output(PG_FUNCTION_ARGS) {
 }
 
 Datum mtree_text_consistent(PG_FUNCTION_ARGS) {
-	/* elog(INFO, "mtree_text_consistent"); */
-
 	GISTENTRY* entry = (GISTENTRY*)PG_GETARG_POINTER(0);
 	mtree_text* query = PG_GETARG_MTREE_TEXT_P(1);
 	StrategyNumber strategy = (StrategyNumber)PG_GETARG_UINT16(2);
@@ -90,7 +86,9 @@ Datum mtree_text_consistent(PG_FUNCTION_ARGS) {
 			returnValue = mtree_text_contained_distance(key, query, distance);
 			break;
 		default:
-			elog(ERROR, "Invalid consistent strategy: %d", strategy);
+			ereport(ERROR,
+				errcode(ERRCODE_SYNTAX_ERROR),
+				errmsg("Invalid StrategyNumber for consistent function: %u", strategy));
 			break;
 		}
 	}
@@ -113,7 +111,9 @@ Datum mtree_text_consistent(PG_FUNCTION_ARGS) {
 			*recheck = !mtree_text_contained_distance(key, query, distance);
 			break;
 		default:
-			elog(ERROR, "Invalid consistent strategy: %d", strategy);
+			ereport(ERROR,
+				errcode(ERRCODE_SYNTAX_ERROR),
+				errmsg("Invalid StrategyNumber for consistent function: %u", strategy));
 			break;
 		}
 	}
@@ -122,7 +122,6 @@ Datum mtree_text_consistent(PG_FUNCTION_ARGS) {
 }
 
 Datum mtree_text_union(PG_FUNCTION_ARGS) {
-	// elog(INFO, "mtree_text_union");
 	GistEntryVector* entryVector = (GistEntryVector*)PG_GETARG_POINTER(0);
 	GISTENTRY* entry = entryVector->vector;
 	int ranges = entryVector->n;
@@ -142,7 +141,9 @@ Datum mtree_text_union(PG_FUNCTION_ARGS) {
 		searchRange = ranges;
 		break;
 	default:
-		elog(ERROR, "Invalid union strategy: %d", UNION_STRATEGY_TEXT);
+		ereport(ERROR,
+			errcode(ERRCODE_SYNTAX_ERROR),
+			errmsg("Invalid StrategyNumber for union function: %u", UNION_STRATEGY_TEXT));
 		break;
 	}
 
@@ -176,7 +177,6 @@ Datum mtree_text_union(PG_FUNCTION_ARGS) {
 }
 
 Datum mtree_text_same(PG_FUNCTION_ARGS) {
-	/* elog(INFO, "mtree_text_same"); */
 	mtree_text* first = PG_GETARG_MTREE_TEXT_P(0);
 	mtree_text* second = PG_GETARG_MTREE_TEXT_P(1);
 	bool result = mtree_text_equals(first, second);
@@ -184,7 +184,6 @@ Datum mtree_text_same(PG_FUNCTION_ARGS) {
 }
 
 Datum mtree_text_penalty(PG_FUNCTION_ARGS) {
-	/* elog(INFO, "mtree_text_penalty"); */
 	GISTENTRY* originalEntry = (GISTENTRY*)PG_GETARG_POINTER(0);
 	GISTENTRY* newEntry = (GISTENTRY*)PG_GETARG_POINTER(1);
 	float* penalty = (float*)PG_GETARG_POINTER(2);
@@ -199,7 +198,6 @@ Datum mtree_text_penalty(PG_FUNCTION_ARGS) {
 }
 
 Datum mtree_text_picksplit(PG_FUNCTION_ARGS) {
-	/* elog(INFO, "mtree_text_picksplit"); */
 	GistEntryVector* entryVector = (GistEntryVector*)PG_GETARG_POINTER(0);
 	GIST_SPLITVEC* vector = (GIST_SPLITVEC*)PG_GETARG_POINTER(1);
 	OffsetNumber maxOffset = (OffsetNumber)entryVector->n - 1;
@@ -386,7 +384,9 @@ Datum mtree_text_picksplit(PG_FUNCTION_ARGS) {
 		}
 		break;
 	default:
-		elog(ERROR, "Invalid picksplit strategy: %distance", PICKSPLIT_STRATEGY_TEXT);
+		ereport(ERROR,
+			errcode(ERRCODE_SYNTAX_ERROR),
+			errmsg("Invalid StrategyNumber for picksplit function: %u", PICKSPLIT_STRATEGY_TEXT));
 		break;
 	}
 
@@ -424,12 +424,10 @@ Datum mtree_text_picksplit(PG_FUNCTION_ARGS) {
 }
 
 Datum mtree_text_compress(PG_FUNCTION_ARGS) {
-	/* elog(INFO, "mtree_text_compress"); */
 	PG_RETURN_POINTER(PG_GETARG_POINTER(0));
 }
 
 Datum mtree_text_decompress(PG_FUNCTION_ARGS) {
-	/* elog(INFO, "mtree_text_decompress"); */
 	PG_RETURN_POINTER(PG_GETARG_POINTER(0));
 }
 
@@ -448,20 +446,19 @@ Datum mtree_text_distance_float(PG_FUNCTION_ARGS) {
 }
 
 Datum mtree_text_distance(PG_FUNCTION_ARGS) {
-	/* elog(INFO, "mtree_text_distance"); */
 	mtree_text* first = PG_GETARG_MTREE_TEXT_P(0);
 	mtree_text* second = PG_GETARG_MTREE_TEXT_P(1);
 
 	/*
-	  leaf     -> return distance
-	  non-leaf -> return distance to closest children
+		TODO
+		leaf     -> return distance
+		non-leaf -> return distance to closest children
 	*/
 
 	PG_RETURN_FLOAT4(mtree_text_string_distance(first, second));
 }
 
 Datum mtree_text_overlap(PG_FUNCTION_ARGS) {
-	/* elog(INFO, "mtree_text_overlap"); */
 	mtree_text* first = PG_GETARG_MTREE_TEXT_P(0);
 	mtree_text* second = PG_GETARG_MTREE_TEXT_P(1);
 	bool result = mtree_text_overlap_wrapper(first, second);
@@ -470,7 +467,6 @@ Datum mtree_text_overlap(PG_FUNCTION_ARGS) {
 }
 
 Datum mtree_text_contains(PG_FUNCTION_ARGS) {
-	/* elog(INFO, "mtree_text_contains"); */
 	mtree_text* first = PG_GETARG_MTREE_TEXT_P(0);
 	mtree_text* second = PG_GETARG_MTREE_TEXT_P(1);
 	bool result = mtree_text_contains_wrapper(first, second);
@@ -479,7 +475,6 @@ Datum mtree_text_contains(PG_FUNCTION_ARGS) {
 }
 
 Datum mtree_text_contained(PG_FUNCTION_ARGS) {
-	/* elog(INFO, "mtree_text_contained"); */
 	mtree_text* first = PG_GETARG_MTREE_TEXT_P(0);
 	mtree_text* second = PG_GETARG_MTREE_TEXT_P(1);
 	bool result = mtree_text_contained_wrapper(first, second);
@@ -488,7 +483,6 @@ Datum mtree_text_contained(PG_FUNCTION_ARGS) {
 }
 
 Datum mtree_text_equals_first(PG_FUNCTION_ARGS) {
-	/* elog(INFO, "mtree_text_equals_first"); */
 	mtree_text* first = (mtree_text*)PG_GETARG_POINTER(0);
 	mtree_text* second = (mtree_text*)PG_GETARG_POINTER(1);
 	bool* result = (bool*)PG_GETARG_POINTER(2);

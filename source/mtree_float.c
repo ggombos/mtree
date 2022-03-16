@@ -34,8 +34,6 @@ PG_FUNCTION_INFO_V1(mtree_float_overlap_operator);
 Datum mtree_float_input(PG_FUNCTION_ARGS) {
 	char* input = PG_GETARG_CSTRING(0);
 
-	elog(INFO, "input [char*]: %s", input);
-
 	mtree_float* result = (mtree_float*)palloc(MTREE_FLOAT_SIZE);
 	result->coveringRadius = 0;
 	result->parentDistance = 0;
@@ -45,16 +43,12 @@ Datum mtree_float_input(PG_FUNCTION_ARGS) {
 	char* tmp;
 	result->data = atof(input);
 
-	elog(INFO, "input [float]: %f", result->data);
-
 	PG_RETURN_POINTER(result);
 }
 
 Datum mtree_float_output(PG_FUNCTION_ARGS) {
 	mtree_float* output = PG_GETARG_MTREE_FLOAT_P(0);
 	char* result;
-
-	elog(INFO, "output [float]: %f", output->data);
 
 	if (output->coveringRadius == 0) {
 		result = psprintf("%f", output->data);
@@ -64,8 +58,6 @@ Datum mtree_float_output(PG_FUNCTION_ARGS) {
 			psprintf("coveringRadius|%d parentDistance|%d data|%f",
 				output->coveringRadius, output->parentDistance, output->data);
 	}
-
-	elog(INFO, "output [char*]: %s", result);
 
 	PG_RETURN_CSTRING(result);
 }
@@ -95,7 +87,9 @@ Datum mtree_float_consistent(PG_FUNCTION_ARGS) {
 			returnValue = mtree_float_contained_distance(key, query, distance);
 			break;
 		default:
-			elog(ERROR, "Invalid consistent strategyNumber: %d", strategyNumber);
+			ereport(ERROR,
+				errcode(ERRCODE_SYNTAX_ERROR),
+				errmsg("Invalid StrategyNumber for consistent function: %u", strategyNumber));
 			break;
 		}
 	}
@@ -118,7 +112,9 @@ Datum mtree_float_consistent(PG_FUNCTION_ARGS) {
 			*recheck = !mtree_float_contained_distance(key, query, distance);
 			break;
 		default:
-			elog(ERROR, "Invalid consistent strategyNumber: %d", strategyNumber);
+			ereport(ERROR,
+				errcode(ERRCODE_SYNTAX_ERROR),
+				errmsg("Invalid StrategyNumber for consistent function: %u", strategyNumber));
 			break;
 		}
 	}
@@ -146,7 +142,9 @@ Datum mtree_float_union(PG_FUNCTION_ARGS) {
 		searchRange = ranges;
 		break;
 	default:
-		elog(ERROR, "Invalid union strategy: %d", UNION_STRATEGY_FLOAT);
+		ereport(ERROR,
+			errcode(ERRCODE_SYNTAX_ERROR),
+			errmsg("Invalid StrategyNumber for union function: %u", UNION_STRATEGY_FLOAT));
 		break;
 	}
 
@@ -420,7 +418,9 @@ Datum mtree_float_picksplit(PG_FUNCTION_ARGS) {
 		}
 		break;
 	default:
-		elog(ERROR, "Invalid picksplit strategy: %d", PICKSPLIT_STRATEGY_FLOAT);
+		ereport(ERROR,
+			errcode(ERRCODE_SYNTAX_ERROR),
+			errmsg("Invalid StrategyNumber for picksplit function: %u", PICKSPLIT_STRATEGY_FLOAT));
 		break;
 	}
 
