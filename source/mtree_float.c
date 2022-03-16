@@ -76,7 +76,7 @@ Datum mtree_float_consistent(PG_FUNCTION_ARGS) {
 	StrategyNumber strategyNumber = (StrategyNumber)PG_GETARG_UINT16(2);
 	bool* recheck = (bool*)PG_GETARG_POINTER(4);
 	mtree_float* key = DatumGetMtreeFloat(entry->key);
-	int distance = mtree_float_distance_internal(key, query);
+	float distance = mtree_float_distance_internal(key, query);
 
 	bool returnValue;
 	if (GIST_LEAF(entry)) {
@@ -86,13 +86,13 @@ Datum mtree_float_consistent(PG_FUNCTION_ARGS) {
 			returnValue = mtree_float_equals(key, query);
 			break;
 		case OverlapStrategyNumber:
-			returnValue = mtree_float_overlap_distance(key, query, &distance);
+			returnValue = mtree_float_overlap_distance(key, query, distance);
 			break;
 		case ContainsStrategyNumber:
-			returnValue = mtree_float_contains_distance(key, query, &distance);
+			returnValue = mtree_float_contains_distance(key, query, distance);
 			break;
 		case ContainedStrategyNumber:
-			returnValue = mtree_float_contained_distance(key, query, &distance);
+			returnValue = mtree_float_contained_distance(key, query, distance);
 			break;
 		default:
 			elog(ERROR, "Invalid consistent strategyNumber: %d", strategyNumber);
@@ -102,20 +102,20 @@ Datum mtree_float_consistent(PG_FUNCTION_ARGS) {
 	else {
 		switch (strategyNumber) {
 		case SameStrategyNumber:
-			returnValue = mtree_float_contains_distance(key, query, &distance);
+			returnValue = mtree_float_contains_distance(key, query, distance);
 			*recheck = true;
 			break;
 		case OverlapStrategyNumber:
-			returnValue = mtree_float_overlap_distance(key, query, &distance);
-			*recheck = !mtree_float_contained_distance(key, query, &distance);
+			returnValue = mtree_float_overlap_distance(key, query, distance);
+			*recheck = !mtree_float_contained_distance(key, query, distance);
 			break;
 		case ContainsStrategyNumber:
-			returnValue = mtree_float_contains_distance(key, query, &distance);
+			returnValue = mtree_float_contains_distance(key, query, distance);
 			*recheck = true;
 			break;
 		case ContainedStrategyNumber:
-			returnValue = mtree_float_overlap_distance(key, query, &distance);
-			*recheck = !mtree_float_contained_distance(key, query, &distance);
+			returnValue = mtree_float_overlap_distance(key, query, distance);
+			*recheck = !mtree_float_contained_distance(key, query, distance);
 			break;
 		default:
 			elog(ERROR, "Invalid consistent strategyNumber: %d", strategyNumber);
@@ -493,8 +493,7 @@ Datum mtree_float_distance_operator(PG_FUNCTION_ARGS) {
 Datum mtree_float_overlap_operator(PG_FUNCTION_ARGS) {
 	mtree_float* first = PG_GETARG_MTREE_FLOAT_P(0);
 	mtree_float* second = PG_GETARG_MTREE_FLOAT_P(1);
-	float res = mtree_float_distance_internal(first, second);
-	bool result = mtree_float_contains_distance(first, second, &res);
+	bool result = mtree_float_contains_distance(first, second, mtree_float_distance_internal(first, second));
 
 	PG_RETURN_BOOL(result);
 }
@@ -502,8 +501,7 @@ Datum mtree_float_overlap_operator(PG_FUNCTION_ARGS) {
 Datum mtree_float_contains_operator(PG_FUNCTION_ARGS) {
 	mtree_float* first = PG_GETARG_MTREE_FLOAT_P(0);
 	mtree_float* second = PG_GETARG_MTREE_FLOAT_P(1);
-	float res = mtree_float_distance_internal(first, second);
-	bool result = mtree_float_contains_distance(first, second, &res);
+	bool result = mtree_float_contains_distance(first, second, mtree_float_distance_internal(first, second));
 
 	PG_RETURN_BOOL(result);
 }
@@ -511,8 +509,7 @@ Datum mtree_float_contains_operator(PG_FUNCTION_ARGS) {
 Datum mtree_float_contained_operator(PG_FUNCTION_ARGS) {
 	mtree_float* first = PG_GETARG_MTREE_FLOAT_P(0);
 	mtree_float* second = PG_GETARG_MTREE_FLOAT_P(1);
-	float res = mtree_float_distance_internal(second, first);
-	bool result = mtree_float_contains_distance(second, first, &res);
+	bool result = mtree_float_contains_distance(second, first, mtree_float_distance_internal(second, first));
 
 	PG_RETURN_BOOL(result);
 }

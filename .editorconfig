@@ -3,7 +3,6 @@ root = true
 [*]
 charset = utf-8
 end_of_line = lf
-insert_final_newline = true
 max_line_length = 80
 trim_trailing_whitespace = true
 
@@ -33,3 +32,6 @@ tab_width = 4
 
 [*.md]
 max_line_length = off
+
+[*.expected]
+trim_trailing_whitespace = false

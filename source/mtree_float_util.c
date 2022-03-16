@@ -12,15 +12,15 @@ bool mtree_float_equals(mtree_float* first, mtree_float* second) {
 	return (first->data - second->data) == 0;
 }
 
-bool mtree_float_overlap_distance(mtree_float* first, mtree_float* second, float* distance) {
-	return *distance <= first->coveringRadius + second->coveringRadius;
+bool mtree_float_overlap_distance(mtree_float* first, mtree_float* second, float distance) {
+	return distance <= first->coveringRadius + second->coveringRadius;
 }
 
-bool mtree_float_contains_distance(mtree_float* first, mtree_float* second, float* distance) {
-	return first->coveringRadius >= *distance + second->coveringRadius;
+bool mtree_float_contains_distance(mtree_float* first, mtree_float* second, float distance) {
+	return first->coveringRadius >= distance + second->coveringRadius;
 }
 
-bool mtree_float_contained_distance(mtree_float* first, mtree_float* second, float* distance) {
+bool mtree_float_contained_distance(mtree_float* first, mtree_float* second, float distance) {
 	return mtree_float_contains_distance(second, first, distance);
 }
 

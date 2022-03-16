@@ -4,6 +4,7 @@
 
 #include "mtree_int8_array.h"
 
+#include "mtree_int8_array_util.h"
 #include "mtree_util.h"
 
  /* TODO: Strategy should be a parameter! */
@@ -40,7 +41,7 @@ Datum mtree_int8_array_input(PG_FUNCTION_ARGS) {
 			errmsg("The input is an empty string."));
 	}
 
-	char previousInteger = NULL;
+	char previousInteger = '\0';
 	unsigned char arrayLength = 1;
 	for (unsigned char i = 0; i < inputLength; ++i) {
 		if (isblank(input[i])) {
@@ -48,10 +49,10 @@ Datum mtree_int8_array_input(PG_FUNCTION_ARGS) {
 				errcode(ERRCODE_SYNTAX_ERROR),
 				errmsg("The array can not contain space or tab characters."));
 		}
-		else if (input[i] == ',' && previousInteger != NULL) {
+		else if (input[i] == ',' && previousInteger != '\0') {
 			++arrayLength;
 		}
-		else if (input[i] == '0' && previousInteger == NULL && (i + 1) < inputLength && isdigit(input[i + 1])) {
+		else if (input[i] == '0' && previousInteger == '\0' && (i + 1) < inputLength && isdigit(input[i + 1])) {
 			ereport(ERROR,
 				errcode(ERRCODE_SYNTAX_ERROR),
 				errmsg("The integers can not contain leading zeros [0]."));
@@ -64,13 +65,17 @@ Datum mtree_int8_array_input(PG_FUNCTION_ARGS) {
 		previousInteger = input[i];
 	}
 
-	size_t size = MTREE_INT8_ARRAY_SIZE + arrayLength * sizeof(int64) + 1;
+	size_t size = MTREE_INT8_ARRAY_SIZE + arrayLength * sizeof(long int) + 1;
 	mtree_int8_array* result = (mtree_int8_array*)palloc(size);
 
 	char* tmp;
 	char* arrayElement = strtok(input, ",");
 	for (unsigned char i = 0; i < arrayLength; ++i) {
-		result->data[i] = strtoul(arrayElement, &tmp, 10);
+		ereport(INFO,
+			errmsg("arrayElement == %s", arrayElement));
+		result->data[i] = strtol(arrayElement, &tmp, 10);
+		ereport(INFO,
+			errmsg("result->data[%d] == %ld", i, result->data[i]));
 		arrayElement = strtok(NULL, ",");
 	}
 
@@ -91,9 +96,21 @@ Datum mtree_int8_array_output(PG_FUNCTION_ARGS) {
 	StringInfoData stringInfo;
 	initStringInfo(&stringInfo);
 
-	char tmp[20];
+	char tmp[64];
 	for (unsigned char i = 0; i < arrayLength; ++i) {
-		sprintf(tmp, "%lld", output->data[i]);
+		ereport(INFO,
+			errmsg("output->data[%hhu] == %li", i, output->data[i]));
+		ereport(INFO,
+			errmsg("output->data[%hhu] == %ld", i, output->data[i]));
+		ereport(INFO,
+			errmsg("output->data[%hhu] == %lu", i, output->data[i]));
+		ereport(INFO,
+			errmsg("output->data[%hhu] == %lli", i, output->data[i]));
+		ereport(INFO,
+			errmsg("output->data[%hhu] == %lld", i, output->data[i]));
+		ereport(INFO,
+			errmsg("output->data[%hhu] == %llu", i, output->data[i]));
+		sprintf(tmp, "%ld", output->data[i]);
 		appendStringInfoString(&stringInfo, tmp);
 		if (i != arrayLength - 1) {
 			appendStringInfoChar(&stringInfo, ',');
@@ -119,13 +136,13 @@ Datum mtree_int8_array_consistent(PG_FUNCTION_ARGS) {
 			returnValue = mtree_int8_array_equals(key, query);
 			break;
 		case OverlapStrategyNumber:
-			returnValue = mtree_int8_array_overlap_distance(key, query, &distance);
+			returnValue = mtree_int8_array_overlap_distance(key, query, distance);
 			break;
 		case ContainsStrategyNumber:
-			returnValue = mtree_int8_array_contains_distance(key, query, &distance);
+			returnValue = mtree_int8_array_contains_distance(key, query, distance);
 			break;
 		case ContainedStrategyNumber:
-			returnValue = mtree_int8_array_contained_distance(key, query, &distance);
+			returnValue = mtree_int8_array_contained_distance(key, query, distance);
 			break;
 		default:
 			elog(ERROR, "Invalid consistent strategyNumber: %d", strategyNumber);
@@ -135,20 +152,20 @@ Datum mtree_int8_array_consistent(PG_FUNCTION_ARGS) {
 	else {
 		switch (strategyNumber) {
 		case SameStrategyNumber:
-			returnValue = mtree_int8_array_contains_distance(key, query, &distance);
+			returnValue = mtree_int8_array_contains_distance(key, query, distance);
 			*recheck = true;
 			break;
 		case OverlapStrategyNumber:
-			returnValue = mtree_int8_array_overlap_distance(key, query, &distance);
-			*recheck = !mtree_int8_array_contained_distance(key, query, &distance);
+			returnValue = mtree_int8_array_overlap_distance(key, query, distance);
+			*recheck = !mtree_int8_array_contained_distance(key, query, distance);
 			break;
 		case ContainsStrategyNumber:
-			returnValue = mtree_int8_array_contains_distance(key, query, &distance);
+			returnValue = mtree_int8_array_contains_distance(key, query, distance);
 			*recheck = true;
 			break;
 		case ContainedStrategyNumber:
-			returnValue = mtree_int8_array_overlap_distance(key, query, &distance);
-			*recheck = !mtree_int8_array_contained_distance(key, query, &distance);
+			returnValue = mtree_int8_array_overlap_distance(key, query, distance);
+			*recheck = !mtree_int8_array_contained_distance(key, query, distance);
 			break;
 		default:
 			elog(ERROR, "Invalid consistent strategyNumber: %d", strategyNumber);

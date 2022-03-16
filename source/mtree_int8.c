@@ -41,7 +41,7 @@ Datum mtree_int8_input(PG_FUNCTION_ARGS) {
 	SET_VARSIZE(result, MTREE_INT8_SIZE);
 
 	char* tmp;
-	result->data = strtoul(input, &tmp, 10);
+	result->data = strtol(input, &tmp, 10);
 
 	PG_RETURN_POINTER(result);
 }
@@ -78,13 +78,13 @@ Datum mtree_int8_consistent(PG_FUNCTION_ARGS) {
 			returnValue = mtree_int8_equals(key, query);
 			break;
 		case OverlapStrategyNumber:
-			returnValue = mtree_int8_overlap_distance(key, query, &distance);
+			returnValue = mtree_int8_overlap_distance(key, query, distance);
 			break;
 		case ContainsStrategyNumber:
-			returnValue = mtree_int8_contains_distance(key, query, &distance);
+			returnValue = mtree_int8_contains_distance(key, query, distance);
 			break;
 		case ContainedStrategyNumber:
-			returnValue = mtree_int8_contained_distance(key, query, &distance);
+			returnValue = mtree_int8_contained_distance(key, query, distance);
 			break;
 		default:
 			elog(ERROR, "Invalid consistent strategyNumber: %d", strategyNumber);
@@ -94,20 +94,20 @@ Datum mtree_int8_consistent(PG_FUNCTION_ARGS) {
 	else {
 		switch (strategyNumber) {
 		case SameStrategyNumber:
-			returnValue = mtree_int8_contains_distance(key, query, &distance);
+			returnValue = mtree_int8_contains_distance(key, query, distance);
 			*recheck = true;
 			break;
 		case OverlapStrategyNumber:
-			returnValue = mtree_int8_overlap_distance(key, query, &distance);
-			*recheck = !mtree_int8_contained_distance(key, query, &distance);
+			returnValue = mtree_int8_overlap_distance(key, query, distance);
+			*recheck = !mtree_int8_contained_distance(key, query, distance);
 			break;
 		case ContainsStrategyNumber:
-			returnValue = mtree_int8_contains_distance(key, query, &distance);
+			returnValue = mtree_int8_contains_distance(key, query, distance);
 			*recheck = true;
 			break;
 		case ContainedStrategyNumber:
-			returnValue = mtree_int8_overlap_distance(key, query, &distance);
-			*recheck = !mtree_int8_contained_distance(key, query, &distance);
+			returnValue = mtree_int8_overlap_distance(key, query, distance);
+			*recheck = !mtree_int8_contained_distance(key, query, distance);
 			break;
 		default:
 			elog(ERROR, "Invalid consistent strategyNumber: %d", strategyNumber);

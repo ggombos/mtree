@@ -13,15 +13,15 @@ bool mtree_int8_equals(mtree_int8* first, mtree_int8* second) {
 	return (first->data - second->data) == 0;
 }
 
-bool mtree_int8_overlap_distance(mtree_int8* first, mtree_int8* second, int* distance) {
-	return *distance <= first->coveringRadius + second->coveringRadius;
+bool mtree_int8_overlap_distance(mtree_int8* first, mtree_int8* second, int distance) {
+	return distance <= first->coveringRadius + second->coveringRadius;
 }
 
-bool mtree_int8_contains_distance(mtree_int8* first, mtree_int8* second, int* distance) {
-	return first->coveringRadius >= *distance + second->coveringRadius;
+bool mtree_int8_contains_distance(mtree_int8* first, mtree_int8* second, int distance) {
+	return first->coveringRadius >= distance + second->coveringRadius;
 }
 
-bool mtree_int8_contained_distance(mtree_int8* first, mtree_int8* second, int* distance) {
+bool mtree_int8_contained_distance(mtree_int8* first, mtree_int8* second, int distance) {
 	return mtree_int8_contains_distance(second, first, distance);
 }
 

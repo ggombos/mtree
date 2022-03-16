@@ -5,6 +5,7 @@
 #include "mtree_text_array.h"
 
 #include "mtree_text_array_util.h"
+#include "mtree_util.h"
 
  /* TODO: Strategy should be a parameter! */
 const UnionStrategy UNION_STRATEGY_text_array = Best;

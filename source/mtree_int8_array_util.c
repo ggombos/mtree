@@ -22,17 +22,17 @@ bool mtree_int8_array_equals(mtree_int8_array* first, mtree_int8_array* second) 
 	return true;
 }
 
-bool mtree_int8_array_overlap_distance(mtree_int8_array* first, mtree_int8_array* second, int* distance) {
+bool mtree_int8_array_overlap_distance(mtree_int8_array* first, mtree_int8_array* second, int distance) {
 	// TODO: Implement overlap distance
 	return false;
 }
 
-bool mtree_int8_array_contains_distance(mtree_int8_array* first, mtree_int8_array* second, int* distance) {
+bool mtree_int8_array_contains_distance(mtree_int8_array* first, mtree_int8_array* second, int distance) {
 	// TODO: Implement contains distance
 	return false;
 }
 
-bool mtree_int8_array_contained_distance(mtree_int8_array* first, mtree_int8_array* second, int* distance) {
+bool mtree_int8_array_contained_distance(mtree_int8_array* first, mtree_int8_array* second, int distance) {
 	return mtree_int8_array_contains_distance(second, first, distance);
 }
 
