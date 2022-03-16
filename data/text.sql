@@ -1,7 +1,5 @@
 /* contrib/mtree_gist/data/text.sql */
 
-SET client_min_messages TO WARNING;
-
 DROP TABLE IF EXISTS TEXT_TEST CASCADE;
 CREATE TABLE TEXT_TEST (
   id  INTEGER,
@@ -13,8 +11,6 @@ DROP INDEX IF EXISTS TEXT_TEST_IDX CASCADE;
 CREATE INDEX TEXT_TEST_IDX ON TEXT_TEST USING GiST (val mtree_text_opclass);
 
 SET enable_seqscan TO OFF;
-
-SELECT COUNT(*) FROM TEXT_TEST;
 
 SELECT * FROM TEXT_TEST;
 

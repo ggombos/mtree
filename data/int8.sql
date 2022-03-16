@@ -1,7 +1,5 @@
 /* contrib/mtree_gist/data/int8.sql */
 
-SET client_min_messages TO WARNING;
-
 DROP TABLE IF EXISTS INT8_TEST CASCADE;
 CREATE TABLE INT8_TEST (
   id  INTEGER,
@@ -13,8 +11,6 @@ DROP INDEX IF EXISTS INT8_TEST_IDX CASCADE;
 CREATE INDEX INT8_TEST_IDX ON INT8_TEST USING GiST (val mtree_int8_opclass);
 
 SET enable_seqscan TO OFF;
-
-SELECT COUNT(*) FROM INT8_TEST;
 
 SELECT * FROM INT8_TEST;
 
