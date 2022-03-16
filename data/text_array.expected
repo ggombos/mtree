@@ -1,0 +1,16 @@
+SET
+DROP TABLE
+CREATE TABLE
+COPY 5
+DROP INDEX
+CREATE INDEX
+SET
+ id |              val              
+----+-------------------------------
+  0 | 0
+  1 | a
+  2 | a,b
+  3 | a,b,c
+  4 | aaaaa,bbbbb,ccccc,ddddd,eeeee
+(5 rows)
+

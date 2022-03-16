@@ -33,11 +33,28 @@ PG_FUNCTION_INFO_V1(mtree_text_array_overlap_operator);
 
 Datum mtree_text_array_input(PG_FUNCTION_ARGS) {
 	char* input = PG_GETARG_CSTRING(0);
+	unsigned char inputLength = strlen(input);
 
-	// TODO: Validate input string syntax
-	// TODO: I
+	if (inputLength == 0) {
+		ereport(ERROR,
+			errcode(ERRCODE_SYNTAX_ERROR),
+			errmsg("The input is an empty string."));
+	}
 
-	unsigned char arrayLength = get_array_length(input);
+	char previousChar = '\0';
+	unsigned char arrayLength = 1;
+	for (unsigned char i = 0; i < inputLength; ++i) {
+		if (isblank(input[i])) {
+			ereport(ERROR,
+				errcode(ERRCODE_SYNTAX_ERROR),
+				errmsg("The array can not contain space or tab characters."));
+		}
+		else if (input[i] == ',' && previousChar != '\0') {
+			++arrayLength;
+			previousChar = '\0';
+		}
+		previousChar = input[i];
+	}
 
 	size_t size = MTREE_TEXT_ARRAY_SIZE + arrayLength * MTREE_TEXT_ARRAY_MAX_STRINGLENGTH * sizeof(char) + 1;
 	mtree_text_array* result = (mtree_text_array*)palloc(size);

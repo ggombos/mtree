@@ -51,13 +51,14 @@ Datum mtree_int8_array_input(PG_FUNCTION_ARGS) {
 		}
 		else if (input[i] == ',' && previousInteger != '\0') {
 			++arrayLength;
+			previousInteger = '\0';
 		}
 		else if (input[i] == '0' && previousInteger == '\0' && (i + 1) < inputLength && isdigit(input[i + 1])) {
 			ereport(ERROR,
 				errcode(ERRCODE_SYNTAX_ERROR),
 				errmsg("The integers can not contain leading zeros [0]."));
 		}
-		else if (!isdigit(input[i])) {
+		else if (!isdigit(input[i]) && input[i] != '-') {
 			ereport(ERROR,
 				errcode(ERRCODE_SYNTAX_ERROR),
 				errmsg("The array can only contain integers [0-9] and commas [,]."));
@@ -92,9 +93,13 @@ Datum mtree_int8_array_output(PG_FUNCTION_ARGS) {
 	StringInfoData stringInfo;
 	initStringInfo(&stringInfo);
 
-	char tmp[64];
+	char tmp[512];
 	for (unsigned char i = 0; i < arrayLength; ++i) {
+		ereport(INFO,
+			errmsg("output->data[%hhu] == %ld", i, output->data[i]));
 		sprintf(tmp, "%ld", output->data[i]);
+		ereport(INFO,
+			errmsg("tmp == %s", tmp));
 		appendStringInfoString(&stringInfo, tmp);
 		if (i != arrayLength - 1) {
 			appendStringInfoChar(&stringInfo, ',');

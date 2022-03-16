@@ -7,13 +7,29 @@ readonly SOURCE_DATA_DIRECTORY="/home/zsolt/DATA/Development/mtree_gist/data"
 readonly TARGET_DATA_DIRECTORY="/home/postgres/test_files"
 
 readonly DATA_FILENAMES=(
+  "float4.csv"
+  "float4.expected"
+  "float4.sql"
+
+  "float4_array.csv"
+  "float4_array.expected"
+  "float4_array.sql"
+
   "int8.csv"
   "int8.expected"
   "int8.sql"
 
+  "int8_array.csv"
+  "int8_array.expected"
+  "int8_array.sql"
+
   "text.csv"
   "text.expected"
   "text.sql"
+
+  "text_array.csv"
+  "text_array.expected"
+  "text_array.sql"
 
   "setup.sql"
   "teardown.sql"

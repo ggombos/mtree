@@ -5,8 +5,12 @@ set -e
 readonly TEST_DIRECTORY="/home/postgres/test_files"
 
 readonly TEST_TYPES=(
+  "float4"
+  "float4_array"
   "int8"
+#  "int8_array"
   "text"
+#  "text_array"
 )
 
 function setup() {
