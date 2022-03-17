@@ -588,6 +588,12 @@ RETURNS float4
 AS 'MODULE_PATHNAME', 'mtree_text_array_distance_operator'
 LANGUAGE C STRICT IMMUTABLE PARALLEL SAFE;
 
+CREATE OR REPLACE FUNCTION mtree_text_array_options(internal)
+RETURNS void
+AS 'MODULE_PATHNAME','mtree_text_array_options'
+LANGUAGE C STRICT;
+
+
 -- Equals operator
 CREATE OPERATOR = (
 	COMMUTATOR = =,
@@ -647,7 +653,9 @@ AS
 	FUNCTION 5 mtree_text_array_penalty (internal, internal, internal),
 	FUNCTION 6 mtree_text_array_picksplit (internal, internal),
 	FUNCTION 7 mtree_text_array_same (mtree_text_array, mtree_text_array),
-	FUNCTION 8 mtree_text_array_distance (internal, mtree_text_array, smallint, oid, internal)
+	FUNCTION 8 mtree_text_array_distance (internal, mtree_text_array, smallint, oid, internal),
+	FUNCTION 10 mtree_text_array_options(internal)
+
 ;
 
 

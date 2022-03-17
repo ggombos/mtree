@@ -3,6 +3,7 @@
  */
 #ifndef __MTREE_GIST_H__
 #define __MTREE_GIST_H__
+// #include "access/reloptions.h"
 
 typedef enum {
 	First,
@@ -19,6 +20,7 @@ typedef enum {
 	SamplingMinOverlapArea,
 	SamplingMinAreaSum
 } PicksplitStrategy;
+
 
 /* TODO: Some of these can be simplified */
 #define SameStrategyNumber      1 //  =

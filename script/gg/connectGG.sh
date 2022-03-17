@@ -1,1 +1,1 @@
-su -c ../postgre/bin/psql postgres 
+su -c ../../postgre/bin/psql postgres 

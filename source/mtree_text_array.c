@@ -7,6 +7,11 @@
 #include "mtree_text_array_util.h"
 #include "mtree_util.h"
 
+#include "access/reloptions.h"
+#include "utils/formatting.h"
+#include "catalog/pg_collation.h"
+
+
  /* TODO: Strategy should be a parameter! */
 const UnionStrategy UNION_STRATEGY_text_array = Best;
 const PicksplitStrategy PICKSPLIT_STRATEGY_text_array = SamplingMinOverlapArea;
@@ -31,23 +36,43 @@ PG_FUNCTION_INFO_V1(mtree_text_array_contained_operator);
 PG_FUNCTION_INFO_V1(mtree_text_array_distance_operator);
 PG_FUNCTION_INFO_V1(mtree_text_array_overlap_operator);
 
+PG_FUNCTION_INFO_V1(mtree_text_array_options);
+
+
+//TODO: ezt ki kell emelni a mtree_gist.h-ba, de nem sikerült!!!
+static relopt_enum_elt_def PicksplitStrategyValues[] =
+{
+	{"Random", Random},
+	{"FirstTwo", FirstTwo},
+	{"FirstTwo", FirstTwo},
+	{"MaxDistanceFromFirst", MaxDistanceFromFirst},
+	{"MaxDistancePair", MaxDistancePair},
+	{"SamplingMinCoveringSum", SamplingMinCoveringSum},
+	{"SamplingMinCoveringMax", SamplingMinCoveringMax},
+	{"SamplingMinOverlapArea", SamplingMinOverlapArea},
+	{"SamplingMinAreaSum", SamplingMinAreaSum},
+    {(const char *) NULL}   /* list terminator */
+};
+
+
+
 Datum mtree_text_array_input(PG_FUNCTION_ARGS) {
 	char* input = PG_GETARG_CSTRING(0);
 	unsigned char inputLength = strlen(input);
 
 	if (inputLength == 0) {
-		ereport(ERROR,
-			errcode(ERRCODE_SYNTAX_ERROR),
-			errmsg("The input is an empty string."));
+		// ereport(ERROR,
+			// errcode(ERRCODE_SYNTAX_ERROR),
+			// errmsg("The input is an empty string."));
 	}
 
 	char previousChar = '\0';
 	unsigned char arrayLength = 1;
 	for (unsigned char i = 0; i < inputLength; ++i) {
 		if (isblank(input[i])) {
-			ereport(ERROR,
-				errcode(ERRCODE_SYNTAX_ERROR),
-				errmsg("The array can not contain space or tab characters."));
+			// ereport(ERROR,
+				// errcode(ERRCODE_SYNTAX_ERROR),
+				// errmsg("The array can not contain space or tab characters."));
 		}
 		else if (input[i] == ',' && previousChar != '\0') {
 			++arrayLength;
@@ -268,8 +293,19 @@ Datum mtree_text_array_picksplit(PG_FUNCTION_ARGS) {
 	int minCoveringMax = -1;
 	int minOverlapArea = -1;
 	int minSumArea = -1;
+	
+	
+	PicksplitStrategy enum_param = SamplingMinOverlapArea;
+    if (PG_HAS_OPCLASS_OPTIONS())
+    {
+        MtreeOptionsStruct *options = (MtreeOptionsStruct *) PG_GET_OPCLASS_OPTIONS();
 
-	switch (PICKSPLIT_STRATEGY_text_array) {
+        enum_param = options->picksplitstrategy;
+    }
+	
+
+	// switch (PICKSPLIT_STRATEGY_text_array) {
+	switch (enum_param) {
 	case Random:
 		leftIndex = ((int)random()) % (maxOffset - 1);
 		rightIndex = (leftIndex + 1) + (((int)random()) % (maxOffset - leftIndex - 1));
@@ -484,6 +520,54 @@ Datum mtree_text_array_distance(PG_FUNCTION_ARGS) {
 
 	PG_RETURN_FLOAT4((float4)mtree_text_array_distance_internal(query, key));
 }
+
+
+// based on: https://www.hs.net/r/cms/www/itn/forPrd/html/gist-extensibility.html
+// https://www.postgresql.org/docs/13/gist-extensibility.html
+
+static void 
+validate_my_string_relopt(const char *value)
+{
+	//TODO: check string is valid
+    // if (strlen(value) > 8)
+        // ereport(ERROR,
+                // (errcode(ERRCODE_INVALID_PARAMETER_VALUE),
+                 // errmsg("str_param must be at most 8 bytes")));
+}
+
+static long unsigned int 
+fill_my_string_relopt(const char *value, void *ptr)
+{
+    char   *tmp = str_tolower(value, strlen(value), DEFAULT_COLLATION_OID);
+    int     len = strlen(tmp);
+
+    if (ptr)
+        strcpy((char *) ptr, tmp);
+
+    pfree(tmp);
+    return len + 1;
+}
+
+Datum
+mtree_text_array_options(PG_FUNCTION_ARGS)
+{
+    local_relopts *relopts = (local_relopts *) PG_GETARG_POINTER(0);
+
+    init_local_reloptions(relopts, sizeof(MtreeOptionsStruct));
+    add_local_string_reloption(relopts, "distancestrategy", "distancestrategy",
+                               str_param_default,
+                               &validate_my_string_relopt,
+                               &fill_my_string_relopt,
+                               offsetof(MtreeOptionsStruct, distancestrategy));
+	add_local_enum_reloption(relopts, "picksplitstrategy", "picksplitstrategy",
+                             PicksplitStrategyValues, SamplingMinOverlapArea,
+                             "Valid values are: \"Random\", \"Best\" .......",
+                             offsetof(MtreeOptionsStruct, picksplitstrategy));
+							 
+    PG_RETURN_VOID();
+}
+
+
 
 Datum mtree_text_array_distance_operator(PG_FUNCTION_ARGS) {
 	mtree_text_array* first = PG_GETARG_MTREE_TEXT_ARRAY_P(0);
