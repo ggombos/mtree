@@ -564,6 +564,12 @@ RETURNS float4
 AS 'MODULE_PATHNAME', 'mtree_text_array_distance'
 LANGUAGE C STRICT IMMUTABLE PARALLEL SAFE;
 
+-- [Optional] Options function
+CREATE OR REPLACE FUNCTION mtree_text_array_options(internal)
+RETURNS void
+AS 'MODULE_PATHNAME','mtree_text_array_options'
+LANGUAGE C STRICT;
+
 -- [Operator] Overlap function
 CREATE OR REPLACE FUNCTION mtree_text_array_overlap_operator(mtree_text_array, mtree_text_array)
 RETURNS bool
@@ -587,12 +593,6 @@ CREATE OR REPLACE FUNCTION mtree_text_array_distance_operator(mtree_text_array, 
 RETURNS float4
 AS 'MODULE_PATHNAME', 'mtree_text_array_distance_operator'
 LANGUAGE C STRICT IMMUTABLE PARALLEL SAFE;
-
-CREATE OR REPLACE FUNCTION mtree_text_array_options(internal)
-RETURNS void
-AS 'MODULE_PATHNAME','mtree_text_array_options'
-LANGUAGE C STRICT;
-
 
 -- Equals operator
 CREATE OPERATOR = (
@@ -655,9 +655,7 @@ AS
 	FUNCTION 7 mtree_text_array_same (mtree_text_array, mtree_text_array),
 	FUNCTION 8 mtree_text_array_distance (internal, mtree_text_array, smallint, oid, internal),
 	FUNCTION 10 mtree_text_array_options(internal)
-
 ;
-
 
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 -- float array (for float arrays)

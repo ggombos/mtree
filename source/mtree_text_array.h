@@ -37,17 +37,12 @@ typedef struct {
 	char data[FLEXIBLE_ARRAY_MEMBER][MTREE_TEXT_ARRAY_MAX_STRINGLENGTH];
 } mtree_text_array;
 
+#define MTREE_TEXT_ARRAY_DISTANCE_FUNCTION_COUNTER 2
 
-typedef struct
-{
-    int32   vl_len_;    /* varlena header (do not touch directly!) */
-    int     distancestrategy;  /* string parameter */
-    // int     picksplitstrategy;  /* string parameter */
-	PicksplitStrategy picksplitstrategy; /* enum parameter */
-} MtreeOptionsStruct;
-
-static char *str_param_default = "default";
-
+static char mtree_text_array_distance_functions[MTREE_TEXT_ARRAY_DISTANCE_FUNCTION_COUNTER][64] = {
+   "simple_text_array_distance",
+   "weighted_text_array_distance"
+};
 
 #define MTREE_TEXT_ARRAY_SIZE (2 * sizeof(int) + sizeof(unsigned char))
 #define DatumGetMtreeTextArray(x) ((mtree_text_array *) PG_DETOAST_DATUM(x))

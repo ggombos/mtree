@@ -3,7 +3,10 @@
  */
 #ifndef __MTREE_GIST_H__
 #define __MTREE_GIST_H__
-// #include "access/reloptions.h"
+
+#include "postgres.h"
+#include "c.h"
+#include "access/reloptions.h"
 
 typedef enum {
 	First,
@@ -21,6 +24,24 @@ typedef enum {
 	SamplingMinAreaSum
 } PicksplitStrategy;
 
+typedef struct {
+	int32 vl_len_;
+	int distancestrategy;
+	PicksplitStrategy picksplitstrategy;
+} MtreeOptionsStruct;
+
+static relopt_enum_elt_def PicksplitStrategyValues[] = {
+	{"Random", Random},
+	{"FirstTwo", FirstTwo},
+	{"FirstTwo", FirstTwo},
+	{"MaxDistanceFromFirst", MaxDistanceFromFirst},
+	{"MaxDistancePair", MaxDistancePair},
+	{"SamplingMinCoveringSum", SamplingMinCoveringSum},
+	{"SamplingMinCoveringMax", SamplingMinCoveringMax},
+	{"SamplingMinOverlapArea", SamplingMinOverlapArea},
+	{"SamplingMinAreaSum", SamplingMinAreaSum},
+	{(const char*)NULL}
+};
 
 /* TODO: Some of these can be simplified */
 #define SameStrategyNumber      1 //  =

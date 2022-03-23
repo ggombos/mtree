@@ -8,7 +8,7 @@ CREATE TABLE TEXT_ARRAY_TEST (
 COPY TEXT_ARRAY_TEST(id, val) FROM '/home/postgres/test_files/text_array.csv' DELIMITER ';' CSV HEADER;
 
 DROP INDEX IF EXISTS TEXT_ARRAY_TEST_IDX CASCADE;
-CREATE INDEX TEXT_ARRAY_TEST_IDX ON TEXT_ARRAY_TEST USING GiST (val mtree_text_array_opclass);
+CREATE INDEX TEXT_ARRAY_TEST_IDX ON TEXT_ARRAY_TEST USING GiST (val mtree_text_array_opclass(distancestrategy='simple_text_array_distance', picksplitstrategy='SamplingMinOverlapArea'));
 
 SET enable_seqscan TO OFF;
 

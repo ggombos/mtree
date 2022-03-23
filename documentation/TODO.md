@@ -18,6 +18,10 @@ Boundaries are not working -> instead of 9223372036854775807 it tells 65535.
 
 Input size is maybe bad when allocating memory (int64 * 2 instead of int64).
 
-# text_array
+# Tests
 
-Function weighted_text_distance kills PostgreSQL.
+Check if it uses the index (with EXPLAIN ANALYZE).
+
+# Scripts
+
+Configuration file for paths.

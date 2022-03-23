@@ -5,18 +5,30 @@
 #include "mtree_text_array_util.h"
 #include "mtree_util.h"
 
-float mtree_text_array_distance_internal(mtree_text_array* first, mtree_text_array* second) {
-	// return simple_text_distance(first, second);
-	return weighted_text_distance(first, second);
+float mtree_text_array_distance_internal(mtree_text_array* first, mtree_text_array* second, PG_FUNCTION_ARGS) {
+	char* distanceFunctionName = mtree_text_array_distance_functions[0];
+
+	if (PG_HAS_OPCLASS_OPTIONS()) {
+		MtreeOptionsStruct* options = (MtreeOptionsStruct*)PG_GET_OPCLASS_OPTIONS();
+
+		distanceFunctionName = GET_STRING_RELOPTION(options, distancestrategy);
+	}
+
+	if (strcmp(distanceFunctionName, "simple_text_array_distance") == 0) {
+		return simple_text_array_distance(first, second);
+	}
+	return weighted_text_array_distance(first, second);
 }
 
-float weighted_text_distance(mtree_text_array* first, mtree_text_array* second) {
+/*
+ * This distance function only works with a specific type of data!
+ */
+float weighted_text_array_distance(mtree_text_array* first, mtree_text_array* second) {
 	float sum = 0.0;
 	int sameTagCount = 0;
 	char* save_ptr1;
 	int lengthF = first->arrayLength;
 	int lengthS = second->arrayLength;
-
 	for (int xF = 0; xF < lengthF; ++xF) {
 
 		// copy because the strtok kill the original string
@@ -34,7 +46,6 @@ float weighted_text_distance(mtree_text_array* first, mtree_text_array* second) 
 			char* rest2 = calloc(strlen(second->data[xS]) + 1, sizeof(char));
 			char* rest2Ptr = rest2;	// csak hogy fel tudjuk szabaditani
 			strcpy(rest2, second->data[xS]);
-
 
 			char* tagS = strtok_r(rest2, "###", &rest2);
 			tagNumS = atoi(strtok_r(rest2, "###", &rest2));
@@ -60,16 +71,17 @@ float weighted_text_distance(mtree_text_array* first, mtree_text_array* second) 
 	return 100.0 - sum;
 }
 
-
-int simple_text_distance(mtree_text_array* first, mtree_text_array* second) {
+int simple_text_array_distance(mtree_text_array* first, mtree_text_array* second) {
 	int sum = 0;
-	int length = (int)sizeof(first);
-	if ((int)sizeof(second) < length) {
-		length = (int)sizeof(second);
+	unsigned char length = first->arrayLength;
+
+	if (second->arrayLength < length) {
+		length = second->arrayLength;
 	}
-	for (int x = 0; x < length; ++x) {
-		if (string_distance(first->data[x], second->data[x]) == 0) {
-			sum++;
+
+	for (unsigned char i = 0; i < length; ++i) {
+		if (string_distance(first->data[i], second->data[i]) == 0) {
+			++sum;
 		}
 	}
 
@@ -108,9 +120,9 @@ mtree_text_array* mtree_text_array_deep_copy(mtree_text_array* source) {
 	return destination;
 }
 
-int get_text_array_distance(int size, mtree_text_array* entries[size], int distances[size][size], int i, int j) {
+int get_text_array_distance(int size, mtree_text_array* entries[size], int distances[size][size], int i, int j, PG_FUNCTION_ARGS) {
 	if (distances[i][j] == -1) {
-		distances[i][j] = mtree_text_array_distance_internal(entries[i], entries[j]);
+		distances[i][j] = mtree_text_array_distance_internal(entries[i], entries[j], fcinfo);
 	}
 	return distances[i][j];
 }
