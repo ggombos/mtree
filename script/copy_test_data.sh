@@ -2,9 +2,17 @@
 
 set -e
 
-readonly SOURCE_SCRIPT_DIRECTORY="/home/zsolt/DATA/Development/mtree_gist/script"
-readonly SOURCE_DATA_DIRECTORY="/home/zsolt/DATA/Development/mtree_gist/data"
-readonly TARGET_DATA_DIRECTORY="/home/postgres/test_files"
+readonly PROPERTIES_FILE="./script/mtree_gist.properties"
+
+function read_property() {
+  PROPERTY_KEY=$1
+  PROPERTY_VALUE=$(cat ${PROPERTIES_FILE} | grep "${PROPERTY_KEY}" | cut -d '=' -f 2 | tr -d '\n')
+  echo "${PROPERTY_VALUE}"
+}
+
+SOURCE_SCRIPT_DIRECTORY="$(read_property "mtree.source")/script"
+SOURCE_DATA_DIRECTORY="$(read_property "mtree.source")/data"
+TARGET_DATA_DIRECTORY="$(read_property "postgresql.test")"
 
 readonly DATA_FILENAMES=(
   "float4_array.csv"
@@ -36,6 +44,7 @@ readonly DATA_FILENAMES=(
 )
 
 readonly SCRIPT_FILENAMES=(
+  "mtree_gist.properties"
   "start.sh"
   "stop.sh"
   "test.sh"

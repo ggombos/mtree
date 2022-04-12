@@ -17,3 +17,5 @@ SELECT * FROM TEXT_ARRAY_TEST;
 SELECT id, val, (val <-> '0') AS dst FROM TEXT_ARRAY_TEST ORDER BY (val <-> '0');
 
 SELECT * FROM TEXT_ARRAY_TEST WHERE val #<# '0';
+
+SELECT id, val, (val <-> '0') AS dst FROM TEXT_ARRAY_TEST ORDER BY (val <-> '0') LIMIT 3;

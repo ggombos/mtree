@@ -2,10 +2,18 @@
 
 set -e
 
-readonly SOURCE_DIRECTORY="/home/zsolt/DATA/Development/mtree_gist/source"
-readonly POSTGRESQL_INCLUDE_DIRECTORY="/usr/include/postgresql/server"
-readonly POSTGRESQL_EXTENSION_DIRECTORY="/usr/share/postgresql/extension"
-readonly POSTGRESQL_LIBRARY_DIRECTORY="/usr/lib/postgresql"
+readonly PROPERTIES_FILE="./script/mtree_gist.properties"
+
+function read_property() {
+  PROPERTY_KEY=$1
+  PROPERTY_VALUE=$(cat ${PROPERTIES_FILE} | grep "${PROPERTY_KEY}" | cut -d '=' -f 2 | tr -d '\n')
+  echo "${PROPERTY_VALUE}"
+}
+
+SOURCE_DIRECTORY="$(read_property "mtree.source")/source"
+POSTGRESQL_INCLUDE_DIRECTORY="$(read_property "postgresql.include")"
+POSTGRESQL_EXTENSION_DIRECTORY="$(read_property "postgresql.extension")"
+POSTGRESQL_LIBRARY_DIRECTORY="$(read_property "postgresql.lib")"
 
 readonly FILENAMES=(
   "mtree_text"
@@ -42,6 +50,7 @@ function create_parameter_list() {
 }
 
 function create_and_copy_so() {
+  # shellcheck disable=SC2046
   cc -shared -o "${SOURCE_DIRECTORY}/mtree_gist.so" $(create_parameter_list)
   cp "${SOURCE_DIRECTORY}/mtree_gist.so" "${POSTGRESQL_LIBRARY_DIRECTORY}/mtree_gist.so"
   rm "${SOURCE_DIRECTORY}/mtree_gist.so"

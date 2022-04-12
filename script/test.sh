@@ -2,7 +2,15 @@
 
 set -e
 
-readonly TEST_DIRECTORY="/home/postgres/test_files"
+readonly PROPERTIES_FILE="./test_files/mtree_gist.properties"
+
+function read_property() {
+  PROPERTY_KEY=$1
+  PROPERTY_VALUE=$(cat ${PROPERTIES_FILE} | grep "${PROPERTY_KEY}" | cut -d '=' -f 2 | tr -d '\n')
+  echo "${PROPERTY_VALUE}"
+}
+
+TEST_DIRECTORY="$(read_property "postgresql.test")"
 
 readonly TEST_TYPES=(
   "float4_array"

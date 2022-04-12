@@ -125,3 +125,4 @@ fabric.properties
 *.log
 out
 *tmp*
+*.properties
