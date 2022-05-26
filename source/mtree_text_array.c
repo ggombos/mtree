@@ -170,7 +170,7 @@ Datum mtree_text_array_union(PG_FUNCTION_ARGS) {
 		coveringRadii[i] = 0;
 
 		for (int j = 0; j < ranges; ++j) {
-			int distance = mtree_text_array_distance_internal(entries[i], entries[j], fcinfo);
+			float distance = mtree_text_array_distance_internal(entries[i], entries[j], fcinfo);
 			int newCoveringRadius = distance + entries[j]->coveringRadius;
 
 			if (coveringRadii[i] < newCoveringRadius) {
@@ -206,9 +206,9 @@ Datum mtree_text_array_penalty(PG_FUNCTION_ARGS) {
 	mtree_text_array* original = DatumGetMtreeTextArray(originalEntry->key);
 	mtree_text_array* new = DatumGetMtreeTextArray(newEntry->key);
 
-	int distance = mtree_text_array_distance_internal(original, new, fcinfo);
-	int newCoveringRadius = distance + new->coveringRadius;
-	*penalty = (float)(newCoveringRadius < original->coveringRadius ? 0 : newCoveringRadius - original->coveringRadius);
+	float distance = mtree_text_array_distance_internal(original, new, fcinfo);
+	float newCoveringRadius = distance + 1.0 * new->coveringRadius;
+	*penalty = (float)(newCoveringRadius < 1.0 * original->coveringRadius ? 0.0 : newCoveringRadius - 1.0 * original->coveringRadius);
 
 	PG_RETURN_POINTER(penalty);
 }

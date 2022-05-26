@@ -17,56 +17,62 @@ float mtree_text_array_distance_internal(mtree_text_array* first, mtree_text_arr
 	if (strcmp(distanceFunctionName, "simple_text_array_distance") == 0) {
 		return simple_text_array_distance(first, second);
 	}
+
 	return weighted_text_array_distance(first, second);
 }
 
+#define MIN_FLOAT(x, y) (((x) < (y)) ? (1.0 * x) : (1.0 * y))
+
 /*
- * This distance function only works with a specific type of data!
+ * This distance function is used for song similarity queries with the
+ * Million Songs Dataset.
  */
 float weighted_text_array_distance(mtree_text_array* first, mtree_text_array* second) {
+	unsigned char lengthOfFirstArray = first->arrayLength;
+	unsigned char lengthOfSecondArray = second->arrayLength;
+	unsigned char numberOfMatchingTags = 0;
+	char* separator = "###";
+	char* saveFirst;
+	char* saveSecond;
 	float sum = 0.0;
-	int sameTagCount = 0;
-	char* save_ptr1;
-	int lengthF = first->arrayLength;
-	int lengthS = second->arrayLength;
-	for (int xF = 0; xF < lengthF; ++xF) {
 
-		// copy because the strtok kill the original string
-		char* rest = calloc(strlen(first->data[xF]) + 1, sizeof(char));
-		char* restPtr = rest;	// csak hogy fel tudjuk szabaditani
-		strcpy(rest, first->data[xF]);
+	for (unsigned char i = 0; i < lengthOfFirstArray; ++i) {
+		char* firstData = calloc(strlen(first->data[i]) + 1, sizeof(char));
+		char* firstDataStart = firstData;
+		strcpy(firstData, first->data[i]);
 
-		char* tagF = strtok_r(rest, "###", &rest);
-		int tagNumF = atoi(strtok_r(rest, "###", &rest));
-		strtok_r(rest, "###", &rest);
+		char* firstTagName = strtok_r(firstData, separator, &saveFirst);
+		int firstTagRelevance = atoi(strtok_r(NULL, separator, &saveFirst));
 
-		bool found = false;
-		int tagNumS;
-		for (int xS = 0; xS < lengthS; ++xS) {
-			char* rest2 = calloc(strlen(second->data[xS]) + 1, sizeof(char));
-			char* rest2Ptr = rest2;	// csak hogy fel tudjuk szabaditani
-			strcpy(rest2, second->data[xS]);
+		bool isMatchingTag = false;
+		int secondTagRelevance;
+		for (unsigned char j = 0; j < lengthOfSecondArray; ++j) {
+			char* secondData = calloc(strlen(second->data[j]) + 1, sizeof(char));
+			char* secondDataStart = secondData;
+			strcpy(secondData, second->data[j]);
 
-			char* tagS = strtok_r(rest2, "###", &rest2);
-			tagNumS = atoi(strtok_r(rest2, "###", &rest2));
-			strtok_r(rest2, "###", &rest2);
+			char* secondTagName = strtok_r(secondData, separator, &saveSecond);
+			secondTagRelevance = atoi(strtok_r(NULL, separator, &saveSecond));
 
-			if (strcmp(tagF, tagS) == 0) {
-				found = true;
-				sameTagCount++;
-				free(rest2Ptr);
+			if (strcmp(firstTagName, secondTagName) == 0) {
+				isMatchingTag = true;
+				numberOfMatchingTags++;
+
+				free(secondDataStart);
 				continue;
 			}
-			free(rest2Ptr);
+
+			free(secondDataStart);
 		}
-		free(restPtr);
-		if (found) {
-			sum += 100.0 - abs(tagNumF - tagNumS);
+
+		if (isMatchingTag) {
+			sum += MIN_FLOAT(firstTagRelevance, secondTagRelevance);
 		}
+
+		free(firstDataStart);
 	}
-	// a nem talalhato tageket 100-zal szamolodnak
-	// sum += 100.0*(lengthF+lengthS-(2*sameTagCount));
-	sum /= 1.0 * (lengthF + lengthS - sameTagCount);
+
+	sum /= 1.0 * (lengthOfFirstArray + lengthOfSecondArray - numberOfMatchingTags);
 
 	return 100.0 - sum;
 }

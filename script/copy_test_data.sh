@@ -41,6 +41,8 @@ readonly DATA_FILENAMES=(
 
   "setup.sql"
   "teardown.sql"
+
+  "MillionSongsDataset.csv"
 )
 
 readonly SCRIPT_FILENAMES=(

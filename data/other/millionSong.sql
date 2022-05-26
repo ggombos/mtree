@@ -37,10 +37,6 @@ SELECT artist, title, (tags <-> 'classic rock###100,rock###100,80s###100') AS ds
 SELECT artist, title, (tags <-> 'pop###100,latin###100,female vocalists###100') AS dst, tags FROM millionSong order by tags <-> 'pop###100,latin###100,female vocalists###100' LIMIT 10;
 
 
-	
-	
-	
-
 --SELECT song_fk, hash, offset2, hash_gist, (hash_gist <-> 'xxx,472,171,300,000,000,0000') AS dst FROM fingerprints2 ORDER BY (hash_gist <-> 'xxx,472,171,300,000,000,0000');
 
  -- song_fk |        hash         | offset2 | dst
@@ -55,4 +51,3 @@ SELECT artist, title, (tags <-> 'pop###100,latin###100,female vocalists###100') 
      -- 169 | 7721238100000000000 |    1205 |   8
      -- 169 | 6557120000000000000 |     463 |   8
      -- 169 | 4721713000000000000 |    1171 |   8
-
