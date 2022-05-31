@@ -6,15 +6,9 @@
 #include "mtree_util.h"
 
 float mtree_text_array_distance_internal(mtree_text_array* first, mtree_text_array* second, PG_FUNCTION_ARGS) {
-	char* distanceFunctionName = mtree_text_array_distance_functions[0];
+	ereport(DEBUG5, errmsg("Used distance strategy: %s", distance_strategy));
 
-	if (PG_HAS_OPCLASS_OPTIONS()) {
-		MtreeOptionsStruct* options = (MtreeOptionsStruct*)PG_GET_OPCLASS_OPTIONS();
-
-		distanceFunctionName = GET_STRING_RELOPTION(options, distancestrategy);
-	}
-
-	if (strcmp(distanceFunctionName, "simple_text_array_distance") == 0) {
+	if (strcmp(distance_strategy, "simple_text_array_distance") == 0) {
 		return simple_text_array_distance(first, second);
 	}
 
@@ -73,8 +67,16 @@ float weighted_text_array_distance(mtree_text_array* first, mtree_text_array* se
 	}
 
 	sum /= 1.0 * (lengthOfFirstArray + lengthOfSecondArray - numberOfMatchingTags);
-
-	return 100.0 - sum;
+	/*
+		ereport(INFO,
+			errmsg("(sum,%f)", sum));
+	*/
+	float result = 100.0 - sum;
+	/*
+		ereport(INFO,
+			errmsg("(result,%f)", result));
+	*/
+	return result;
 }
 
 int simple_text_array_distance(mtree_text_array* first, mtree_text_array* second) {
@@ -126,8 +128,8 @@ mtree_text_array* mtree_text_array_deep_copy(mtree_text_array* source) {
 	return destination;
 }
 
-int get_text_array_distance(int size, mtree_text_array* entries[size], int distances[size][size], int i, int j, PG_FUNCTION_ARGS) {
-	if (distances[i][j] == -1) {
+float get_text_array_distance(int size, mtree_text_array* entries[size], float distances[size][size], int i, int j, PG_FUNCTION_ARGS) {
+	if (distances[i][j] == -1.0) {
 		distances[i][j] = mtree_text_array_distance_internal(entries[i], entries[j], fcinfo);
 	}
 	return distances[i][j];

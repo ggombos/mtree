@@ -15,6 +15,6 @@ bool mtree_text_array_overlap_distance(mtree_text_array* first, mtree_text_array
 bool mtree_text_array_contains_distance(mtree_text_array* first, mtree_text_array* second, float* distance);
 bool mtree_text_array_contained_distance(mtree_text_array* first, mtree_text_array* second, float* distance);
 mtree_text_array* mtree_text_array_deep_copy(mtree_text_array* source);
-int get_text_array_distance(int size, mtree_text_array* entries[size], int distances[size][size], int i, int j, PG_FUNCTION_ARGS);
+float get_text_array_distance(int size, mtree_text_array* entries[size], float distances[size][size], int i, int j, PG_FUNCTION_ARGS);
 
 #endif

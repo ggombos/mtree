@@ -26,13 +26,12 @@ typedef enum {
 
 typedef struct {
 	int32 vl_len_;
-	int distancestrategy;
 	PicksplitStrategy picksplitstrategy;
+	int distancestrategy;
 } MtreeOptionsStruct;
 
 static relopt_enum_elt_def PicksplitStrategyValues[] = {
 	{"Random", Random},
-	{"FirstTwo", FirstTwo},
 	{"FirstTwo", FirstTwo},
 	{"MaxDistanceFromFirst", MaxDistanceFromFirst},
 	{"MaxDistancePair", MaxDistancePair},

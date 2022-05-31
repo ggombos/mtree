@@ -13,6 +13,7 @@
 
 int string_distance(const char*, const char*);
 void init_distances(const int, int*);
+void init_distances_float(const int, float*);
 double overlap_area(const int, const int, const int);
 
 unsigned char get_array_length(const char*);

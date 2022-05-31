@@ -39,6 +39,14 @@ void init_distances(const int size, int* distances) {
 	}
 }
 
+void init_distances_float(const int size, float* distances) {
+	for (int i = 0; i < size; ++i) {
+		for (int j = 0; j < size; ++j) {
+			distances[i * size + j] = -1.0;
+		}
+	}
+}
+
 double overlap_area(const int radiusOne, const int radiusTwo, const int distance) {
 	if (radiusOne == 0 || radiusTwo == 0 || distance == 0) {
 		return 0;
