@@ -11,7 +11,7 @@
 #include "catalog/pg_collation.h"
 #include "utils/formatting.h"
 
-char* distance_strategy = "default_value";
+char* distance_function = "default_value";
 
 PG_FUNCTION_INFO_V1(mtree_text_array_input);
 PG_FUNCTION_INFO_V1(mtree_text_array_output);
@@ -101,7 +101,7 @@ Datum mtree_text_array_consistent(PG_FUNCTION_ARGS) {
 	bool* recheck = (bool*)PG_GETARG_POINTER(4);
 	mtree_text_array* key = DatumGetMtreeTextArray(entry->key);
 
-	float distance = mtree_text_array_distance_internal(key, query, fcinfo);
+	float distance = mtree_text_array_distance_internal(key, query);
 
 	bool returnValue;
 	if (GIST_LEAF(entry)) {
@@ -172,7 +172,7 @@ Datum mtree_text_array_union(PG_FUNCTION_ARGS) {
 		coveringRadii[i] = 0.0;
 
 		for (int j = 0; j < ranges; ++j) {
-			float distance = mtree_text_array_distance_internal(entries[i], entries[j], fcinfo);
+			float distance = mtree_text_array_distance_internal(entries[i], entries[j]);
 			float newCoveringRadius = distance + entries[j]->coveringRadius;
 
 			if (coveringRadii[i] < newCoveringRadius) {
@@ -208,7 +208,7 @@ Datum mtree_text_array_penalty(PG_FUNCTION_ARGS) {
 	mtree_text_array* original = DatumGetMtreeTextArray(originalEntry->key);
 	mtree_text_array* new = DatumGetMtreeTextArray(newEntry->key);
 
-	float distance = mtree_text_array_distance_internal(original, new, fcinfo);
+	float distance = mtree_text_array_distance_internal(original, new);
 	float newCoveringRadius = distance + 1.0 * new->coveringRadius;
 	*penalty = (float)(newCoveringRadius < 1.0 * original->coveringRadius ? 0.0 : newCoveringRadius - 1.0 * original->coveringRadius);
 
@@ -253,7 +253,9 @@ Datum mtree_text_array_picksplit(PG_FUNCTION_ARGS) {
 		MtreeOptionsStruct* options = (MtreeOptionsStruct*)PG_GET_OPCLASS_OPTIONS();
 
 		enum_param = options->picksplitstrategy;
-		distance_strategy = GET_STRING_RELOPTION(options, distancestrategy);
+		char* functionName = GET_STRING_RELOPTION(options, distancestrategy);
+		distance_function = calloc(strlen(functionName) + 1, sizeof(char));
+		strcpy(distance_function, functionName);
 	}
 
 	switch (enum_param) {
@@ -268,7 +270,7 @@ Datum mtree_text_array_picksplit(PG_FUNCTION_ARGS) {
 	case MaxDistanceFromFirst:
 		maxDistance = -1;
 		for (int r = 0; r < maxOffset; ++r) {
-			float distance = get_text_array_distance(maxOffset, entries, distances, 0, r, fcinfo);
+			float distance = get_text_array_distance(maxOffset, entries, distances, 0, r);
 			if (distance > maxDistance) {
 				maxDistance = distance;
 				rightCandidateIndex = r;
@@ -280,7 +282,7 @@ Datum mtree_text_array_picksplit(PG_FUNCTION_ARGS) {
 	case MaxDistancePair:
 		for (OffsetNumber l = 0; l < maxOffset; ++l) {
 			for (OffsetNumber r = l; r < maxOffset; ++r) {
-				float distance = get_text_array_distance(maxOffset, entries, distances, l, r, fcinfo);
+				float distance = get_text_array_distance(maxOffset, entries, distances, l, r);
 				if (distance > maxDistance) {
 					maxDistance = distance;
 					leftCandidateIndex = l;
@@ -298,8 +300,8 @@ Datum mtree_text_array_picksplit(PG_FUNCTION_ARGS) {
 			float leftRadius = 0.0, rightRadius = 0.0;
 
 			for (int currentIndex = 0; currentIndex < maxOffset; currentIndex++) {
-				float leftDistance = get_text_array_distance(maxOffset, entries, distances, leftCandidateIndex, currentIndex, fcinfo);
-				float rightDistance = get_text_array_distance(maxOffset, entries, distances, rightCandidateIndex, currentIndex, fcinfo);
+				float leftDistance = get_text_array_distance(maxOffset, entries, distances, leftCandidateIndex, currentIndex);
+				float rightDistance = get_text_array_distance(maxOffset, entries, distances, rightCandidateIndex, currentIndex);
 
 				if (leftDistance < rightDistance) {
 					if (leftDistance + entries[currentIndex]->coveringRadius > leftRadius) {
@@ -327,8 +329,8 @@ Datum mtree_text_array_picksplit(PG_FUNCTION_ARGS) {
 			float leftRadius = 0.0, rightRadius = 0.0;
 
 			for (int currentIndex = 0; currentIndex < maxOffset; ++currentIndex) {
-				float leftDistance = get_text_array_distance(maxOffset, entries, distances, leftCandidateIndex, currentIndex, fcinfo);
-				float rightDistance = get_text_array_distance(maxOffset, entries, distances, rightCandidateIndex, currentIndex, fcinfo);
+				float leftDistance = get_text_array_distance(maxOffset, entries, distances, leftCandidateIndex, currentIndex);
+				float rightDistance = get_text_array_distance(maxOffset, entries, distances, rightCandidateIndex, currentIndex);
 
 				if (leftDistance < rightDistance) {
 					if (leftDistance + entries[currentIndex]->coveringRadius > leftRadius) {
@@ -353,12 +355,12 @@ Datum mtree_text_array_picksplit(PG_FUNCTION_ARGS) {
 		for (int i = 0; i < trialCount; i++) {
 			leftCandidateIndex = ((int)random()) % (maxOffset - 1);
 			rightCandidateIndex = (leftCandidateIndex + 1) + (((int)random()) % (maxOffset - leftCandidateIndex - 1));
-			float distance = get_text_array_distance(maxOffset, entries, distances, leftCandidateIndex, rightCandidateIndex, fcinfo);
+			float distance = get_text_array_distance(maxOffset, entries, distances, leftCandidateIndex, rightCandidateIndex);
 			float leftRadius = 0.0, rightRadius = 0.0;
 
 			for (int currentIndex = 0; currentIndex < maxOffset; currentIndex++) {
-				float leftDistance = get_text_array_distance(maxOffset, entries, distances, leftCandidateIndex, currentIndex, fcinfo);
-				float rightDistance = get_text_array_distance(maxOffset, entries, distances, rightCandidateIndex, currentIndex, fcinfo);
+				float leftDistance = get_text_array_distance(maxOffset, entries, distances, leftCandidateIndex, currentIndex);
+				float rightDistance = get_text_array_distance(maxOffset, entries, distances, rightCandidateIndex, currentIndex);
 
 				if (leftDistance < rightDistance) {
 					if (leftDistance + entries[currentIndex]->coveringRadius > leftRadius) {
@@ -387,8 +389,8 @@ Datum mtree_text_array_picksplit(PG_FUNCTION_ARGS) {
 			float leftRadius = 0.0, rightRadius = 0.0;
 
 			for (int currentIndex = 0; currentIndex < maxOffset; currentIndex++) {
-				float leftDistance = get_text_array_distance(maxOffset, entries, distances, leftCandidateIndex, currentIndex, fcinfo);
-				float rightDistance = get_text_array_distance(maxOffset, entries, distances, rightCandidateIndex, currentIndex, fcinfo);
+				float leftDistance = get_text_array_distance(maxOffset, entries, distances, leftCandidateIndex, currentIndex);
+				float rightDistance = get_text_array_distance(maxOffset, entries, distances, rightCandidateIndex, currentIndex);
 
 				if (leftDistance < rightDistance) {
 					if (leftDistance + entries[currentIndex]->coveringRadius > leftRadius) {
@@ -422,8 +424,8 @@ Datum mtree_text_array_picksplit(PG_FUNCTION_ARGS) {
 	mtree_text_array* current;
 
 	for (OffsetNumber i = FirstOffsetNumber; i <= maxOffset; i = OffsetNumberNext(i)) {
-		float distanceLeft = get_text_array_distance(maxOffset, entries, distances, leftIndex, i - 1, fcinfo);
-		float distanceRight = get_text_array_distance(maxOffset, entries, distances, rightIndex, i - 1, fcinfo);
+		float distanceLeft = get_text_array_distance(maxOffset, entries, distances, leftIndex, i - 1);
+		float distanceRight = get_text_array_distance(maxOffset, entries, distances, rightIndex, i - 1);
 		current = entries[i - 1];
 
 		if (distanceLeft < distanceRight) {
@@ -469,7 +471,7 @@ Datum mtree_text_array_distance(PG_FUNCTION_ARGS) {
 		*recheck = true;
 	}
 
-	PG_RETURN_FLOAT4(mtree_text_array_distance_internal(query, key, fcinfo));
+	PG_RETURN_FLOAT4(mtree_text_array_distance_internal(query, key));
 }
 
 static void validate_mtree_text_array_distance_function(const char* value) {
@@ -520,13 +522,13 @@ Datum mtree_text_array_distance_operator(PG_FUNCTION_ARGS) {
 	mtree_text_array* first = PG_GETARG_MTREE_TEXT_ARRAY_P(0);
 	mtree_text_array* second = PG_GETARG_MTREE_TEXT_ARRAY_P(1);
 
-	PG_RETURN_FLOAT4(mtree_text_array_distance_internal(first, second, fcinfo));
+	PG_RETURN_FLOAT4(mtree_text_array_distance_internal(first, second));
 }
 
 Datum mtree_text_array_overlap_operator(PG_FUNCTION_ARGS) {
 	mtree_text_array* first = PG_GETARG_MTREE_TEXT_ARRAY_P(0);
 	mtree_text_array* second = PG_GETARG_MTREE_TEXT_ARRAY_P(1);
-	float tmp = mtree_text_array_distance_internal(first, second, fcinfo);
+	float tmp = mtree_text_array_distance_internal(first, second);
 	bool result = mtree_text_array_overlap_distance(first, second, &tmp);
 
 	PG_RETURN_BOOL(result);
@@ -535,7 +537,7 @@ Datum mtree_text_array_overlap_operator(PG_FUNCTION_ARGS) {
 Datum mtree_text_array_contains_operator(PG_FUNCTION_ARGS) {
 	mtree_text_array* first = PG_GETARG_MTREE_TEXT_ARRAY_P(0);
 	mtree_text_array* second = PG_GETARG_MTREE_TEXT_ARRAY_P(1);
-	float tmp = mtree_text_array_distance_internal(first, second, fcinfo);
+	float tmp = mtree_text_array_distance_internal(first, second);
 	bool result = mtree_text_array_contains_distance(first, second, &tmp);
 
 	PG_RETURN_BOOL(result);
@@ -544,7 +546,7 @@ Datum mtree_text_array_contains_operator(PG_FUNCTION_ARGS) {
 Datum mtree_text_array_contained_operator(PG_FUNCTION_ARGS) {
 	mtree_text_array* first = PG_GETARG_MTREE_TEXT_ARRAY_P(0);
 	mtree_text_array* second = PG_GETARG_MTREE_TEXT_ARRAY_P(1);
-	float tmp = mtree_text_array_distance_internal(second, first, fcinfo);
+	float tmp = mtree_text_array_distance_internal(second, first);
 	bool result = mtree_text_array_contains_distance(second, first, &tmp);
 
 	PG_RETURN_BOOL(result);

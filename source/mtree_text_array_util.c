@@ -5,14 +5,60 @@
 #include "mtree_text_array_util.h"
 #include "mtree_util.h"
 
-float mtree_text_array_distance_internal(mtree_text_array* first, mtree_text_array* second, PG_FUNCTION_ARGS) {
-	ereport(DEBUG5, errmsg("Used distance strategy: %s", distance_strategy));
-
-	if (strcmp(distance_strategy, "simple_text_array_distance") == 0) {
-		return simple_text_array_distance(first, second);
+bool mtree_text_array_equals(mtree_text_array* first, mtree_text_array* second) {
+	if (first->arrayLength != second->arrayLength) {
+		return false;
 	}
 
-	return weighted_text_array_distance(first, second);
+	for (unsigned char i = 0; i < first->arrayLength; ++i) {
+		if (first->data[i] != second->data[i]) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool mtree_text_array_overlap_distance(mtree_text_array* first, mtree_text_array* second, float* distance) {
+	return *distance <= first->coveringRadius + second->coveringRadius;
+}
+
+bool mtree_text_array_contains_distance(mtree_text_array* first, mtree_text_array* second, float* distance) {
+	return first->coveringRadius >= *distance + second->coveringRadius;
+}
+
+bool mtree_text_array_contained_distance(mtree_text_array* first, mtree_text_array* second, float* distance) {
+	return mtree_text_array_contains_distance(second, first, distance);
+}
+
+mtree_text_array* mtree_text_array_deep_copy(mtree_text_array* source) {
+	mtree_text_array* destination = (mtree_text_array*)palloc(VARSIZE_ANY(source));
+	memcpy(destination, source, VARSIZE_ANY(source));
+	return destination;
+}
+
+float get_text_array_distance(int size, mtree_text_array* entries[size], float distances[size][size], int i, int j) {
+	if (distances[i][j] == -1.0) {
+		distances[i][j] = mtree_text_array_distance_internal(entries[i], entries[j]);
+	}
+	return distances[i][j];
+}
+
+float simple_text_array_distance(mtree_text_array* first, mtree_text_array* second) {
+	float sum = 0.0;
+	float length = first->arrayLength;
+
+	if (second->arrayLength < length) {
+		length = second->arrayLength;
+	}
+
+	for (unsigned char i = 0; i < length; ++i) {
+		if (string_distance(first->data[i], second->data[i]) == 0) {
+			++sum;
+		}
+	}
+
+	return length - sum;
 }
 
 #define MIN_FLOAT(x, y) (((x) < (y)) ? (1.0 * x) : (1.0 * y))
@@ -67,70 +113,27 @@ float weighted_text_array_distance(mtree_text_array* first, mtree_text_array* se
 	}
 
 	sum /= 1.0 * (lengthOfFirstArray + lengthOfSecondArray - numberOfMatchingTags);
-	/*
-		ereport(INFO,
-			errmsg("(sum,%f)", sum));
-	*/
-	float result = 100.0 - sum;
-	/*
-		ereport(INFO,
-			errmsg("(result,%f)", result));
-	*/
-	return result;
+
+	return 100.0 - sum;
 }
 
-int simple_text_array_distance(mtree_text_array* first, mtree_text_array* second) {
-	int sum = 0;
-	unsigned char length = first->arrayLength;
-
-	if (second->arrayLength < length) {
-		length = second->arrayLength;
+float mtree_text_array_distance_internal(mtree_text_array* first, mtree_text_array* second) {
+	if (strcmp(distance_function, "no_function") == 0) {
+		ereport(ERROR,
+			errcode(ERRCODE_UNDEFINED_PARAMETER),
+			errmsg("No distance function specified - please specify one in the operator class."));
 	}
 
-	for (unsigned char i = 0; i < length; ++i) {
-		if (string_distance(first->data[i], second->data[i]) == 0) {
-			++sum;
-		}
+	if (strcmp(distance_function, "simple_text_array_distance") == 0) {
+		return simple_text_array_distance(first, second);
 	}
-
-	return length - sum;
-}
-
-bool mtree_text_array_equals(mtree_text_array* first, mtree_text_array* second) {
-	if (first->arrayLength != second->arrayLength) {
-		return false;
+	else if (strcmp(distance_function, "weighted_text_array_distance") == 0) {
+		return weighted_text_array_distance(first, second);
 	}
-
-	for (unsigned char i = 0; i < first->arrayLength; ++i) {
-		if (first->data[i] != second->data[i]) {
-			return false;
-		}
+	else {
+		ereport(ERROR,
+			errcode(ERRCODE_INVALID_PARAMETER_VALUE),
+			errmsg("Unknown distance function specified: %s", distance_function));
+		return 0.0;
 	}
-
-	return true;
-}
-
-bool mtree_text_array_overlap_distance(mtree_text_array* first, mtree_text_array* second, float* distance) {
-	return *distance <= first->coveringRadius + second->coveringRadius;
-}
-
-bool mtree_text_array_contains_distance(mtree_text_array* first, mtree_text_array* second, float* distance) {
-	return first->coveringRadius >= *distance + second->coveringRadius;
-}
-
-bool mtree_text_array_contained_distance(mtree_text_array* first, mtree_text_array* second, float* distance) {
-	return mtree_text_array_contains_distance(second, first, distance);
-}
-
-mtree_text_array* mtree_text_array_deep_copy(mtree_text_array* source) {
-	mtree_text_array* destination = (mtree_text_array*)palloc(VARSIZE_ANY(source));
-	memcpy(destination, source, VARSIZE_ANY(source));
-	return destination;
-}
-
-float get_text_array_distance(int size, mtree_text_array* entries[size], float distances[size][size], int i, int j, PG_FUNCTION_ARGS) {
-	if (distances[i][j] == -1.0) {
-		distances[i][j] = mtree_text_array_distance_internal(entries[i], entries[j], fcinfo);
-	}
-	return distances[i][j];
 }
