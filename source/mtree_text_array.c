@@ -11,7 +11,7 @@
 #include "catalog/pg_collation.h"
 #include "utils/formatting.h"
 
-char* distance_function = "default_value";
+char* distance_function = "no_function";
 
 PG_FUNCTION_INFO_V1(mtree_text_array_input);
 PG_FUNCTION_INFO_V1(mtree_text_array_output);
@@ -253,9 +253,6 @@ Datum mtree_text_array_picksplit(PG_FUNCTION_ARGS) {
 		MtreeOptionsStruct* options = (MtreeOptionsStruct*)PG_GET_OPCLASS_OPTIONS();
 
 		enum_param = options->picksplitstrategy;
-		char* functionName = GET_STRING_RELOPTION(options, distancestrategy);
-		distance_function = calloc(strlen(functionName) + 1, sizeof(char));
-		strcpy(distance_function, functionName);
 	}
 
 	switch (enum_param) {
@@ -453,6 +450,13 @@ Datum mtree_text_array_picksplit(PG_FUNCTION_ARGS) {
 }
 
 Datum mtree_text_array_compress(PG_FUNCTION_ARGS) {
+	if (PG_HAS_OPCLASS_OPTIONS()) {
+		MtreeOptionsStruct* options = (MtreeOptionsStruct*)PG_GET_OPCLASS_OPTIONS();
+		char* functionName = GET_STRING_RELOPTION(options, distancestrategy);
+		distance_function = calloc(strlen(functionName) + 1, sizeof(char));
+		strcpy(distance_function, functionName);
+	}
+
 	PG_RETURN_POINTER(PG_GETARG_POINTER(0));
 }
 
