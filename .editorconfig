@@ -1,0 +1,43 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+max_line_length = 80
+trim_trailing_whitespace = true
+
+[*.{c,h,l,y,pl,pm}]
+indent_style = tab
+indent_size = tab
+indent_brace_style = K&R
+cpp_new_line_before_open_brace_namespace = same_line
+tab_width = 4
+
+[*.{sgml,xml}]
+indent_style = space
+indent_size = 1
+
+[*.xsl]
+indent_style = space
+indent_size = 2
+
+[*.json]
+indent_style = space
+indent_size = 2
+
+[*.sql]
+indent_style = tab
+indent_size = tab
+tab_width = 4
+
+[*.md]
+max_line_length = off
+
+[*.expected]
+trim_trailing_whitespace = false
+
+[*.py]
+indent_style = tab
+indent_size = tab
+tab_width = 4
+max_line_length = 120
