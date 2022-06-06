@@ -17,9 +17,9 @@ CREATE TABLE millionSong (
 );
 
 -- \copy millionSong FROM '/home/ggombos/mtree/mtree_gist/data/millionSongSrc/millionSongTags.csv' DELIMITER ';' CSV HEADER;
-\copy millionSong FROM '/home/ggombos/mtree/mtree_gist/data/millionSongSrc/million100e.csv' DELIMITER ';' CSV HEADER;
+\copy millionSong FROM '/home/ggombos/mtree/mtree_gist/data/millionSongSrc/million100edist.csv' DELIMITER ';' CSV HEADER;
 
-CREATE INDEX millionSong_gist_index ON millionSong USING gist (tags mtree_text_array_opclass(distancestrategy='1',picksplitstrategy="SamplingMinOverlapArea")) ;
+CREATE INDEX millionSong_gist_index ON millionSong USING gist (tags mtree_text_array_opclass(distancestrategy='weighted_text_array_distance',picksplitstrategy="SamplingMinOverlapArea")) ;
 
 SET enable_seqscan = off;
 
