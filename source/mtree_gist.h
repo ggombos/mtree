@@ -5,7 +5,6 @@
 #define __MTREE_GIST_H__
 
 #include "postgres.h"
-#include "c.h"
 #include "access/reloptions.h"
 
 typedef enum {
