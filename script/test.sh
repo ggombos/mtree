@@ -15,7 +15,7 @@ TEST_DIRECTORY="$(read_property "postgresql.test")"
 readonly TEST_TYPES=(
   "float4_array"
   "float4"
-#  "int8_array"
+  "int8_array"
   "int8"
   "text_array"
   "text"

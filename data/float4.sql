@@ -12,8 +12,10 @@ CREATE INDEX FLOAT4_TEST_IDX ON FLOAT4_TEST USING GiST (val mtree_float_opclass)
 
 SET enable_seqscan TO OFF;
 
+SELECT COUNT(*) FROM FLOAT4_TEST;
+
 SELECT * FROM FLOAT4_TEST;
 
-SELECT id, val, (val <-> '0') AS dst FROM FLOAT4_TEST ORDER BY (val <-> '0');
+SELECT id, val, (val <-> '0') AS dst FROM FLOAT4_TEST ORDER BY (val <-> '0'), id;
 
 SELECT * FROM FLOAT4_TEST WHERE val #<# '0';

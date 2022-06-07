@@ -46,19 +46,27 @@ float get_text_array_distance(int size, mtree_text_array* entries[size], float d
 
 float simple_text_array_distance(mtree_text_array* first, mtree_text_array* second) {
 	float sum = 0.0;
-	float length = first->arrayLength;
+	unsigned char arrayLength = first->arrayLength;
 
-	if (second->arrayLength < length) {
-		length = second->arrayLength;
+	if (second->arrayLength < arrayLength) {
+		arrayLength = second->arrayLength;
 	}
 
-	for (unsigned char i = 0; i < length; ++i) {
-		if (string_distance(first->data[i], second->data[i]) == 0) {
-			++sum;
+	for (unsigned char i = 0; i < arrayLength; ++i) {
+		unsigned char stringLength = strlen(first->data[i]);
+
+		if (strlen(second->data[i]) > stringLength) {
+			stringLength = strlen(second->data[i]);
+		}
+
+		for (unsigned char j = 0; j < stringLength; ++j) {
+			if (first->data[i][j] != second->data[i][j]) {
+				sum += 1.0;
+			}
 		}
 	}
 
-	return length - sum;
+	return arrayLength - sum;
 }
 
 #define MIN_FLOAT(x, y) (((x) < (y)) ? (1.0 * x) : (1.0 * y))

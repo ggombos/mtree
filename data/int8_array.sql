@@ -12,8 +12,8 @@ CREATE INDEX INT8_ARRAY_TEST_IDX ON INT8_ARRAY_TEST USING GiST (val mtree_int8_a
 
 SET enable_seqscan TO OFF;
 
+SELECT COUNT(*) FROM INT8_ARRAY_TEST;
+
 SELECT * FROM INT8_ARRAY_TEST;
 
-SELECT id, val, (val <-> '0') AS dst FROM INT8_ARRAY_TEST ORDER BY (val <-> '0');
-
-SELECT * FROM INT8_ARRAY_TEST WHERE val #<# '0';
+SELECT id, val, (val <-> '0') AS dst FROM INT8_ARRAY_TEST ORDER BY (val <-> '0'), id;

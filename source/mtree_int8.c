@@ -51,11 +51,11 @@ Datum mtree_int8_output(PG_FUNCTION_ARGS) {
 	char* result;
 
 	if (output->coveringRadius == 0) {
-		result = psprintf("%ld", output->data);
+		result = psprintf("%lld", output->data);
 	}
 	else {
 		result =
-			psprintf("coveringRadius|%d parentDistance|%d data|%ld",
+			psprintf("coveringRadius|%d parentDistance|%d data|%lld",
 				output->coveringRadius, output->parentDistance, output->data);
 	}
 

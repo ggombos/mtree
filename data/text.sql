@@ -12,8 +12,10 @@ CREATE INDEX TEXT_TEST_IDX ON TEXT_TEST USING GiST (val mtree_text_opclass);
 
 SET enable_seqscan TO OFF;
 
+SELECT COUNT(*) FROM TEXT_TEST;
+
 SELECT * FROM TEXT_TEST;
 
-SELECT id, val, (val <-> '0') AS dst FROM TEXT_TEST ORDER BY (val <-> '0');
+SELECT id, val, (val <-> 'aaaaaaaaaa') AS dst FROM TEXT_TEST ORDER BY (val <-> 'aaaaaaaaaa'), id;
 
-SELECT * FROM TEXT_TEST WHERE val #<# '0';
+SELECT * FROM TEXT_TEST WHERE val #<# 'aaaaaaaaaa';

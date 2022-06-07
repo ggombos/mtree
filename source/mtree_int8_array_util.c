@@ -5,7 +5,7 @@
 #include "mtree_int8_array_util.h"
 
 int64 mtree_int8_array_distance_internal(mtree_int8_array* first, mtree_int8_array* second) {
-	return int8_array_kullback_leibler_distance(first, second);
+	return int8_simple_distance(first, second);
 }
 
 bool mtree_int8_array_equals(mtree_int8_array* first, mtree_int8_array* second) {
@@ -45,6 +45,34 @@ int get_int8_array_distance(int size, mtree_int8_array* entries[size], int dista
 		distances[i][j] = mtree_int8_array_distance_internal(entries[i], entries[j]);
 	}
 	return distances[i][j];
+}
+
+int int8_simple_distance(mtree_int8_array* first, mtree_int8_array* second) {
+	int distance = 0;
+	unsigned char minimumLength, maximumLength;
+	mtree_int8_array* longer;
+
+	if (first->arrayLength <= second->arrayLength) {
+		minimumLength = first->arrayLength;
+		maximumLength = second->arrayLength;
+		longer = second;
+	}
+	else {
+		minimumLength = second->arrayLength;
+		maximumLength = first->arrayLength;
+		longer = first;
+	}
+
+	for (unsigned char i = 0; i < minimumLength; ++i) {
+		if (first->data[i] > second->data[i]) {
+			--distance;
+		}
+		else {
+			++distance;
+		}
+	}
+
+	return distance;
 }
 
 int int8_array_sum_distance(mtree_int8_array* first, mtree_int8_array* second) {

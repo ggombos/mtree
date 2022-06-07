@@ -12,8 +12,10 @@ CREATE INDEX INT8_TEST_IDX ON INT8_TEST USING GiST (val mtree_int8_opclass);
 
 SET enable_seqscan TO OFF;
 
+SELECT COUNT(*) FROM INT8_TEST;
+
 SELECT * FROM INT8_TEST;
 
-SELECT id, val, (val <-> '0') AS dst FROM INT8_TEST ORDER BY (val <-> '0');
+SELECT id, val, (val <-> '0') AS dst FROM INT8_TEST ORDER BY (val <-> '0'), id;
 
 SELECT * FROM INT8_TEST WHERE val #<# '0';

@@ -16,7 +16,7 @@ typedef struct {
 	int parentDistance;
 	int coveringRadius;
 	unsigned char arrayLength;
-	int64 data[FLEXIBLE_ARRAY_MEMBER];
+	long long int data[FLEXIBLE_ARRAY_MEMBER];
 } mtree_int8_array;
 
 #define MTREE_INT8_ARRAY_SIZE (2 * sizeof(int) + sizeof(unsigned char))
