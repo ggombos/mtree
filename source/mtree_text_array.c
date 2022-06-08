@@ -37,11 +37,11 @@ PG_FUNCTION_INFO_V1(mtree_text_array_options);
 
 Datum mtree_text_array_input(PG_FUNCTION_ARGS) {
 	char* input = PG_GETARG_CSTRING(0);
-	unsigned char inputLength = strlen(input);
+	int inputLength = strlen(input);
 
 	char previousChar = '\0';
 	unsigned char arrayLength = 1;
-	for (unsigned char i = 0; i < inputLength; ++i) {
+	for (int i = 0; i < inputLength; ++i) {
 		if (input[i] == ',' && previousChar != '\0') {
 			++arrayLength;
 			previousChar = '\0';
