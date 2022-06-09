@@ -16,7 +16,7 @@ CREATE TABLE fingerprints2 (
 
 \copy fingerprints2 FROM '/home/ggombos/mtree/mtree_gist/data/fingerprint_data_10';
 
-CREATE INDEX fingerprint2_gist_index ON fingerprints2 USING gist (hash_gist mtree_text_opclass) ;
+CREATE INDEX fingerprint2_gist_index ON fingerprints2 USING gist (hash_gist gist_mtree_text_ops) ;
 
 SET enable_seqscan = off;
 

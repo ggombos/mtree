@@ -9,7 +9,7 @@ DELIMITER = ';'
 
 NUMBER_OF_ROWS = [
     # 100,
-    1000  # ,
+    10000  # ,
     # 10000,
     # 100000,
     # 1000000,
@@ -134,11 +134,11 @@ def generate_text_array_data():
 
 
 def main():
-    generate_float_data()
-    generate_int8_data()
-    generate_text_data()
-    generate_float_array_data()
-    generate_int8_array_data()
+    # generate_float_data()
+    # generate_int8_data()
+    # generate_text_data()
+    # generate_float_array_data()
+    # generate_int8_array_data()
     generate_text_array_data()
 
 

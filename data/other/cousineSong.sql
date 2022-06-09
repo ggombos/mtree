@@ -16,7 +16,7 @@ CREATE TABLE cousineSong (
 
 \copy cousineSong FROM '/home/ggombos/mtree/mtree_gist/data/cosineSrc/cosine2mainComponent.csv' DELIMITER ';' CSV HEADER;
 
-CREATE INDEX cousineSong_gist_index ON cousineSong USING gist (tags mtree_float_array_opclass) ;
+CREATE INDEX cousineSong_gist_index ON cousineSong USING gist (tags gist_mtree_float_array_ops) ;
 
 SET enable_seqscan = off;
 

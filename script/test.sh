@@ -13,12 +13,12 @@ function read_property() {
 TEST_DIRECTORY="$(read_property "postgresql.test")"
 
 readonly TEST_TYPES=(
-  "float4_array"
-  "float4"
-  "int8_array"
-  "int8"
+#  "float4_array"
+#  "float4"
+#  "int8_array"
+#  "int8"
   "text_array"
-  "text"
+#  "text"
 )
 
 function setup() {
@@ -34,7 +34,7 @@ function run_test() {
   echo ""
   echo "$1 test results:"
   cmp "${TEST_DIRECTORY}/$1.expected" "${TEST_DIRECTORY}/$1.output"
-  echo "All $1 tests were successful!"
+  echo "$1 tests were successful!"
 }
 
 function teardown() {

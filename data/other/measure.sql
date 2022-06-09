@@ -12,7 +12,7 @@ SET enable_seqscan = off;
 \timing on
 
 \echo '#region Create index:'
-CREATE INDEX index_test ON Songs USING gist (data mtree_text_opclass);
+CREATE INDEX index_test ON Songs USING gist (data gist_mtree_text_ops);
 \echo '#endregion'
 
 \echo '#region Range based query - short - small:'

@@ -8,8 +8,8 @@
 #include "mtree_util.h"
 
  /* TODO: Strategy should be a parameter! */
-const UnionStrategy UNION_STRATEGY_INT8_ARRAY = Best;
-const PicksplitStrategy PICKSPLIT_STRATEGY_INT8_ARRAY = SamplingMinOverlapArea;
+const MtreeUnionStrategy UNION_STRATEGY_INT8_ARRAY = MinMaxDistance;
+const MtreePickSplitStrategy PICKSPLIT_STRATEGY_INT8_ARRAY = SamplingMinOverlapArea;
 
 PG_FUNCTION_INFO_V1(mtree_int8_array_input);
 PG_FUNCTION_INFO_V1(mtree_int8_array_output);
@@ -117,16 +117,16 @@ Datum mtree_int8_array_consistent(PG_FUNCTION_ARGS) {
 	if (GIST_LEAF(entry)) {
 		*recheck = false;
 		switch (strategyNumber) {
-		case SameStrategyNumber:
+		case GIST_SN_SAME:
 			returnValue = mtree_int8_array_equals(key, query);
 			break;
-		case OverlapStrategyNumber:
+		case GIST_SN_OVERLAPS:
 			returnValue = mtree_int8_array_overlap_distance(key, query, distance);
 			break;
-		case ContainsStrategyNumber:
+		case GIST_SN_CONTAINS:
 			returnValue = mtree_int8_array_contains_distance(key, query, distance);
 			break;
-		case ContainedStrategyNumber:
+		case GIST_SN_CONTAINED_BY:
 			returnValue = mtree_int8_array_contained_distance(key, query, distance);
 			break;
 		default:
@@ -138,19 +138,19 @@ Datum mtree_int8_array_consistent(PG_FUNCTION_ARGS) {
 	}
 	else {
 		switch (strategyNumber) {
-		case SameStrategyNumber:
+		case GIST_SN_SAME:
 			returnValue = mtree_int8_array_contains_distance(key, query, distance);
 			*recheck = true;
 			break;
-		case OverlapStrategyNumber:
+		case GIST_SN_OVERLAPS:
 			returnValue = mtree_int8_array_overlap_distance(key, query, distance);
 			*recheck = !mtree_int8_array_contained_distance(key, query, distance);
 			break;
-		case ContainsStrategyNumber:
+		case GIST_SN_CONTAINS:
 			returnValue = mtree_int8_array_contains_distance(key, query, distance);
 			*recheck = true;
 			break;
-		case ContainedStrategyNumber:
+		case GIST_SN_CONTAINED_BY:
 			returnValue = mtree_int8_array_overlap_distance(key, query, distance);
 			*recheck = !mtree_int8_array_contained_distance(key, query, distance);
 			break;
@@ -181,7 +181,7 @@ Datum mtree_int8_array_union(PG_FUNCTION_ARGS) {
 	case First:
 		searchRange = 1;
 		break;
-	case Best:
+	case MinMaxDistance:
 		searchRange = ranges;
 		break;
 	default:
@@ -359,8 +359,8 @@ Datum mtree_int8_array_picksplit(PG_FUNCTION_ARGS) {
 				}
 			}
 
-			if (minCoveringMax == -1 || MAX2(leftRadius, rightRadius) < minCoveringMax) {
-				minCoveringMax = MAX2(leftRadius, rightRadius);
+			if (minCoveringMax == -1 || MAX_2(leftRadius, rightRadius) < minCoveringMax) {
+				minCoveringMax = MAX_2(leftRadius, rightRadius);
 				leftIndex = leftCandidateIndex;
 				rightIndex = rightCandidateIndex;
 			}

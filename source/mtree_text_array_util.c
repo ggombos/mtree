@@ -5,13 +5,17 @@
 #include "mtree_text_array_util.h"
 #include "mtree_util.h"
 
-bool mtree_text_array_equals(mtree_text_array* first, mtree_text_array* second) {
-	if (first->arrayLength != second->arrayLength) {
+bool mtree_text_array_equals(mtree_text_array* first, mtree_text_array* second)
+{
+	if (first->arrayLength != second->arrayLength)
+	{
 		return false;
 	}
 
-	for (unsigned char i = 0; i < first->arrayLength; ++i) {
-		if (first->data[i] != second->data[i]) {
+	for (unsigned char i = 0; i < first->arrayLength; ++i)
+	{
+		if (first->data[i] != second->data[i])
+		{
 			return false;
 		}
 	}
@@ -19,48 +23,60 @@ bool mtree_text_array_equals(mtree_text_array* first, mtree_text_array* second) 
 	return true;
 }
 
-bool mtree_text_array_overlap_distance(mtree_text_array* first, mtree_text_array* second, float* distance) {
+bool mtree_text_array_overlap_distance(mtree_text_array* first, mtree_text_array* second, float* distance)
+{
 	return *distance <= first->coveringRadius + second->coveringRadius;
 }
 
-bool mtree_text_array_contains_distance(mtree_text_array* first, mtree_text_array* second, float* distance) {
+bool mtree_text_array_contains_distance(mtree_text_array* first, mtree_text_array* second, float* distance)
+{
 	return first->coveringRadius >= *distance + second->coveringRadius;
 }
 
-bool mtree_text_array_contained_distance(mtree_text_array* first, mtree_text_array* second, float* distance) {
+bool mtree_text_array_contained_distance(mtree_text_array* first, mtree_text_array* second, float* distance)
+{
 	return mtree_text_array_contains_distance(second, first, distance);
 }
 
-mtree_text_array* mtree_text_array_deep_copy(mtree_text_array* source) {
-	mtree_text_array* destination = (mtree_text_array*)palloc(VARSIZE_ANY(source));
+mtree_text_array* mtree_text_array_deep_copy(mtree_text_array* source)
+{
+	mtree_text_array* destination = (mtree_text_array*) palloc(VARSIZE_ANY(source));
 	memcpy(destination, source, VARSIZE_ANY(source));
 	return destination;
 }
 
-float get_text_array_distance(int size, mtree_text_array* entries[size], float distances[size][size], int i, int j) {
-	if (distances[i][j] == -1.0) {
+float get_text_array_distance(int size, mtree_text_array* entries[size], float distances[size][size], int i, int j)
+{
+	if (distances[i][j] == -1.0)
+	{
 		distances[i][j] = mtree_text_array_distance_internal(entries[i], entries[j]);
 	}
 	return distances[i][j];
 }
 
-float simple_text_array_distance(mtree_text_array* first, mtree_text_array* second) {
+float simple_text_array_distance(mtree_text_array* first, mtree_text_array* second)
+{
 	float sum = 0.0;
 	unsigned char arrayLength = first->arrayLength;
 
-	if (second->arrayLength < arrayLength) {
+	if (second->arrayLength < arrayLength)
+	{
 		arrayLength = second->arrayLength;
 	}
 
-	for (unsigned char i = 0; i < arrayLength; ++i) {
+	for (unsigned char i = 0; i < arrayLength; ++i)
+	{
 		unsigned char stringLength = strlen(first->data[i]);
 
-		if (strlen(second->data[i]) > stringLength) {
+		if (strlen(second->data[i]) > stringLength)
+		{
 			stringLength = strlen(second->data[i]);
 		}
 
-		for (unsigned char j = 0; j < stringLength; ++j) {
-			if (first->data[i][j] != second->data[i][j]) {
+		for (unsigned char j = 0; j < stringLength; ++j)
+		{
+			if (first->data[i][j] != second->data[i][j])
+			{
 				sum += 1.0;
 			}
 		}
@@ -75,7 +91,8 @@ float simple_text_array_distance(mtree_text_array* first, mtree_text_array* seco
  * This distance function is used for song similarity queries with the
  * Million Songs Dataset.
  */
-float weighted_text_array_distance(mtree_text_array* first, mtree_text_array* second) {
+float weighted_text_array_distance(mtree_text_array* first, mtree_text_array* second)
+{
 	unsigned char lengthOfFirstArray = first->arrayLength;
 	unsigned char lengthOfSecondArray = second->arrayLength;
 	unsigned char numberOfMatchingTags = 0;
@@ -84,7 +101,8 @@ float weighted_text_array_distance(mtree_text_array* first, mtree_text_array* se
 	char* saveSecond;
 	float sum = 0.0;
 
-	for (unsigned char i = 0; i < lengthOfFirstArray; ++i) {
+	for (unsigned char i = 0; i < lengthOfFirstArray; ++i)
+	{
 		char* firstData = calloc(strlen(first->data[i]) + 1, sizeof(char));
 		char* firstDataStart = firstData;
 		strcpy(firstData, first->data[i]);
@@ -94,7 +112,8 @@ float weighted_text_array_distance(mtree_text_array* first, mtree_text_array* se
 
 		bool isMatchingTag = false;
 		int secondTagRelevance;
-		for (unsigned char j = 0; j < lengthOfSecondArray; ++j) {
+		for (unsigned char j = 0; j < lengthOfSecondArray; ++j)
+		{
 			char* secondData = calloc(strlen(second->data[j]) + 1, sizeof(char));
 			char* secondDataStart = secondData;
 			strcpy(secondData, second->data[j]);
@@ -102,7 +121,8 @@ float weighted_text_array_distance(mtree_text_array* first, mtree_text_array* se
 			char* secondTagName = strtok_r(secondData, separator, &saveSecond);
 			secondTagRelevance = atoi(strtok_r(NULL, separator, &saveSecond));
 
-			if (strcmp(firstTagName, secondTagName) == 0) {
+			if (strcmp(firstTagName, secondTagName) == 0)
+			{
 				isMatchingTag = true;
 				numberOfMatchingTags++;
 
@@ -113,7 +133,8 @@ float weighted_text_array_distance(mtree_text_array* first, mtree_text_array* se
 			free(secondDataStart);
 		}
 
-		if (isMatchingTag) {
+		if (isMatchingTag)
+		{
 			sum += MIN_FLOAT(firstTagRelevance, secondTagRelevance);
 		}
 
@@ -125,23 +146,8 @@ float weighted_text_array_distance(mtree_text_array* first, mtree_text_array* se
 	return 100.0 - sum;
 }
 
-float mtree_text_array_distance_internal(mtree_text_array* first, mtree_text_array* second) {
-	if (strcmp(distance_function, "no_function") == 0) {
-		ereport(ERROR,
-			errcode(ERRCODE_UNDEFINED_PARAMETER),
-			errmsg("No distance function specified - please specify one in the operator class."));
-	}
-
-	if (strcmp(distance_function, "simple_text_array_distance") == 0) {
-		return simple_text_array_distance(first, second);
-	}
-	else if (strcmp(distance_function, "weighted_text_array_distance") == 0) {
-		return weighted_text_array_distance(first, second);
-	}
-	else {
-		ereport(ERROR,
-			errcode(ERRCODE_INVALID_PARAMETER_VALUE),
-			errmsg("Unknown distance function specified: %s", distance_function));
-		return 0.0;
-	}
+float mtree_text_array_distance_internal(mtree_text_array* first, mtree_text_array* second)
+{
+	/*return simple_text_array_distance(first, second);*/
+	return weighted_text_array_distance(first, second);
 }

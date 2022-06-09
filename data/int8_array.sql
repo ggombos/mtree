@@ -8,7 +8,7 @@ CREATE TABLE INT8_ARRAY_TEST (
 COPY INT8_ARRAY_TEST(id, val) FROM '/home/postgres/test_files/int8_array.csv' DELIMITER ';' CSV HEADER;
 
 DROP INDEX IF EXISTS INT8_ARRAY_TEST_IDX CASCADE;
-CREATE INDEX INT8_ARRAY_TEST_IDX ON INT8_ARRAY_TEST USING GiST (val mtree_int8_array_opclass);
+CREATE INDEX INT8_ARRAY_TEST_IDX ON INT8_ARRAY_TEST USING GiST (val gist_mtree_int8_array_ops);
 
 SET enable_seqscan TO OFF;
 
@@ -16,4 +16,4 @@ SELECT COUNT(*) FROM INT8_ARRAY_TEST;
 
 SELECT * FROM INT8_ARRAY_TEST;
 
-SELECT id, val, (val <-> '0') AS dst FROM INT8_ARRAY_TEST ORDER BY (val <-> '0'), id;
+SELECT id, val, (val <-> '0') AS dst FROM INT8_ARRAY_TEST ORDER BY (val <-> '0');

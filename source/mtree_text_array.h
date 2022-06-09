@@ -16,18 +16,13 @@
 #define PG_GETARG_MTREE_TEXT_ARRAY_P(x) DatumGetMtreeTextArray(PG_GETARG_DATUM(x))
 #define PG_RETURN_MTREE_TEXT_ARRAY_P(x) PG_RETURN_POINTER(x)
 
-typedef struct {
+typedef struct
+{
 	float parentDistance;
 	float coveringRadius;
 	unsigned char arrayLength;
 	char data[FLEXIBLE_ARRAY_MEMBER][MTREE_TEXT_ARRAY_MAX_STRINGLENGTH];
-} mtree_text_array;
-
-static char mtree_text_array_distance_functions[2][64] = {
-   "simple_text_array_distance",
-   "weighted_text_array_distance"
-};
-
-extern char* distance_function;
+}
+mtree_text_array;
 
 #endif

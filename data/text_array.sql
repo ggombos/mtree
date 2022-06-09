@@ -1,23 +1,48 @@
 /* contrib/mtree_gist/data/text_array.sql */
 
-DROP TABLE IF EXISTS TEXT_ARRAY_TEST CASCADE;
-CREATE TABLE TEXT_ARRAY_TEST (
-  id  INTEGER,
-  val mtree_text_array
-);
-COPY TEXT_ARRAY_TEST(id, val) FROM '/home/postgres/test_files/text_array.csv' DELIMITER ';' CSV HEADER;
+DROP TABLE IF EXISTS mtree_text_array_test CASCADE;
 
-DROP INDEX IF EXISTS TEXT_ARRAY_TEST_IDX CASCADE;
-CREATE INDEX TEXT_ARRAY_TEST_IDX ON TEXT_ARRAY_TEST USING GiST (val mtree_text_array_opclass(distancestrategy='simple_text_array_distance', picksplitstrategy='SamplingMinOverlapArea'));
+CREATE TABLE mtree_text_array_test (
+	id	INTEGER,
+	val	mtree_text_array
+);
+
+COPY mtree_text_array_test(id, val)
+FROM '/home/postgres/test_files/text_array.csv'
+DELIMITER ';' CSV HEADER;
+
+DROP INDEX IF EXISTS mtree_text_array_test_idx CASCADE;
+
+CREATE INDEX mtree_text_array_test_idx ON mtree_text_array_test USING gist (
+	val gist_mtree_text_array_ops (
+		picksplit_strategy	= 'SamplingMinOverlapArea',
+		union_strategy		= 'MinMaxDistance'
+	)
+);
 
 SET enable_seqscan TO OFF;
 
-SELECT COUNT(*) FROM TEXT_ARRAY_TEST;
+EXPLAIN ANALYZE
+SELECT id, val, (val <-> 'aaaaaaaaaa') AS dst
+FROM mtree_text_array_test
+ORDER BY (val <-> 'aaaaaaaaaa');
 
-SELECT * FROM TEXT_ARRAY_TEST;
+SELECT COUNT(*)
+FROM mtree_text_array_test;
 
-SELECT id, val, (val <-> 'aaaaaaaaaa') AS dst FROM TEXT_ARRAY_TEST ORDER BY (val <-> 'aaaaaaaaaa'), id;
+SELECT *
+FROM mtree_text_array_test;
 
-SELECT * FROM TEXT_ARRAY_TEST WHERE val #<# 'aaaaaaaaaa';
+SELECT id, val, (val <-> 'aaaaaaaaaa') AS dst
+FROM mtree_text_array_test
+ORDER BY (val <-> 'aaaaaaaaaa')
+LIMIT 10;
 
-SELECT id, val, (val <-> 'aaaaaaaaaa') AS dst FROM TEXT_ARRAY_TEST ORDER BY (val <-> 'aaaaaaaaaa'), id LIMIT 3;
+SELECT *
+FROM mtree_text_array_test
+WHERE val #<# 'aaaaaaaaaa';
+
+SELECT id, val, (val <-> 'aaaaaaaaaa') AS dst
+FROM mtree_text_array_test
+ORDER BY (val <-> 'aaaaaaaaaa')
+LIMIT 10;

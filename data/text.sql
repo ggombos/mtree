@@ -1,21 +1,35 @@
 /* contrib/mtree_gist/data/text.sql */
 
-DROP TABLE IF EXISTS TEXT_TEST CASCADE;
-CREATE TABLE TEXT_TEST (
-  id  INTEGER,
-  val mtree_text
-);
-COPY TEXT_TEST(id, val) FROM '/home/postgres/test_files/text.csv' DELIMITER ';' CSV HEADER;
+DROP TABLE IF EXISTS mtree_text_test CASCADE;
 
-DROP INDEX IF EXISTS TEXT_TEST_IDX CASCADE;
-CREATE INDEX TEXT_TEST_IDX ON TEXT_TEST USING GiST (val mtree_text_opclass);
+CREATE TABLE mtree_text_test (
+	id	INTEGER,
+	val	mtree_text
+);
+
+COPY mtree_text_test(id, val)
+FROM '/home/postgres/test_files/text.csv'
+DELIMITER ';' CSV HEADER;
+
+DROP INDEX IF EXISTS mtree_text_test_idx CASCADE;
+
+CREATE INDEX mtree_text_test_idx ON mtree_text_test USING gist (
+	val gist_mtree_text_ops (
+		picksplit_strategy	= 'SamplingMinOverlapArea',
+		union_strategy		= 'MinMaxDistance'
+	)
+);
 
 SET enable_seqscan TO OFF;
 
-SELECT COUNT(*) FROM TEXT_TEST;
+SELECT COUNT(*)
+FROM mtree_text_test;
 
-SELECT * FROM TEXT_TEST;
+SELECT id, val, (val <-> 'ghwfxakyka') AS dst
+FROM mtree_text_test
+ORDER BY (val <-> 'ghwfxakyka')
+LIMIT 10;
 
-SELECT id, val, (val <-> 'aaaaaaaaaa') AS dst FROM TEXT_TEST ORDER BY (val <-> 'aaaaaaaaaa'), id;
-
-SELECT * FROM TEXT_TEST WHERE val #<# 'aaaaaaaaaa';
+SELECT *
+FROM mtree_text_test
+WHERE val #<# 'ghwfxakyka';
