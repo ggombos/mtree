@@ -38,6 +38,7 @@ readonly DATA_FILENAMES=(
   "text.csv"
   "text.expected"
   "text.sql"
+  "text_use_index.sql"
 
   "setup.sql"
   "teardown.sql"

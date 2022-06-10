@@ -17,8 +17,8 @@ readonly TEST_TYPES=(
 #  "float4"
 #  "int8_array"
 #  "int8"
-  "text_array"
-#  "text"
+#  "text_array"
+  "text"
 )
 
 function setup() {
@@ -37,6 +37,14 @@ function run_test() {
   echo "$1 tests were successful!"
 }
 
+function run_test_use_index() {
+  psql --username=postgres --file="${TEST_DIRECTORY}/$1_use_index.sql" --output="${TEST_DIRECTORY}/$1_use_index.output" --echo-all
+  echo ""
+  echo "$1_use_index test results:"
+  grep "${TEST_DIRECTORY}/$1_use_index.output" -e "Index Scan using mtree_$1_test_idx on mtree_$1_test"
+  echo "$1_use_index tests were successful!"
+}
+
 function teardown() {
   echo ""
   echo "--------------------< teardown >--------------------"
@@ -49,5 +57,6 @@ setup
 for type in "${TEST_TYPES[@]}";
 do
   run_test "${type}"
+  run_test_use_index "${type}"
 done
 teardown
