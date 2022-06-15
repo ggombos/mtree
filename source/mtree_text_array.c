@@ -64,7 +64,7 @@ mtree_text_array_output(PG_FUNCTION_ARGS)
 	StringInfoData stringInfo;
 	initStringInfo(&stringInfo);
 
-	int maxChar = 0;
+	unsigned short maxChar = 0;
 	for (unsigned char i = 0; i < arrayLength; ++i)
 	{
 		maxChar += strlen(output->data[i]);
@@ -249,8 +249,8 @@ mtree_text_array_penalty(PG_FUNCTION_ARGS)
 	mtree_text_array* new = DatumGetMtreeTextArray(newEntry->key);
 
 	float distance = mtree_text_array_distance_internal(original, new);
-	float newCoveringRadius = distance + 1.0 * new->coveringRadius;
-	*penalty = (float) (newCoveringRadius < 1.0 * original->coveringRadius ? 0.0 : newCoveringRadius - 1.0 * original->coveringRadius);
+	float newCoveringRadius = distance + new->coveringRadius;
+	*penalty = (float) (newCoveringRadius < original->coveringRadius ? 0.0 : newCoveringRadius - original->coveringRadius);
 
 	PG_RETURN_POINTER(penalty);
 }
@@ -260,12 +260,11 @@ PG_FUNCTION_INFO_V1(mtree_text_array_picksplit);
 Datum
 mtree_text_array_picksplit(PG_FUNCTION_ARGS)
 {
-	GistEntryVector* entryVector = (GistEntryVector*) PG_GETARG_POINTER(0);
-	GIST_SPLITVEC* vector = (GIST_SPLITVEC*) PG_GETARG_POINTER(1);
-	OffsetNumber maxOffset = (OffsetNumber) entryVector->n - 1;
-	OffsetNumber numberBytes = (OffsetNumber) (maxOffset + 1) * sizeof(OffsetNumber);
-	OffsetNumber* left;
-	OffsetNumber* right;
+	GistEntryVector	*entryVector = (GistEntryVector*) PG_GETARG_POINTER(0);
+	GIST_SPLITVEC	*vector = (GIST_SPLITVEC*) PG_GETARG_POINTER(1);
+	OffsetNumber	maxOffset = (OffsetNumber) entryVector->n - 1;
+	OffsetNumber	numberBytes = (OffsetNumber) (maxOffset + 1) * sizeof(OffsetNumber);
+	OffsetNumber	*left, *right;
 
 	vector->spl_left = (OffsetNumber*) palloc(numberBytes);
 	left = vector->spl_left;
@@ -274,6 +273,13 @@ mtree_text_array_picksplit(PG_FUNCTION_ARGS)
 	vector->spl_right = (OffsetNumber*) palloc(numberBytes);
 	right = vector->spl_right;
 	vector->spl_nright = 0;
+
+	MtreeUnionStrategy picksplit_strategy = SamplingMinOverlapArea;
+	if (PG_HAS_OPCLASS_OPTIONS())
+	{
+		MtreeOptions* options = (MtreeOptions *) PG_GET_OPCLASS_OPTIONS();
+		picksplit_strategy = options->picksplit_strategy;
+	}
 
 	mtree_text_array* entries[maxOffset];
 	for (OffsetNumber i = FirstOffsetNumber; i <= maxOffset; i = OffsetNumberNext(i))
@@ -291,13 +297,6 @@ mtree_text_array_picksplit(PG_FUNCTION_ARGS)
 	float minCoveringMax = -1.0;
 	float minOverlapArea = -1.0;
 	float minSumArea = -1.0;
-
-	MtreeUnionStrategy picksplit_strategy = SamplingMinOverlapArea;
-	if (PG_HAS_OPCLASS_OPTIONS())
-	{
-		MtreeOptions* options = (MtreeOptions *) PG_GET_OPCLASS_OPTIONS();
-		picksplit_strategy = options->picksplit_strategy;
-	}
 
 	switch (picksplit_strategy)
 	{

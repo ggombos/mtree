@@ -5,9 +5,6 @@
 #ifndef __MTREE_TEXT_ARRAY_H__
 #define __MTREE_TEXT_ARRAY_H__
 
-#include "postgres.h"
-#include "access/gist.h"
-
 #include "mtree_gist.h"
 
 #define MTREE_TEXT_ARRAY_MAX_STRINGLENGTH 128

@@ -5,6 +5,7 @@
 #define __MTREE_GIST_H__
 
 #include "postgres.h"
+#include "access/gist.h"
 #include "access/reloptions.h"
 
 /*

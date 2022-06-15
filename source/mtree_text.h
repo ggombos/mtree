@@ -5,9 +5,6 @@
 #ifndef __MTREE_TEXT_H__
 #define __MTREE_TEXT_H__
 
-#include "postgres.h"
-#include "access/gist.h"
-
 #include "mtree_gist.h"
 
 /*

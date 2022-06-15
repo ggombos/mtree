@@ -38,12 +38,12 @@ CREATE TYPE mtree_text (
 CREATE OR REPLACE FUNCTION mtree_text_consistent(internal, mtree_text, smallint, oid, internal)
 RETURNS bool
 AS 'MODULE_PATHNAME'
-LANGUAGE C STRICT IMMUTABLE;
+LANGUAGE C STRICT;
 
 CREATE OR REPLACE FUNCTION mtree_text_union(internal, internal)
 RETURNS mtree_text
 AS 'MODULE_PATHNAME'
-LANGUAGE C STRICT IMMUTABLE;
+LANGUAGE C STRICT;
 
 CREATE OR REPLACE FUNCTION mtree_text_same(mtree_text, mtree_text, internal)
 RETURNS internal
@@ -58,7 +58,7 @@ LANGUAGE C STRICT IMMUTABLE;
 CREATE OR REPLACE FUNCTION mtree_text_picksplit(internal, internal)
 RETURNS internal
 AS 'MODULE_PATHNAME'
-LANGUAGE C STRICT IMMUTABLE;
+LANGUAGE C STRICT;
 
 CREATE OR REPLACE FUNCTION mtree_text_distance(internal, mtree_text, smallint, oid, internal)
 RETURNS float4
@@ -166,12 +166,12 @@ CREATE TYPE mtree_text_array (
 CREATE OR REPLACE FUNCTION mtree_text_array_consistent(internal, mtree_text_array, smallint, oid, internal)
 RETURNS bool
 AS 'MODULE_PATHNAME'
-LANGUAGE C STRICT IMMUTABLE;
+LANGUAGE C STRICT;
 
 CREATE OR REPLACE FUNCTION mtree_text_array_union(internal, internal)
 RETURNS mtree_text_array
 AS 'MODULE_PATHNAME'
-LANGUAGE C STRICT IMMUTABLE;
+LANGUAGE C STRICT;
 
 CREATE OR REPLACE FUNCTION mtree_text_array_compress(internal)
 RETURNS internal
@@ -196,7 +196,7 @@ LANGUAGE C STRICT IMMUTABLE;
 CREATE OR REPLACE FUNCTION mtree_text_array_picksplit(internal, internal)
 RETURNS internal
 AS 'MODULE_PATHNAME'
-LANGUAGE C STRICT IMMUTABLE;
+LANGUAGE C STRICT;
 
 CREATE OR REPLACE FUNCTION mtree_text_array_distance(internal, mtree_text_array, smallint, oid, internal)
 RETURNS float4
