@@ -1,5 +1,6 @@
 --csv header artist;title;tags
 -- tags: rock,60###heavy metal,30
+SET client_min_messages TO DEBUG1;
 
 DROP INDEX millionSong_gist_index;
 DROP TABLE millionSong;
@@ -17,9 +18,18 @@ CREATE TABLE millionSong (
 );
 
 -- \copy millionSong FROM '/home/ggombos/mtree/mtree_gist/data/millionSongSrc/millionSongTags.csv' DELIMITER ';' CSV HEADER;
-\copy millionSong FROM '/home/ggombos/mtree/mtree_gist/data/millionSongSrc/million100edist.csv' DELIMITER ';' CSV HEADER;
+-- \copy millionSong FROM '/home/ggombos/mtree/mtree_gist/data/millionSongSrc/million100edist.csv' DELIMITER ';' CSV HEADER;
+-- \copy millionSong FROM '/home/ggombos/mtree/mtree_gist/data/millionSongSrc/millionTmp.csv' DELIMITER ';' CSV HEADER ;
+\copy millionSong FROM '/home/ggombos/mtree/mtree_gist/data/millionSongSrc/millionTmpAllUniq.csv' DELIMITER ';' CSV HEADER ;
+-- \copy millionSong FROM '/home/ggombos/mtree/mtree_gist/data/millionSongSrc/oneLine.csv' DELIMITER ';' CSV HEADER ;
+-- \copy millionSong FROM '/home/ggombos/mtree/mtree_gist/data/millionSongSrc/millionTmpminimal.csv' DELIMITER ';' CSV HEADER;
 
-CREATE INDEX millionSong_gist_index ON millionSong USING gist (tags gist_mtree_text_array_ops(distance_strategy='weighted_text_array_distance',MtreePickSplitStrategy="SamplingMinOverlapArea")) ;
+-- CREATE INDEX millionSong_gist_index ON millionSong USING gist (tags mtree_text_array_opclass(distancestrategy='weighted_text_array_distance',picksplitstrategy="SamplingMinOverlapArea")) ;
+-- CREATE INDEX millionSong_gist_index ON millionSong USING gist (tags mtree_text_array_opclass(distancestrategy='weighted_text_array_distance',picksplitstrategy="FirstTwo")) ;
+-- CREATE INDEX millionSong_gist_index ON millionSong USING gist (tags mtree_text_array_opclass(distancestrategy='simple_text_array_distance',picksplitstrategy="FirstTwo")) ;
+-- CREATE INDEX millionSong_gist_index ON millionSong USING gist (tags gist_mtree_text_array_ops(distancestrategy='weighted_text_array_distance',picksplitstrategy="FirstTwo")) ;
+-- CREATE INDEX millionSong_gist_index ON millionSong USING gist (tags gist_mtree_text_array_ops(picksplit_strategy="FirstTwo",distance_strategy="Weighted")) ;
+CREATE INDEX millionSong_gist_index ON millionSong USING gist (tags gist_mtree_text_array_ops(picksplit_strategy="MaxDistancePair"));
 
 SET enable_seqscan = off;
 

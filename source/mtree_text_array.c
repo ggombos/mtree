@@ -336,7 +336,7 @@ mtree_text_array_picksplit(PG_FUNCTION_ARGS)
 					}
 				}
 			}
-			leftIndex = 0;
+			leftIndex = leftCandidateIndex;
 			rightIndex = rightCandidateIndex;
 			break;
 		case SamplingMinCoveringSum:
@@ -496,14 +496,27 @@ mtree_text_array_picksplit(PG_FUNCTION_ARGS)
 	mtree_text_array* unionLeft = mtree_text_array_deep_copy(entries[leftIndex]);
 	mtree_text_array* unionRight = mtree_text_array_deep_copy(entries[rightIndex]);
 	mtree_text_array* current;
+	unionLeft->coveringRadius = 0;
+	unionRight->coveringRadius = 0;
+	bool forceLeft = false;
 
 	for (OffsetNumber i = FirstOffsetNumber; i <= maxOffset; i = OffsetNumberNext(i))
 	{
 		float distanceLeft = get_text_array_distance(maxOffset, entries, distances, leftIndex, i - 1);
 		float distanceRight = get_text_array_distance(maxOffset, entries, distances, rightIndex, i - 1);
+		// float distanceMax = get_text_array_distance(maxOffset, entries, distances, rightIndex, leftIndex);
+		// elog(INFO,"Max: %f %f %f", distanceMax, distanceLeft, distanceRight);
 		current = entries[i - 1];
+		forceLeft = false;
+		
+		if (distanceLeft == distanceRight) {
+			if (vector->spl_nleft<vector->spl_nright) {
+				forceLeft = true;
+			}
+		}
+		
 
-		if (distanceLeft < distanceRight)
+		if (forceLeft || distanceLeft < distanceRight)
 		{
 			if (distanceLeft + current->coveringRadius > unionLeft->coveringRadius)
 			{
@@ -527,6 +540,7 @@ mtree_text_array_picksplit(PG_FUNCTION_ARGS)
 
 	vector->spl_ldatum = PointerGetDatum(unionLeft);
 	vector->spl_rdatum = PointerGetDatum(unionRight);
+	// elog(INFO, "%d %d" , vector->spl_nleft,vector->spl_nright);
 
 	PG_RETURN_POINTER(vector);
 }
