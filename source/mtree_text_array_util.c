@@ -148,6 +148,6 @@ float weighted_text_array_distance(mtree_text_array* first, mtree_text_array* se
 
 float mtree_text_array_distance_internal(mtree_text_array* first, mtree_text_array* second)
 {
-	/*return simple_text_array_distance(first, second);*/
+	// return simple_text_array_distance(first, second);
 	return weighted_text_array_distance(first, second);
 }
