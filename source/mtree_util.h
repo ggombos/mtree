@@ -17,6 +17,6 @@ void init_distances_float(const int, float*);
 double overlap_area(const int, const int, const int);
 double overlap_area_float(float, float, float);
 
-unsigned char get_array_length(const char*);
+unsigned char get_array_length(const char*, const size_t);
 
 #endif

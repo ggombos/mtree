@@ -16,36 +16,40 @@ PG_FUNCTION_INFO_V1(mtree_text_array_input);
 Datum
 mtree_text_array_input(PG_FUNCTION_ARGS)
 {
-	char* input = PG_GETARG_CSTRING(0);
-	int inputLength = strlen(input);
+	char*	input = PG_GETARG_CSTRING(0);
+	size_t	inputLength = strlen(input);
 
-	char previousChar = '\0';
-	unsigned char arrayLength = 1;
-	for (int i = 0; i < inputLength; ++i)
+	if (inputLength == 0)
 	{
-		if (input[i] == ',' && previousChar != '\0')
-		{
-			++arrayLength;
-			previousChar = '\0';
-		}
-		previousChar = input[i];
+		ereport(ERROR,
+			errcode(ERRCODE_INVALID_PARAMETER_VALUE),
+			errmsg("The input can't be an empty string!"));
 	}
+
+	unsigned char arrayLength = get_array_length(input, inputLength);
 
 	size_t size = MTREE_TEXT_ARRAY_SIZE + arrayLength * MTREE_TEXT_ARRAY_MAX_STRINGLENGTH * sizeof(char) + 1;
 	mtree_text_array* result = (mtree_text_array*) palloc(size);
 
-	char* tmp;
 	char* arrayElement = strtok(input, ",");
 	for (unsigned char i = 0; i < arrayLength; ++i)
 	{
+		size_t arrayElementLength = strlen(arrayElement);
+		if (arrayElementLength > MTREE_TEXT_ARRAY_MAX_STRINGLENGTH)
+		{
+			ereport(ERROR,
+				errcode(ERRCODE_INVALID_PARAMETER_VALUE),
+				errmsg("Every element of the input array should me maximum of %d characters long!", MTREE_TEXT_ARRAY_MAX_STRINGLENGTH));
+		}
+
 		strcpy(result->data[i], arrayElement);
 		result->data[i][strlen(result->data[i])] = '\0';
 		arrayElement = strtok(NULL, ",");
 	}
 
+	result->arrayLength = arrayLength;
 	result->coveringRadius = 0.0;
 	result->parentDistance = 0.0;
-	result->arrayLength = arrayLength;
 
 	SET_VARSIZE(result, size);
 
@@ -498,23 +502,38 @@ mtree_text_array_picksplit(PG_FUNCTION_ARGS)
 	mtree_text_array* current;
 	unionLeft->coveringRadius = 0;
 	unionRight->coveringRadius = 0;
-	bool forceLeft = false;
 
 	for (OffsetNumber i = FirstOffsetNumber; i <= maxOffset; i = OffsetNumberNext(i))
 	{
 		float distanceLeft = get_text_array_distance(maxOffset, entries, distances, leftIndex, i - 1);
 		float distanceRight = get_text_array_distance(maxOffset, entries, distances, rightIndex, i - 1);
-		// float distanceMax = get_text_array_distance(maxOffset, entries, distances, rightIndex, leftIndex);
-		// elog(INFO,"Max: %f %f %f", distanceMax, distanceLeft, distanceRight);
+		bool forceLeft = false;
+		bool forceRight = false;
 		current = entries[i - 1];
-		forceLeft = false;
-		
-		if (distanceLeft == distanceRight) {
-			if (vector->spl_nleft<vector->spl_nright) {
+
+		if (distanceLeft == distanceRight)
+		{
+			if (vector->spl_nleft < vector->spl_nright)
+			{
 				forceLeft = true;
 			}
+			else if (vector->spl_nleft > vector->spl_nright)
+			{
+				forceRight = true;
+			}
+			else if (vector->spl_nleft == 0)
+			{
+				forceLeft = true;
+			}
+			else if (vector->spl_nright == 0)
+			{
+				forceRight = true;
+			}
+			else
+			{
+				forceRight = true;
+			}
 		}
-		
 
 		if (forceLeft || distanceLeft < distanceRight)
 		{
@@ -526,7 +545,7 @@ mtree_text_array_picksplit(PG_FUNCTION_ARGS)
 			++left;
 			++(vector->spl_nleft);
 		}
-		else
+		else if (forceRight || distanceLeft > distanceRight)
 		{
 			if (distanceRight + current->coveringRadius > unionRight->coveringRadius)
 			{
@@ -540,7 +559,6 @@ mtree_text_array_picksplit(PG_FUNCTION_ARGS)
 
 	vector->spl_ldatum = PointerGetDatum(unionLeft);
 	vector->spl_rdatum = PointerGetDatum(unionRight);
-	// elog(INFO, "%d %d" , vector->spl_nleft,vector->spl_nright);
 
 	PG_RETURN_POINTER(vector);
 }

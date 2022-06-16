@@ -95,9 +95,9 @@ double overlap_area_float(float r1, float r2, float dst)
 	return a1 + a2;
 }
 
-unsigned char get_array_length(const char* arrayString)
+unsigned char get_array_length(const char* arrayString, const size_t arrayStringLength)
 {
-	char copyOfArrayString[strlen(arrayString)];
+	char copyOfArrayString[arrayStringLength];
 	strcpy(copyOfArrayString, arrayString);
 
 	unsigned char numberOfCommas = 0;
