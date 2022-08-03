@@ -329,6 +329,47 @@ float Cosine(mtree_text_array* first, mtree_text_array* second)
 // def Jaccard(u,v):
 float Jaccard(mtree_text_array* first, mtree_text_array* second)
 {
+	unsigned char lengthOfFirstArray = first->arrayLength;
+	unsigned char lengthOfSecondArray = second->arrayLength;
+	float a = 0.0;
+	
+	char* separator = "###";
+	char* saveFirst;
+	char* saveSecond;
+	
+	
+	for (unsigned char i = 0; i < lengthOfFirstArray; ++i)
+	{
+		char* firstData = calloc(strlen(first->data[i]) + 1, sizeof(char));
+		char* firstDataStart = firstData;
+		strcpy(firstData, first->data[i]);
+
+		char* firstTagName = strtok_r(firstData, separator, &saveFirst);
+		float firstTagRelevance = (float)atoi(strtok_r(NULL, separator, &saveFirst));
+
+		float secondTagRelevance;
+		for (unsigned char j = 0; j < lengthOfSecondArray; ++j)
+		{
+			char* secondData = calloc(strlen(second->data[j]) + 1, sizeof(char));
+			char* secondDataStart = secondData;
+			strcpy(secondData, second->data[j]);
+
+			char* secondTagName = strtok_r(secondData, separator, &saveSecond);
+			secondTagRelevance = (float)atoi(strtok_r(NULL, separator, &saveSecond));
+
+			if (strcmp(firstTagName, secondTagName) == 0)
+			{
+				a++;
+
+				free(secondDataStart);
+				continue;
+			}
+
+		}
+		free(firstDataStart);
+	}
+	
+	return 1.0 - (a / ((float)lengthOfFirstArray + (float)lengthOfSecondArray - a));
 	
 }
 
@@ -373,5 +414,7 @@ float mtree_text_array_distance_internal(mtree_text_array* first, mtree_text_arr
 	// return simple_text_array_distance(first, second);
 	// return weighted_text_array_distance(first, second);
 	// return PCC(first, second);
-	return Cosine(first,second);
+	// return Cosine(first,second);
+	// nem foglalkozik a relevanciaval
+	return Jaccard(first,second);
 }
