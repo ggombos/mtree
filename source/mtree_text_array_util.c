@@ -485,7 +485,53 @@ float MSD(mtree_text_array* first, mtree_text_array* second)
 // def ra(u,v):
 float RA(mtree_text_array* first, mtree_text_array* second)
 {
+		unsigned char lengthOfFirstArray = first->arrayLength;
+	unsigned char lengthOfSecondArray = second->arrayLength;
+	float a = 0.0;
+	float b = 0.0;
 	
+	char* separator = "###";
+	char* saveFirst;
+	char* saveSecond;
+	
+	
+	for (unsigned char i = 0; i < lengthOfFirstArray; ++i)
+	{
+		char* firstData = calloc(strlen(first->data[i]) + 1, sizeof(char));
+		char* firstDataStart = firstData;
+		strcpy(firstData, first->data[i]);
+
+		char* firstTagName = strtok_r(firstData, separator, &saveFirst);
+		float firstTagRelevance = (float)atoi(strtok_r(NULL, separator, &saveFirst));
+
+		float secondTagRelevance;
+		for (unsigned char j = 0; j < lengthOfSecondArray; ++j)
+		{
+			char* secondData = calloc(strlen(second->data[j]) + 1, sizeof(char));
+			char* secondDataStart = secondData;
+			strcpy(secondData, second->data[j]);
+
+			char* secondTagName = strtok_r(secondData, separator, &saveSecond);
+			secondTagRelevance = (float)atoi(strtok_r(NULL, separator, &saveSecond));
+
+			if (strcmp(firstTagName, secondTagName) == 0)
+			{
+				b++;
+				a += fmin(firstTagRelevance,secondTagRelevance) / fmax(firstTagRelevance,secondTagRelevance);
+
+				free(secondDataStart);
+				continue;
+			}
+
+		}
+		free(firstDataStart);
+	}
+	
+	if (b == 0.0) {
+		return 1.0;
+	} else {
+		return 1.0 - a/b;
+	}
 }
 	
 // Relevant Jaccard mean square distance
@@ -506,5 +552,6 @@ float mtree_text_array_distance_internal(mtree_text_array* first, mtree_text_arr
 	// az a probléma hogy nem foglalkozik a nem kozos elemekkel
 	// return ExtendedJaccard(first,second);
 	// az a probléma hogy nem foglalkozik a nem kozos elemekkel
-	return MSD(first,second);
+	// return MSD(first,second);
+	return RA(first,second);
 }
