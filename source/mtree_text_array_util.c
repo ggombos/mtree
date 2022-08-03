@@ -146,8 +146,152 @@ float weighted_text_array_distance(mtree_text_array* first, mtree_text_array* se
 	return 100.0 - sum;
 }
 
+// Pearson correlation coefficient (PCC)
+// def PCC_new(u,v):
+float PCC(mtree_text_array* first, mtree_text_array* second)
+{
+	unsigned char lengthOfFirstArray = first->arrayLength;
+	unsigned char lengthOfSecondArray = second->arrayLength;
+	float avg_first = 0.0;
+	float avg_second = 0.0;
+	float a = 0.0;
+	float b = 0.0;
+	float c = 0.0;
+	
+	char* separator = "###";
+	char* saveFirst;
+	char* saveSecond;
+	bool anyMatchingTag = false;
+
+	for (unsigned char i = 0; i < lengthOfFirstArray; ++i)
+	{
+		char* firstData = calloc(strlen(first->data[i]) + 1, sizeof(char));
+		char* firstDataStart = firstData;
+		strcpy(firstData, first->data[i]);
+		
+		char* firstTagName = strtok_r(firstData, separator, &saveFirst);
+		float firstTagRelevance = atoi(strtok_r(NULL, separator, &saveFirst));
+		avg_first += (float)firstTagRelevance;
+	}
+	avg_first = avg_first / (float)lengthOfFirstArray;
+
+	for (unsigned char i = 0; i < lengthOfSecondArray; ++i)
+	{
+		char* secondData = calloc(strlen(second->data[i]) + 1, sizeof(char));
+		char* secondDataStart = secondData;
+		strcpy(secondData, second->data[i]);
+		
+		char* secondTagName = strtok_r(secondData, separator, &saveSecond);
+		float secondTagRelevance = atoi(strtok_r(NULL, separator, &saveSecond));
+		avg_second += (float)secondTagRelevance;
+	}
+	avg_second = avg_second / (float)lengthOfSecondArray;
+		
+	for (unsigned char i = 0; i < lengthOfFirstArray; ++i)
+	{
+		char* firstData = calloc(strlen(first->data[i]) + 1, sizeof(char));
+		char* firstDataStart = firstData;
+		strcpy(firstData, first->data[i]);
+
+		char* firstTagName = strtok_r(firstData, separator, &saveFirst);
+		float firstTagRelevance = (float)atoi(strtok_r(NULL, separator, &saveFirst));
+
+		bool isMatchingTag = false;
+		float secondTagRelevance;
+		for (unsigned char j = 0; j < lengthOfSecondArray; ++j)
+		{
+			char* secondData = calloc(strlen(second->data[j]) + 1, sizeof(char));
+			char* secondDataStart = secondData;
+			strcpy(secondData, second->data[j]);
+
+			char* secondTagName = strtok_r(secondData, separator, &saveSecond);
+			secondTagRelevance = (float)atoi(strtok_r(NULL, separator, &saveSecond));
+
+			if (strcmp(firstTagName, secondTagName) == 0)
+			{
+				isMatchingTag = true;
+				anyMatchingTag = true;
+
+				free(secondDataStart);
+				continue;
+			}
+
+		}
+		free(firstDataStart);
+
+		if (isMatchingTag)
+		{
+			a += (firstTagRelevance - avg_first) * (secondTagRelevance - avg_second);
+			b += (firstTagRelevance - avg_first) * (firstTagRelevance - avg_first);
+			c += (secondTagRelevance - avg_second) * (secondTagRelevance - avg_second);
+			// elog(INFO,"firstRel %f firstAvg %f secRel %f secAvg %f",firstTagRelevance, avg_first, secondTagRelevance, avg_second);
+			// elog(INFO,"a %f b %f c %f sb %f sc %f dist %f",a,b,c,sqrt(b),sqrt(c), (a / (sqrt(b)*sqrt(c))));
+		}
+	}
+	
+	if ((sqrtf(b)*sqrtf(c)) == 0.0) {
+		elog(INFO,"dist :( a %f b %f c %f",a,b,c );
+		return 1.0;
+	} else {
+		elog(INFO,"dist %f",fabs( a / (sqrtf(b)*sqrtf(c)) ));
+		// return fabs( a / (sqrtf(b)*sqrtf(c)) );
+		return ( a / (sqrtf(b)*sqrtf(c)) )+1.0;
+	}
+}
+
+// Cosine 
+// def cosine(u,v):
+float Cosine(mtree_text_array* first, mtree_text_array* second)
+{
+	
+}
+
+// Jaccard
+// def Jaccard(u,v):
+float Jaccard(mtree_text_array* first, mtree_text_array* second)
+{
+	
+}
+
+// weighted Jaccard
+// def WJaccard(u,v):
+float WJaccard(mtree_text_array* first, mtree_text_array* second)
+{
+	
+}
+
+
+// Triangle Multiplying Jaccard (TMJ)
+// def tmj(u,v):
+float TMJ(mtree_text_array* first, mtree_text_array* second)
+{
+	
+}
+	
+// Mean Squablue Difference (MSD)
+// def msd(u,v):
+float MSD(mtree_text_array* first, mtree_text_array* second)
+{
+	
+}
+	
+// RAtio-based
+// def ra(u,v):
+float RA(mtree_text_array* first, mtree_text_array* second)
+{
+	
+}
+	
+// Relevant Jaccard mean square distance
+float RJMS(mtree_text_array* first, mtree_text_array* second)
+{
+	
+}
+
+
 float mtree_text_array_distance_internal(mtree_text_array* first, mtree_text_array* second)
 {
 	// return simple_text_array_distance(first, second);
-	return weighted_text_array_distance(first, second);
+	// return weighted_text_array_distance(first, second);
+	return PCC(first, second);
 }
