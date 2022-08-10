@@ -228,14 +228,15 @@ float PCC(mtree_text_array* first, mtree_text_array* second)
 			// elog(INFO,"a %f b %f c %f sb %f sc %f dist %f",a,b,c,sqrt(b),sqrt(c), (a / (sqrt(b)*sqrt(c))));
 		}
 	}
-	
+	//nem jo!!!!
 	if ((sqrtf(b)*sqrtf(c)) == 0.0) {
-		elog(INFO,"dist :( a %f b %f c %f",a,b,c );
+		// elog(INFO,"dist :( a %f b %f c %f",a,b,c );
 		return 1.0;
 	} else {
-		elog(INFO,"dist %f",fabs( a / (sqrtf(b)*sqrtf(c)) ));
+		// elog(INFO,"dist %f",fabs( a / (sqrtf(b)*sqrtf(c)) ));
 		// return fabs( a / (sqrtf(b)*sqrtf(c)) );
-		return ( a / (sqrtf(b)*sqrtf(c)) )+1.0;
+		//+1 mert -1 és 1 között van erdetileg
+		return (( a / (sqrtf(b)*sqrtf(c)) )+1.0)/2.0;
 	}
 }
 
@@ -425,7 +426,54 @@ float ExtendedJaccard(mtree_text_array* first, mtree_text_array* second)
 // def tmj(u,v):
 float TMJ(mtree_text_array* first, mtree_text_array* second)
 {
+	unsigned char lengthOfFirstArray = first->arrayLength;
+	unsigned char lengthOfSecondArray = second->arrayLength;
+	float a = 0.0;
+	float b = 0.0;
+	float c = 0.0;
 	
+	char* separator = "###";
+	char* saveFirst;
+	char* saveSecond;
+	
+	
+	for (unsigned char i = 0; i < lengthOfFirstArray; ++i)
+	{
+		char* firstData = calloc(strlen(first->data[i]) + 1, sizeof(char));
+		char* firstDataStart = firstData;
+		strcpy(firstData, first->data[i]);
+
+		char* firstTagName = strtok_r(firstData, separator, &saveFirst);
+		float firstTagRelevance = (float)atoi(strtok_r(NULL, separator, &saveFirst));
+
+		float secondTagRelevance;
+		for (unsigned char j = 0; j < lengthOfSecondArray; ++j)
+		{
+			char* secondData = calloc(strlen(second->data[j]) + 1, sizeof(char));
+			char* secondDataStart = secondData;
+			strcpy(secondData, second->data[j]);
+
+			char* secondTagName = strtok_r(secondData, separator, &saveSecond);
+			secondTagRelevance = (float)atoi(strtok_r(NULL, separator, &saveSecond));
+
+			if (strcmp(firstTagName, secondTagName) == 0)
+			{
+				a += powf( firstTagRelevance - secondTagRelevance , 2 );
+				b += powf( firstTagRelevance , 2 );
+				c += powf( secondTagRelevance , 2 );
+
+				free(secondDataStart);
+				continue;
+			}
+
+		}
+		free(firstDataStart);
+	}
+	if ( isnan(1.0-(Jaccard(first,second) * ( 1.0-(  sqrtf(a) / (sqrtf(b)+sqrtf(c))  ) ))) ) {
+		return 1.0;
+	}
+	
+	return 1.0-(Jaccard(first,second) * ( 1.0-(  sqrtf(a) / (sqrtf(b)+sqrtf(c))  ) ));
 }
 	
 // Mean Squablue Difference (MSD)
@@ -464,7 +512,7 @@ float MSD(mtree_text_array* first, mtree_text_array* second)
 			if (strcmp(firstTagName, secondTagName) == 0)
 			{
 				b++;
-				a += powf((firstTagRelevance-secondTagRelevance)/100.0,2);
+				a += powf((firstTagRelevance-secondTagRelevance),2);
 
 				free(secondDataStart);
 				continue;
@@ -477,7 +525,7 @@ float MSD(mtree_text_array* first, mtree_text_array* second)
 	if (b == 0.0) {
 		return 1.0;
 	} else {
-		return a/b;
+		return (a/b);
 	}
 }
 	
@@ -532,12 +580,6 @@ float RA(mtree_text_array* first, mtree_text_array* second)
 	} else {
 		return 1.0 - a/b;
 	}
-}
-	
-// Relevant Jaccard mean square distance
-float RJMS(mtree_text_array* first, mtree_text_array* second)
-{
-	
 }
 
 float Euclidean(mtree_text_array* first, mtree_text_array* second)
@@ -633,7 +675,7 @@ float Hamming(mtree_text_array* first, mtree_text_array* second)
 	if (b==0.0) {
 		return 1.0;
 	} else {
-		return 1.0 - (a/b);
+		return (a/b);
 	}
 }
 
@@ -684,7 +726,8 @@ float Manhatan(mtree_text_array* first, mtree_text_array* second)
 	if (b==0.0) {
 		return 1.0;
 	} else {
-		return 1.0 - (1.0-(1.0/100.0)*(a/b));
+		// return (1.0-(1.0/100.0)*(a/b));   //similarity
+		return (1.0/100.0)*(a/b);		//distance
 	}
 }
 
@@ -736,27 +779,84 @@ float SimED(mtree_text_array* first, mtree_text_array* second)
 	if (b==0.0) {
 		return 1.0;
 	} else {
-		return 1.0 - ((100.0 - ( (100.0+sqrtf(a)) / 100.0*sqrtf(b) ))/100.0);
+		return  (1.0+sqrtf(a)) / (100.0*sqrtf(b)) ;
 	}
 }
 
 
+
+
+float notCoTagsDistance(mtree_text_array* first, mtree_text_array* second)
+{
+	unsigned char lengthOfFirstArray = first->arrayLength;
+	unsigned char lengthOfSecondArray = second->arrayLength;
+	float b = 0.0;
+	
+	char* separator = "###";
+	char* saveFirst;
+	char* saveSecond;
+	
+	
+	for (unsigned char i = 0; i < lengthOfFirstArray; ++i)
+	{
+		char* firstData = calloc(strlen(first->data[i]) + 1, sizeof(char));
+		char* firstDataStart = firstData;
+		strcpy(firstData, first->data[i]);
+
+		char* firstTagName = strtok_r(firstData, separator, &saveFirst);
+		float firstTagRelevance = (float)atoi(strtok_r(NULL, separator, &saveFirst));
+
+		float secondTagRelevance;
+		for (unsigned char j = 0; j < lengthOfSecondArray; ++j)
+		{
+			char* secondData = calloc(strlen(second->data[j]) + 1, sizeof(char));
+			char* secondDataStart = secondData;
+			strcpy(secondData, second->data[j]);
+
+			char* secondTagName = strtok_r(secondData, separator, &saveSecond);
+			secondTagRelevance = (float)atoi(strtok_r(NULL, separator, &saveSecond));
+
+			if (strcmp(firstTagName, secondTagName) == 0)
+			{
+				b++;
+				free(secondDataStart);
+				continue;
+			}
+
+		}
+		free(firstDataStart);
+	}
+	
+	return (lengthOfFirstArray + lengthOfSecondArray-b) / (lengthOfFirstArray + lengthOfSecondArray);
+}
+
+
+
 float mtree_text_array_distance_internal(mtree_text_array* first, mtree_text_array* second)
 {
-	// return simple_text_array_distance(first, second);
+	return simple_text_array_distance(first, second);
 	// return weighted_text_array_distance(first, second);
 	
-	// return PCC(first, second);
-	// return Cosine(first,second);
-	// nem foglalkozik a relevanciaval
-	// return Jaccard(first,second);
+	//ez nem jo semmire
+	// float dist = PCC(first, second);
 	// az a probléma hogy nem foglalkozik a nem kozos elemekkel
-	// return ExtendedJaccard(first,second);
-	// az a probléma hogy nem foglalkozik a nem kozos elemekkel
-	// return MSD(first,second);
-	// return RA(first,second);
-	// return Euclidean(first,second);
-	// return Hamming(first,second);
-	// return Manhatan(first,second);
-	return SimED(first,second);
+	// float dist = ExtendedJaccard(first,second);
+
+	// float dist = Euclidean(first,second);
+	// float dist = Hamming(first,second);
+	// float dist = Manhatan(first,second);
+	// float dist = SimED(first,second);
+	// float dist = Cosine(first,second);
+	// float dist = Jaccard(first,second);
+	// float dist = TMJ(first,second);
+	// float dist = MSD(first,second);
+	float dist = RA(first,second);
+	
+	// ha a nem közös tagokkal is akarunk foglalkozni
+	dist += (1.0-dist)*notCoTagsDistance(first, second);
+	if (dist > 1.0) {
+		dist = 1.0;
+	}
+
+	return dist;
 }

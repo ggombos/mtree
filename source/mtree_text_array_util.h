@@ -21,12 +21,17 @@ float weighted_text_array_distance(mtree_text_array* first, mtree_text_array* se
 float PCC(mtree_text_array* first, mtree_text_array* second);
 float Cosine(mtree_text_array* first, mtree_text_array* second);
 float Jaccard(mtree_text_array* first, mtree_text_array* second);
-float WJaccard(mtree_text_array* first, mtree_text_array* second);
+float ExtendedJaccard(mtree_text_array* first, mtree_text_array* second);
 float TMJ(mtree_text_array* first, mtree_text_array* second);
 float MSD(mtree_text_array* first, mtree_text_array* second);
 float RA(mtree_text_array* first, mtree_text_array* second);
-float RJMS(mtree_text_array* first, mtree_text_array* second);
 
+float Euclidean(mtree_text_array* first, mtree_text_array* second);
+float Hamming(mtree_text_array* first, mtree_text_array* second);
+float Manhatan(mtree_text_array* first, mtree_text_array* second);
+float SimED(mtree_text_array* first, mtree_text_array* second);
+
+float notCoTagsDistance(mtree_text_array* first, mtree_text_array* second);
 
 float mtree_text_array_distance_internal(mtree_text_array* first, mtree_text_array* second);
 
