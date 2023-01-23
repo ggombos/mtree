@@ -1,0 +1,17 @@
+# Object files
+*.o
+
+# Shared objects (inc. Windows DLLs)
+*.so
+
+# Visual Studio Code
+.vscode
+# Local History for Visual Studio Code
+.history/
+
+# Random files I usually forgot to delete
+*.tar.gz*
+*.log
+*.properties
+*.csv
+*tmp*

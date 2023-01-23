@@ -1,5 +1,0 @@
-# vptree extension
-comment = 'VP-tree implementation'
-default_version = '1.0'
-module_pathname = '$libdir/vptree'
-relocatable = true
