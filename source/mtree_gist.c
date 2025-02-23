@@ -10,8 +10,7 @@ PG_MODULE_MAGIC;
 
 PG_FUNCTION_INFO_V1(mtree_options);
 
-Datum
-mtree_options(PG_FUNCTION_ARGS)
+Datum mtree_options(PG_FUNCTION_ARGS)
 {
 	local_relopts *relopts = (local_relopts *) PG_GETARG_POINTER(0);
 

@@ -3,6 +3,8 @@
  */
 
 #include "mtree_util.h"
+#include "postgres.h"
+// #include "fdlibm.h"
 
 int string_distance(const char* a, const char* b)
 {
@@ -57,12 +59,30 @@ void init_distances_float(const int size, float* distances)
 	}
 }
 
+void init_distances_int128(const int size, float* distances)
+{
+	for (int i = 0; i < size; ++i)
+	{
+		for (int j = 0; j < size; ++j)
+		{
+			distances[i * size + j] = -1.0;
+		}
+	}
+}
+
 double overlap_area(const int radiusOne, const int radiusTwo, const int distance)
 {
 	if (radiusOne == 0 || radiusTwo == 0 || distance == 0)
 	{
 		return 0;
 	}
+
+	if(radiusOne > distance + radiusTwo){
+        return radiusTwo * radiusTwo * M_PI;
+    } 
+    if (distance + radiusOne < radiusTwo) {
+        return radiusOne * radiusOne * M_PI;
+    }
 
 	int radiusOneSquare = radiusOne * radiusOne;
 	int radiusTwoSquare = radiusTwo * radiusTwo;
@@ -87,12 +107,37 @@ double overlap_area_float(float r1, float r2, float dst)
 	float r2_square = r2 * r2;
 	float dst_square = dst * dst;
 
-	double phi = (acos((r1_square + dst_square - r2_square) / (2.0 * r1 * dst))) * 2.0;
-	double theta = (acos((r2_square + dst_square - r1_square) / (2.0 * r2 * dst))) * 2.0;
-	double a1 = 0.5 * theta * r2_square - 0.5 * r2_square * sin(theta);
-	double a2 = 0.5 * phi * r1_square - 0.5 * r1_square * sin(phi);
+	float res;
 
-	return a1 + a2;
+	// if (dst > r1 + r2)
+    //     res = 0;
+    // else if (dst <= (r1 - r2) && r1 >= r2)
+    //     res = M_PI * r2_square;
+    // else if (dst <= (r2 - r1) && r2 >= r1)
+    //     res = M_PI * r1_square;
+    // else {
+		float acos_phi = (r1_square + dst_square - r2_square) / (2.0 * r1 * dst);
+		float acos_theta = (r2_square + dst_square - r1_square) / (2.0 * r2 * dst);
+
+		// if (acos_phi > 1)
+		// 	acos_phi = 1;
+		// else if (acos_phi < -1)
+		// 	acos_phi = -1;
+
+		// if (acos_theta > 1)
+		// 	acos_theta = 1;
+		// else if (acos_theta < -1)
+		// 	acos_theta = -1;
+
+		double phi = (acos(acos_phi)) * 2.0;
+		double theta = (acos(acos_theta)) * 2.0;
+		double a1 = 0.5 * theta * r2_square - 0.5 * r2_square * sin(theta);
+		double a2 = 0.5 * phi * r1_square - 0.5 * r1_square * sin(phi);
+
+		res = a1 + a2;
+	// }
+
+	return res;
 }
 
 unsigned char get_array_length(const char* arrayString, const size_t arrayStringLength)

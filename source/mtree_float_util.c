@@ -30,7 +30,7 @@ mtree_float* mtree_float_deep_copy(mtree_float* source) {
 	return destination;
 }
 
-int get_float_distance(int size, mtree_float* entries[size], int distances[size][size], int i, int j) {
+float get_float_distance(int size, mtree_float* entries[size], float distances[size][size], int i, int j) {
 	if (distances[i][j] == -1) {
 		distances[i][j] = mtree_float_distance_internal(entries[i], entries[j]);
 	}

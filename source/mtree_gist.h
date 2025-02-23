@@ -17,8 +17,7 @@ typedef enum
 	First,
 	/* Choose the entry with the minimal maximum distance from the others. */
 	MinMaxDistance
-}
-MtreeUnionStrategy;
+} MtreeUnionStrategy;
 
 /*
  * PickSplit strategies
@@ -40,9 +39,10 @@ typedef enum
 	/*  */
 	SamplingMinOverlapArea,
 	/*  */
-	SamplingMinAreaSum
-}
-MtreePickSplitStrategy;
+	SamplingMinAreaSum,
+	/* */
+	GuttmanPolyTime
+} MtreePickSplitStrategy;
 
 /*
  * Operator class options
@@ -55,8 +55,7 @@ typedef struct
 	MtreePickSplitStrategy picksplit_strategy;
 	/* Union strategy */
 	MtreeUnionStrategy union_strategy;
-}
-MtreeOptions;
+} MtreeOptions;
 
 /*
  * String representation of MtreeUnionStrategy values for
@@ -83,6 +82,7 @@ static relopt_enum_elt_def mtreePickSplitStrategyValues[] =
 	{"SamplingMinCoveringMax",	SamplingMinCoveringMax},
 	{"SamplingMinOverlapArea",	SamplingMinOverlapArea},
 	{"SamplingMinAreaSum",		SamplingMinAreaSum},
+	{"GuttmanPolyTime", 		GuttmanPolyTime},
 	{(const char*) NULL}
 };
 

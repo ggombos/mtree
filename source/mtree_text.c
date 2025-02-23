@@ -19,11 +19,12 @@ mtree_text_input(PG_FUNCTION_ARGS)
 	char* input = PG_GETARG_CSTRING(0);
 
 	size_t stringLength = strlen(input);
-	mtree_text* result = (mtree_text*) palloc(OWNHDRSZ + stringLength * sizeof(char) + 1);
+	mtree_text* result = (mtree_text*) palloc(MTREE_TEXT_SIZE + stringLength * sizeof(char) + 1);
 	result->coveringRadius = 0;
 	result->parentDistance = 0;
 
-	SET_VARSIZE(result, OWNHDRSZ + stringLength * sizeof(char) + 1);
+	elog(INFO, "Text size: %ld", MTREE_TEXT_SIZE);
+	SET_VARSIZE(result, MTREE_TEXT_SIZE + stringLength * sizeof(char) + 1);
 
 	strcpy(result->vl_data, input);
 	result->vl_data[stringLength] = '\0';
@@ -248,7 +249,7 @@ mtree_text_picksplit(PG_FUNCTION_ARGS)
 	right = vector->spl_right;
 	vector->spl_nright = 0;
 
-	MtreeUnionStrategy picksplit_strategy = SamplingMinOverlapArea;
+	MtreePickSplitStrategy picksplit_strategy = SamplingMinOverlapArea;
 	if (PG_HAS_OPCLASS_OPTIONS())
 	{
 		MtreeOptions* options = (MtreeOptions *) PG_GET_OPCLASS_OPTIONS();

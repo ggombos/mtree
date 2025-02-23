@@ -412,7 +412,8 @@ DEFAULT FOR TYPE mtree_int8 USING gist AS
 	FUNCTION	5	mtree_int8_penalty		(internal, internal, internal),
 	FUNCTION	6	mtree_int8_picksplit	(internal, internal),
 	FUNCTION	7	mtree_int8_same			(mtree_int8, mtree_int8),
-	FUNCTION	8	mtree_int8_distance		(internal, mtree_int8, smallint, oid, internal);
+	FUNCTION	8	mtree_int8_distance		(internal, mtree_int8, smallint, oid, internal),
+	FUNCTION	10	mtree_options			(internal);
 
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 -- _mtree_int8
@@ -546,7 +547,8 @@ DEFAULT FOR TYPE mtree_int8_array USING gist AS
 	FUNCTION	5	mtree_int8_array_penalty	(internal, internal, internal),
 	FUNCTION	6	mtree_int8_array_picksplit	(internal, internal),
 	FUNCTION	7	mtree_int8_array_same		(mtree_int8_array, mtree_int8_array),
-	FUNCTION	8	mtree_int8_array_distance	(internal, mtree_int8_array, smallint, oid, internal);
+	FUNCTION	8	mtree_int8_array_distance	(internal, mtree_int8_array, smallint, oid, internal),
+	FUNCTION	10	mtree_options				(internal);
 
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 -- mtree_float
@@ -680,10 +682,11 @@ DEFAULT FOR TYPE mtree_float USING gist AS
 	FUNCTION	5	mtree_float_penalty		(internal, internal, internal),
 	FUNCTION	6	mtree_float_picksplit	(internal, internal),
 	FUNCTION	7	mtree_float_same		(mtree_float, mtree_float),
-	FUNCTION	8	mtree_float_distance	(internal, mtree_float, smallint, oid, internal);
+	FUNCTION	8	mtree_float_distance	(internal, mtree_float, smallint, oid, internal),
+	FUNCTION	10	mtree_options			(internal);
 
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
--- _mtree_float
+-- _mtree_float_array
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 CREATE TYPE mtree_float_array;
@@ -765,6 +768,11 @@ RETURNS float4
 AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
+CREATE OR REPLACE FUNCTION mtree_float_array_radius(mtree_float_array)
+RETURNS float4
+AS 'MODULE_PATHNAME'
+LANGUAGE C STRICT IMMUTABLE;
+
 CREATE OPERATOR = (
 	LEFTARG		= mtree_float_array,
 	RIGHTARG	= mtree_float_array,
@@ -814,4 +822,6 @@ DEFAULT FOR TYPE mtree_float_array USING gist AS
 	FUNCTION	5	mtree_float_array_penalty		(internal, internal, internal),
 	FUNCTION	6	mtree_float_array_picksplit		(internal, internal),
 	FUNCTION	7	mtree_float_array_same			(mtree_float_array, mtree_float_array),
-	FUNCTION	8	mtree_float_array_distance		(internal, mtree_float_array, smallint, oid, internal);
+	FUNCTION	8	mtree_float_array_distance		(internal, mtree_float_array, smallint, oid, internal),
+	FUNCTION	9	mtree_float_array_radius		(mtree_float_array),
+	FUNCTION	10	mtree_options					(internal);

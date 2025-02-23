@@ -7,10 +7,6 @@
 #include "mtree_int8_array_util.h"
 #include "mtree_util.h"
 
- /* TODO: Strategy should be a parameter! */
-const MtreeUnionStrategy UNION_STRATEGY_INT8_ARRAY = MinMaxDistance;
-const MtreePickSplitStrategy PICKSPLIT_STRATEGY_INT8_ARRAY = SamplingMinOverlapArea;
-
 PG_FUNCTION_INFO_V1(mtree_int8_array_input);
 PG_FUNCTION_INFO_V1(mtree_int8_array_output);
 
@@ -25,6 +21,7 @@ PG_FUNCTION_INFO_V1(mtree_int8_array_compress);
 PG_FUNCTION_INFO_V1(mtree_int8_array_decompress);
 
 PG_FUNCTION_INFO_V1(mtree_int8_array_distance);
+PG_FUNCTION_INFO_V1(mtree_int8_array_radius);
 
 PG_FUNCTION_INFO_V1(mtree_int8_array_contains_operator);
 PG_FUNCTION_INFO_V1(mtree_int8_array_contained_operator);
@@ -66,6 +63,7 @@ Datum mtree_int8_array_input(PG_FUNCTION_ARGS) {
 		previousInteger = input[i];
 	}
 
+	elog(INFO, "Int8 array size: %ld", MTREE_INT8_ARRAY_SIZE);
 	size_t size = MTREE_INT8_ARRAY_SIZE + arrayLength * sizeof(long long int) + 1;
 	mtree_int8_array* result = (mtree_int8_array*)palloc(size);
 
@@ -177,6 +175,13 @@ Datum mtree_int8_array_union(PG_FUNCTION_ARGS) {
 
 	int searchRange;
 
+	MtreeUnionStrategy UNION_STRATEGY_INT8_ARRAY = MinMaxDistance;
+	if (PG_HAS_OPCLASS_OPTIONS())
+	{
+		MtreeOptions* options = (MtreeOptions *) PG_GET_OPCLASS_OPTIONS();
+		UNION_STRATEGY_INT8_ARRAY = options->union_strategy;
+	}
+
 	switch (UNION_STRATEGY_INT8_ARRAY) {
 	case First:
 		searchRange = 1;
@@ -272,6 +277,13 @@ Datum mtree_int8_array_picksplit(PG_FUNCTION_ARGS) {
 	int minCoveringMax = -1;
 	int minOverlapArea = -1;
 	int minSumArea = -1;
+
+	MtreePickSplitStrategy PICKSPLIT_STRATEGY_INT8_ARRAY = SamplingMinOverlapArea;
+	if (PG_HAS_OPCLASS_OPTIONS())
+	{
+		MtreeOptions* options = (MtreeOptions *) PG_GET_OPCLASS_OPTIONS();
+		PICKSPLIT_STRATEGY_INT8_ARRAY = options->picksplit_strategy;
+	}
 
 	switch (PICKSPLIT_STRATEGY_INT8_ARRAY) {
 	case Random:
@@ -479,21 +491,27 @@ Datum mtree_int8_array_distance(PG_FUNCTION_ARGS) {
 	GISTENTRY* entry = (GISTENTRY*)PG_GETARG_POINTER(0);
 	mtree_int8_array* query = PG_GETARG_MTREE_INT8_ARRAY_P(1);
 	mtree_int8_array* key = DatumGetMtreeInt8Array(entry->key);
-	bool isLeaf = GistPageIsLeaf(entry->page);
-	bool* recheck = (bool*)PG_GETARG_POINTER(4);
+	//bool isLeaf = GistPageIsLeaf(entry->page);
+	//bool* recheck = (bool*)PG_GETARG_POINTER(4);
 
-	if (isLeaf) {
-		*recheck = true;
-	}
+	// if (isLeaf) {
+	// 	*recheck = true;
+	// }
 
-	PG_RETURN_FLOAT4((float4)mtree_int8_array_distance_internal(query, key));
+	PG_RETURN_INT64(mtree_int8_array_distance_internal(query, key));
+}
+
+Datum mtree_int8_array_radius(PG_FUNCTION_ARGS) {
+	mtree_int8_array* first = PG_GETARG_MTREE_INT8_ARRAY_P(0);
+
+	PG_RETURN_INT64(first->coveringRadius);
 }
 
 Datum mtree_int8_array_distance_operator(PG_FUNCTION_ARGS) {
 	mtree_int8_array* first = PG_GETARG_MTREE_INT8_ARRAY_P(0);
 	mtree_int8_array* second = PG_GETARG_MTREE_INT8_ARRAY_P(1);
 
-	PG_RETURN_FLOAT4((float4)mtree_int8_array_distance_internal(first, second));
+	PG_RETURN_INT64(mtree_int8_array_distance_internal(first, second));
 }
 
 Datum mtree_int8_array_overlap_operator(PG_FUNCTION_ARGS) {

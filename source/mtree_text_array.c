@@ -29,6 +29,7 @@ mtree_text_array_input(PG_FUNCTION_ARGS)
 	unsigned char arrayLength = get_array_length(input, inputLength);
 
 	size_t size = MTREE_TEXT_ARRAY_SIZE + arrayLength * MTREE_TEXT_ARRAY_MAX_STRINGLENGTH * sizeof(char) + 1;
+	elog(INFO, "Text array size: %ld, size variable %ld", MTREE_TEXT_ARRAY_SIZE, size);
 	mtree_text_array* result = (mtree_text_array*) palloc(size);
 
 	char* arrayElement = strtok(input, ",");
@@ -278,7 +279,7 @@ mtree_text_array_picksplit(PG_FUNCTION_ARGS)
 	right = vector->spl_right;
 	vector->spl_nright = 0;
 
-	MtreeUnionStrategy picksplit_strategy = SamplingMinOverlapArea;
+	MtreePickSplitStrategy picksplit_strategy = SamplingMinOverlapArea;
 	if (PG_HAS_OPCLASS_OPTIONS())
 	{
 		MtreeOptions* options = (MtreeOptions *) PG_GET_OPCLASS_OPTIONS();

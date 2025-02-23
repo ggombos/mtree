@@ -3,13 +3,14 @@
 set -e
 
 # Source code directory of the M-tree index
-readonly SOURCE_DIRECTORY="/home/ggombos/mtree/mtree_gist/source"
+readonly SOURCE_DIRECTORY="/home/data/mtree/source"
 # Include directory
-readonly POSTGRESQL_INCLUDE_DIRECTORY="/home/ggombos/mtree/mtree_gist/postgre/include/postgresql/server"
+# readonly POSTGRESQL_INCLUDE_DIRECTORY="/home/data/mtree_gist/postgre/include/postgresql/server"
+readonly POSTGRESQL_INCLUDE_DIRECTORY="/usr/include/postgresql/15/server"
 # PostgreSQL home of SQL and control files
-readonly POSTGRESQL_EXTENSION_DIRECTORY="/home/ggombos/mtree/mtree_gist/postgre/share/postgresql/extension"
+readonly POSTGRESQL_EXTENSION_DIRECTORY="/usr/share/postgresql/15/extension"
 # PostgreSQL home of shared object libraries
-readonly POSTGRESQL_LIBRARY_DIRECTORY="/home/ggombos/mtree/mtree_gist/postgre"
+readonly POSTGRESQL_LIBRARY_DIRECTORY="/usr/share/postgresql/15/postgre"
 
 readonly FILENAMES=(
   "mtree_text"
@@ -29,7 +30,7 @@ readonly FILENAMES=(
 )
 
 function compile_file() {
-  cc -fPIC -c -I "${POSTGRESQL_INCLUDE_DIRECTORY}" "${SOURCE_DIRECTORY}/$1.c" -o "${SOURCE_DIRECTORY}/$1.o"
+  cc -Wall -fPIC -c -I "${POSTGRESQL_INCLUDE_DIRECTORY}" "${SOURCE_DIRECTORY}/$1.c" -o "${SOURCE_DIRECTORY}/$1.o"
 }
 
 function remove_file() {

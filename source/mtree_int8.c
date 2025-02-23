@@ -7,10 +7,6 @@
 #include "mtree_int8_util.h"
 #include "mtree_util.h"
 
- /* TODO: Strategy should be a parameter! */
-const MtreeUnionStrategy UNION_STRATEGY_INT8 = MinMaxDistance;
-const MtreePickSplitStrategy PICKSPLIT_STRATEGY_INT8 = SamplingMinOverlapArea;
-
 PG_FUNCTION_INFO_V1(mtree_int8_input);
 PG_FUNCTION_INFO_V1(mtree_int8_output);
 
@@ -38,6 +34,7 @@ Datum mtree_int8_input(PG_FUNCTION_ARGS) {
 	result->coveringRadius = 0;
 	result->parentDistance = 0;
 
+	elog(INFO, "Int8 size: %ld", MTREE_INT8_SIZE);
 	SET_VARSIZE(result, MTREE_INT8_SIZE);
 
 	char* tmp;
@@ -133,6 +130,13 @@ Datum mtree_int8_union(PG_FUNCTION_ARGS) {
 	}
 
 	int searchRange;
+
+	MtreeUnionStrategy UNION_STRATEGY_INT8 = MinMaxDistance;
+	if (PG_HAS_OPCLASS_OPTIONS())
+	{
+		MtreeOptions* options = (MtreeOptions *) PG_GET_OPCLASS_OPTIONS();
+		UNION_STRATEGY_INT8 = options->union_strategy;
+	}
 
 	switch (UNION_STRATEGY_INT8) {
 	case First:
@@ -234,6 +238,13 @@ Datum mtree_int8_picksplit(PG_FUNCTION_ARGS) {
 	int minCoveringMax = -1;
 	int minOverlapArea = -1;
 	int minSumArea = -1;
+
+	MtreePickSplitStrategy PICKSPLIT_STRATEGY_INT8 = SamplingMinOverlapArea;
+	if (PG_HAS_OPCLASS_OPTIONS())
+	{
+		MtreeOptions* options = (MtreeOptions *) PG_GET_OPCLASS_OPTIONS();
+		PICKSPLIT_STRATEGY_INT8 = options->picksplit_strategy;
+	}
 
 	switch (PICKSPLIT_STRATEGY_INT8) {
 	case Random:
