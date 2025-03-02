@@ -416,7 +416,7 @@ DEFAULT FOR TYPE mtree_int8 USING gist AS
 	FUNCTION	10	mtree_options			(internal);
 
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
--- _mtree_int8
+-- _mtree_int8_array
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 CREATE TYPE mtree_int8_array;

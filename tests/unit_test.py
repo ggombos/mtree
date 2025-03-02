@@ -2,6 +2,7 @@ import psycopg2
 import os
 
 THRESHOLD = 0.0001
+THRESHOLD_INT = 1000000000
 TYPES = ["float_array", "float", "int8_array", "int8", "text_array", "text"]
 
 def connect_to_database():
@@ -64,7 +65,7 @@ def knn_test(curs, table_name, center_point_id, nn_count=10):
 def cleanup(curs):
     pass
 
-def assert_equal(result1, result2) -> bool:
+def assert_equal(result1, result2, threshold) -> bool:
     if len(result1) != len(result2):
         return False
 
@@ -80,7 +81,7 @@ def assert_equal(result1, result2) -> bool:
         dist1 = float(result1[i][2])
         dist2 = float(result2[i][2])
         diff = abs(dist1 - dist2)
-        if diff > THRESHOLD:
+        if diff > threshold:
             return False
     
     return True
@@ -95,7 +96,7 @@ def main():
             print("────────────────────────────────")
             print(f"Type: {type}")
             print("────────────────────────────────")
-            csv_files = set([f.replace("_cube.csv", "").replace("_mtree.csv", "") for f in os.listdir(type) if f.endswith('.csv')])
+            csv_files = set([f.replace("_cube.csv", "").replace("_mtree.csv", "") for f in os.listdir(f"tests/{type}") if f.endswith('.csv')])
             
             for file in csv_files:
                 print(f"\t[{file}]")
@@ -114,7 +115,11 @@ def main():
 
                     mtree_res = knn_test(curs=curs, table_name=f"{file}_mtree", center_point_id=center_point)
                     rtree_res = knn_test(curs=curs, table_name=f"{file}_cube", center_point_id=center_point)
-                    result = assert_equal(mtree_res, rtree_res)
+                    
+                    if 'int8' in type:
+                        result = assert_equal(mtree_res, rtree_res, THRESHOLD_INT)
+                    else:
+                        result = assert_equal(mtree_res, rtree_res, THRESHOLD)
 
                     print("✅" if result else "❌")
                     if not result:

@@ -58,35 +58,6 @@ typedef struct
 } MtreeOptions;
 
 /*
- * String representation of MtreeUnionStrategy values for
- * operator class option support.
- */
-static relopt_enum_elt_def mtreeUnionStrategyValues[] =
-{
-	{"First",			First},
-	{"MinMaxDistance",	MinMaxDistance},
-	{(const char *) NULL}
-};
-
-/*
- * String representation of MtreePickSplitStrategy values for
- * operator class option support.
- */
-static relopt_enum_elt_def mtreePickSplitStrategyValues[] =
-{
-	{"Random",					Random},
-	{"FirstTwo",				FirstTwo},
-	{"MaxDistanceFromFirst",	MaxDistanceFromFirst},
-	{"MaxDistancePair",			MaxDistancePair},
-	{"SamplingMinCoveringSum",	SamplingMinCoveringSum},
-	{"SamplingMinCoveringMax",	SamplingMinCoveringMax},
-	{"SamplingMinOverlapArea",	SamplingMinOverlapArea},
-	{"SamplingMinAreaSum",		SamplingMinAreaSum},
-	{"GuttmanPolyTime", 		GuttmanPolyTime},
-	{(const char*) NULL}
-};
-
-/*
  * GiST Strategy Numbers
  */
 #define	GIST_SN_STRICTLY_LEFT_OF			1

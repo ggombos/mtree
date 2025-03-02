@@ -37,7 +37,7 @@ int string_distance(const char* a, const char* b)
 	return column[lengthOfA];
 }
 
-void init_distances(const int size, int* distances)
+void init_distances(const int size, long long* distances)
 {
 	for (int i = 0; i < size; ++i)
 	{
@@ -70,7 +70,7 @@ void init_distances_int128(const int size, float* distances)
 	}
 }
 
-double overlap_area(const int radiusOne, const int radiusTwo, const int distance)
+double overlap_area(const long long radiusOne, const long long radiusTwo, const long long distance)
 {
 	if (radiusOne == 0 || radiusTwo == 0 || distance == 0)
 	{
@@ -84,9 +84,9 @@ double overlap_area(const int radiusOne, const int radiusTwo, const int distance
         return radiusOne * radiusOne * M_PI;
     }
 
-	int radiusOneSquare = radiusOne * radiusOne;
-	int radiusTwoSquare = radiusTwo * radiusTwo;
-	int distanceSquare = distance * distance;
+	long long radiusOneSquare = radiusOne * radiusOne;
+	long long radiusTwoSquare = radiusTwo * radiusTwo;
+	long long distanceSquare = distance * distance;
 
 	double phi = (acos((radiusOneSquare + distanceSquare - radiusTwoSquare) / (2 * radiusOne * distance))) * 2;
 	double theta = (acos((radiusTwoSquare + distanceSquare - radiusOneSquare) / (2 * radiusTwo * distance))) * 2;

@@ -4,16 +4,11 @@
 
 #include "mtree_int8_array_util.h"
 
-int mtree_int8_array_distance_internal(mtree_int8_array* first, mtree_int8_array* second) {
-	// return int8_simple_distance(first, second);
-	int distance = int8_array_taxicab_distance(first, second);
-
-	elog(INFO, "DISTANCE: %i", distance);
-
-	int retval = (distance - first->coveringRadius) - second->coveringRadius;
-	elog(INFO, "RETVAL: %i", retval);
-
-	if(retval < 0){
+long long mtree_int8_array_distance_internal(mtree_int8_array* first, mtree_int8_array* second) {
+	long long distance = int8_array_taxicab_distance(first, second);
+	long long retval = (distance - first->coveringRadius) - second->coveringRadius;
+	
+	if (retval < 0) {
 		retval = 0;
 	}
 
@@ -52,7 +47,7 @@ mtree_int8_array* mtree_int8_array_deep_copy(mtree_int8_array* source) {
 	return destination;
 }
 
-int get_int8_array_distance(int size, mtree_int8_array* entries[size], int distances[size][size], int i, int j) {
+long long get_int8_array_distance(int size, mtree_int8_array* entries[size], long long distances[size][size], int i, int j) {
 	if (distances[i][j] == -1) {
 		distances[i][j] = mtree_int8_array_distance_internal(entries[i], entries[j]);
 	}
@@ -151,11 +146,11 @@ int64 int8_array_kullback_leibler_distance(mtree_int8_array* first, mtree_int8_a
 	return distance;
 }
 
-int int8_array_taxicab_distance(mtree_int8_array* first, mtree_int8_array* second) {
-	int distance = 0;
+long long int8_array_taxicab_distance(mtree_int8_array* first, mtree_int8_array* second) {
+	long long distance = 0;
 	
-	for(int i = 0; i < first->arrayLength; i++){
-		distance += abs(first->data[i] - second->data[i]);
+	for (int i = 0; i < first->arrayLength; i++){
+		distance += llabs(first->data[i] - second->data[i]);
 	}
 
 	return distance;

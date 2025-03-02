@@ -52,7 +52,7 @@ Datum mtree_int8_output(PG_FUNCTION_ARGS) {
 	}
 	else {
 		result =
-			psprintf("coveringRadius|%d parentDistance|%d data|%lld",
+			psprintf("coveringRadius|%lld parentDistance|%d data|%lld",
 				output->coveringRadius, output->parentDistance, output->data);
 	}
 
@@ -205,6 +205,7 @@ Datum mtree_int8_penalty(PG_FUNCTION_ARGS) {
 
 /* TODO: Lots of duplicate code. */
 Datum mtree_int8_picksplit(PG_FUNCTION_ARGS) {
+	elog(INFO, "Pickslipt is running...");
 	GistEntryVector* entryVector = (GistEntryVector*)PG_GETARG_POINTER(0);
 	GIST_SPLITVEC* vector = (GIST_SPLITVEC*)PG_GETARG_POINTER(1);
 	OffsetNumber maxOffset = (OffsetNumber)entryVector->n - 1;
@@ -228,16 +229,16 @@ Datum mtree_int8_picksplit(PG_FUNCTION_ARGS) {
 			DatumGetMtreeInt8(entryVector->vector[i].key);
 	}
 
-	int distances[maxOffset][maxOffset];
+	long long distances[maxOffset][maxOffset];
 	init_distances(maxOffset, *distances);
 
 	int leftIndex, rightIndex, leftCandidateIndex, rightCandidateIndex;
 	int trialCount = 100;
-	int maxDistance = -1;
-	int minCoveringSum = -1;
+	long long maxDistance = -1;
+	long long minCoveringSum = -1;
 	int minCoveringMax = -1;
-	int minOverlapArea = -1;
-	int minSumArea = -1;
+	double minOverlapArea = -1;
+	long long minSumArea = -1;
 
 	MtreePickSplitStrategy PICKSPLIT_STRATEGY_INT8 = SamplingMinOverlapArea;
 	if (PG_HAS_OPCLASS_OPTIONS())
@@ -249,8 +250,7 @@ Datum mtree_int8_picksplit(PG_FUNCTION_ARGS) {
 	switch (PICKSPLIT_STRATEGY_INT8) {
 	case Random:
 		leftIndex = ((int)random()) % (maxOffset - 1);
-		rightIndex =
-			(leftIndex + 1) + (((int)random()) % (maxOffset - leftIndex - 1));
+		rightIndex = (leftIndex + 1) + (((int)random()) % (maxOffset - leftIndex - 1));
 		break;
 	case FirstTwo:
 		leftIndex = 0;
@@ -259,7 +259,7 @@ Datum mtree_int8_picksplit(PG_FUNCTION_ARGS) {
 	case MaxDistanceFromFirst:
 		maxDistance = -1;
 		for (int r = 0; r < maxOffset; ++r) {
-			int distance = get_int8_distance(maxOffset, entries, distances, 0, r);
+			long long distance = get_int8_distance(maxOffset, entries, distances, 0, r);
 			if (distance > maxDistance) {
 				maxDistance = distance;
 				rightCandidateIndex = r;
@@ -271,7 +271,7 @@ Datum mtree_int8_picksplit(PG_FUNCTION_ARGS) {
 	case MaxDistancePair:
 		for (OffsetNumber l = 0; l < maxOffset; ++l) {
 			for (OffsetNumber r = l; r < maxOffset; ++r) {
-				int distance = get_int8_distance(maxOffset, entries, distances, l, r);
+				long long distance = get_int8_distance(maxOffset, entries, distances, l, r);
 				if (distance > maxDistance) {
 					maxDistance = distance;
 					leftCandidateIndex = l;
@@ -288,24 +288,20 @@ Datum mtree_int8_picksplit(PG_FUNCTION_ARGS) {
 			rightCandidateIndex =
 				(leftCandidateIndex + 1) +
 				(((int)random()) % (maxOffset - leftCandidateIndex - 1));
-			int leftRadius = 0, rightRadius = 0;
+			long long leftRadius = 0, rightRadius = 0;
 
 			for (int currentIndex = 0; currentIndex < maxOffset; currentIndex++) {
-				int leftDistance = get_int8_distance(maxOffset, entries, distances,
-					leftCandidateIndex, currentIndex);
-				int rightDistance = get_int8_distance(
-					maxOffset, entries, distances, rightCandidateIndex, currentIndex);
+				long long distanceLeft = get_int8_distance(maxOffset, entries, distances, leftCandidateIndex, currentIndex);
+				long long distanceRight = get_int8_distance(maxOffset, entries, distances, rightCandidateIndex, currentIndex);
 
-				if (leftDistance < rightDistance) {
-					if (leftDistance + entries[currentIndex]->coveringRadius >
-						leftRadius) {
-						leftRadius = leftDistance + entries[currentIndex]->coveringRadius;
+				if (distanceLeft < distanceRight) {
+					if (distanceLeft + entries[currentIndex]->coveringRadius > leftRadius) {
+						leftRadius = distanceLeft + entries[currentIndex]->coveringRadius;
 					}
 				}
 				else {
-					if (rightDistance + entries[currentIndex]->coveringRadius >
-						rightRadius) {
-						rightRadius = rightDistance + entries[currentIndex]->coveringRadius;
+					if (distanceRight + entries[currentIndex]->coveringRadius > rightRadius) {
+						rightRadius = distanceRight + entries[currentIndex]->coveringRadius;
 					}
 				}
 			}
@@ -323,24 +319,20 @@ Datum mtree_int8_picksplit(PG_FUNCTION_ARGS) {
 			rightCandidateIndex =
 				(leftCandidateIndex + 1) +
 				(((int)random()) % (maxOffset - leftCandidateIndex - 1));
-			int leftRadius = 0, rightRadius = 0;
+			long long leftRadius = 0, rightRadius = 0;
 
 			for (int currentIndex = 0; currentIndex < maxOffset; ++currentIndex) {
-				int leftDistance = get_int8_distance(maxOffset, entries, distances,
-					leftCandidateIndex, currentIndex);
-				int rightDistance = get_int8_distance(
-					maxOffset, entries, distances, rightCandidateIndex, currentIndex);
+				long long distanceLeft = get_int8_distance(maxOffset, entries, distances,leftCandidateIndex, currentIndex);
+				long long distanceRight = get_int8_distance(maxOffset, entries, distances, rightCandidateIndex, currentIndex);
 
-				if (leftDistance < rightDistance) {
-					if (leftDistance + entries[currentIndex]->coveringRadius >
-						leftRadius) {
-						leftRadius = leftDistance + entries[currentIndex]->coveringRadius;
+				if (distanceLeft < distanceRight) {
+					if (distanceLeft + entries[currentIndex]->coveringRadius > leftRadius) {
+						leftRadius = distanceLeft + entries[currentIndex]->coveringRadius;
 					}
 				}
 				else {
-					if (rightDistance + entries[currentIndex]->coveringRadius >
-						rightRadius) {
-						rightRadius = rightDistance + entries[currentIndex]->coveringRadius;
+					if (distanceRight + entries[currentIndex]->coveringRadius > rightRadius) {
+						rightRadius = distanceRight + entries[currentIndex]->coveringRadius;
 					}
 				}
 			}
@@ -359,34 +351,28 @@ Datum mtree_int8_picksplit(PG_FUNCTION_ARGS) {
 			rightCandidateIndex =
 				(leftCandidateIndex + 1) +
 				(((int)random()) % (maxOffset - leftCandidateIndex - 1));
-			int distance = get_int8_distance(maxOffset, entries, distances,
-				leftCandidateIndex, rightCandidateIndex);
-			int leftRadius = 0, rightRadius = 0;
+			long long distance = get_int8_distance(maxOffset, entries, distances, leftCandidateIndex, rightCandidateIndex);
+			long long leftRadius = 0, rightRadius = 0;
 
 			for (int currentIndex = 0; currentIndex < maxOffset; currentIndex++) {
-				int leftDistance = get_int8_distance(maxOffset, entries, distances,
-					leftCandidateIndex, currentIndex);
-				int rightDistance = get_int8_distance(
-					maxOffset, entries, distances, rightCandidateIndex, currentIndex);
+				long long distanceLeft = get_int8_distance(maxOffset, entries, distances, leftCandidateIndex, currentIndex);
+				long long distanceRight = get_int8_distance(maxOffset, entries, distances, rightCandidateIndex, currentIndex);
 
-				if (leftDistance < rightDistance) {
-					if (leftDistance + entries[currentIndex]->coveringRadius >
-						leftRadius) {
-						leftRadius = leftDistance + entries[currentIndex]->coveringRadius;
+				if (distanceLeft < distanceRight) {
+					if (distanceLeft + entries[currentIndex]->coveringRadius > leftRadius) {
+						leftRadius = distanceLeft + entries[currentIndex]->coveringRadius;
 					}
 				}
 				else {
-					if (rightDistance + entries[currentIndex]->coveringRadius >
-						rightRadius) {
-						rightRadius = rightDistance + entries[currentIndex]->coveringRadius;
+					if (distanceRight + entries[currentIndex]->coveringRadius > rightRadius) {
+						rightRadius = distanceRight + entries[currentIndex]->coveringRadius;
 					}
 				}
 			}
 
-			double currentOverlapArea =
-				overlap_area(leftRadius, rightRadius, distance);
+			float currentOverlapArea = overlap_area(leftRadius, rightRadius, distance);
 			if (minOverlapArea == -1 || currentOverlapArea < minOverlapArea) {
-				minOverlapArea = (int)currentOverlapArea;
+				minOverlapArea = currentOverlapArea;
 				leftIndex = leftCandidateIndex;
 				rightIndex = rightCandidateIndex;
 			}
@@ -398,29 +384,25 @@ Datum mtree_int8_picksplit(PG_FUNCTION_ARGS) {
 			rightCandidateIndex =
 				(leftCandidateIndex + 1) +
 				(((int)random()) % (maxOffset - leftCandidateIndex - 1));
-			int leftRadius = 0, rightRadius = 0;
+			long long leftRadius = 0, rightRadius = 0;
 
 			for (int currentIndex = 0; currentIndex < maxOffset; currentIndex++) {
-				int leftDistance = get_int8_distance(maxOffset, entries, distances,
-					leftCandidateIndex, currentIndex);
-				int rightDistance = get_int8_distance(
-					maxOffset, entries, distances, rightCandidateIndex, currentIndex);
+				long long distanceLeft = get_int8_distance(maxOffset, entries, distances, leftCandidateIndex, currentIndex);
+				long long distanceRight = get_int8_distance(maxOffset, entries, distances, rightCandidateIndex, currentIndex);
 
-				if (leftDistance < rightDistance) {
-					if (leftDistance + entries[currentIndex]->coveringRadius >
-						leftRadius) {
-						leftRadius = leftDistance + entries[currentIndex]->coveringRadius;
+				if (distanceLeft < distanceRight) {
+					if (distanceLeft + entries[currentIndex]->coveringRadius > leftRadius) {
+						leftRadius = distanceLeft + entries[currentIndex]->coveringRadius;
 					}
 				}
 				else {
-					if (rightDistance + entries[currentIndex]->coveringRadius >
-						rightRadius) {
-						rightRadius = rightDistance + entries[currentIndex]->coveringRadius;
+					if (distanceRight + entries[currentIndex]->coveringRadius > rightRadius) {
+						rightRadius = distanceRight + entries[currentIndex]->coveringRadius;
 					}
 				}
 			}
 
-			int currentSumArea = leftRadius * leftRadius + rightRadius * rightRadius;
+			long long currentSumArea = leftRadius * leftRadius + rightRadius * rightRadius;
 			if (minSumArea == -1 || currentSumArea < minSumArea) {
 				minSumArea = currentSumArea;
 				leftIndex = leftCandidateIndex;
@@ -439,12 +421,9 @@ Datum mtree_int8_picksplit(PG_FUNCTION_ARGS) {
 	mtree_int8* unionRight = mtree_int8_deep_copy(entries[rightIndex]);
 	mtree_int8* current;
 
-	for (OffsetNumber i = FirstOffsetNumber; i <= maxOffset;
-		i = OffsetNumberNext(i)) {
-		int distanceLeft =
-			get_int8_distance(maxOffset, entries, distances, leftIndex, i - 1);
-		int distanceRight =
-			get_int8_distance(maxOffset, entries, distances, rightIndex, i - 1);
+	for (OffsetNumber i = FirstOffsetNumber; i <= maxOffset; i = OffsetNumberNext(i)) {
+		long long distanceLeft = get_int8_distance(maxOffset, entries, distances, leftIndex, i - 1);
+		long long distanceRight = get_int8_distance(maxOffset, entries, distances, rightIndex, i - 1);
 		current = entries[i - 1];
 
 		if (distanceLeft < distanceRight) {

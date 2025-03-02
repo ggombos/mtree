@@ -64,7 +64,7 @@ Datum mtree_int8_array_input(PG_FUNCTION_ARGS) {
 	}
 
 	elog(INFO, "Int8 array size: %ld", MTREE_INT8_ARRAY_SIZE);
-	size_t size = MTREE_INT8_ARRAY_SIZE + arrayLength * sizeof(long long int) + 1;
+	size_t size = MTREE_INT8_ARRAY_SIZE + arrayLength * sizeof(long long) + 1;
 	mtree_int8_array* result = (mtree_int8_array*)palloc(size);
 
 	char* tmp;
@@ -267,7 +267,7 @@ Datum mtree_int8_array_picksplit(PG_FUNCTION_ARGS) {
 		entries[i - FirstOffsetNumber] = DatumGetMtreeInt8Array(entryVector->vector[i].key);
 	}
 
-	int distances[maxOffset][maxOffset];
+	long long distances[maxOffset][maxOffset];
 	init_distances(maxOffset, *distances);
 
 	int leftIndex, rightIndex, leftCandidateIndex, rightCandidateIndex;
