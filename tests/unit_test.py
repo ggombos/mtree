@@ -3,8 +3,7 @@ import os
 
 THRESHOLD = 0.0001
 THRESHOLD_INT = 1000000000
-#TYPES = ["float_array", "float", "int8_array", "int8", "text_array", "text"]
-TYPES = ["int64"]
+TYPES = ["float_array", "float", "int8_array", "int8", "text_array", "text"]
 
 def connect_to_database():
     try:
@@ -13,7 +12,7 @@ def connect_to_database():
             port=5432,
             database="postgres",
             user="postgres",
-            password="...")
+            password="Katona01")
 
         curs = conn.cursor()
         return curs

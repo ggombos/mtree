@@ -20,7 +20,7 @@ jobs:
       - name: Configure Docker Container
         run: |
           docker run -d --name labor_postgresql \
-            -v $(pwd)/data:/home/data/ \
+            -v $(pwd):/home/data/mtree \
             -p 10000:5432 \
             -e POSTGRES_DB=pointclouds \
             -e POSTGRES_USER=postgres \
@@ -38,10 +38,14 @@ jobs:
             postgresql-15-pointcloud \
             postgis \
             postgresql-15-postgis \
-            gcc
+            gcc \
+            python3-psycopg2
+          docker exec labor_postgresql bash -c "mkdir /usr/share/postgresql/15/postgre/"
+
+      - name: Build the Code
+        run: |
+          docker exec labor_postgresql bash -c "cd /home/data/mtree && chmod +x script/gg/installGG.sh && script/gg/installGG.sh"
 
       - name: Run Unit Tests in Docker
         run: |
-          docker exec labor_postgresql bash -c "
-          cd /home/data/mtree &&
-          python3 tests/unit_test.py"
+          docker exec labor_postgresql bash -c "cd /home/data/mtree && python3 tests/unit_test.py"
