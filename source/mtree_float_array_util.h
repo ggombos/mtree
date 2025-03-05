@@ -7,8 +7,8 @@
 
 #include "mtree_float_array.h"
 
-float mtree_float_array_distance_internal(mtree_float_array* first, mtree_float_array* second);
-float mtree_float_array_exact_distance(mtree_float_array* first, mtree_float_array* second);
+float mtree_float_array_outer_distance(mtree_float_array* first, mtree_float_array* second);
+float mtree_float_array_full_distance(mtree_float_array* first, mtree_float_array* second);
 bool mtree_float_array_equals(mtree_float_array* first, mtree_float_array* second);
 bool mtree_float_array_overlap_distance(mtree_float_array* first, mtree_float_array* second);
 bool mtree_float_array_contains_distance(mtree_float_array* first, mtree_float_array* second);

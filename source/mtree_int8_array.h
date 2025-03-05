@@ -18,7 +18,7 @@
 
 typedef struct {
 	int parentDistance;
-	int coveringRadius;
+	long long coveringRadius;
 	unsigned char arrayLength;
 	long long data[FLEXIBLE_ARRAY_MEMBER];
 } __attribute__((packed, aligned(1))) mtree_int8_array;

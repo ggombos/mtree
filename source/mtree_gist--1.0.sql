@@ -498,6 +498,11 @@ RETURNS float4
 AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
+CREATE OR REPLACE FUNCTION mtree_int8_array_radius(mtree_int8_array)
+RETURNS float4
+AS 'MODULE_PATHNAME'
+LANGUAGE C STRICT IMMUTABLE;
+
 CREATE OPERATOR = (
 	LEFTARG		= mtree_int8_array,
 	RIGHTARG	= mtree_int8_array,
@@ -548,6 +553,7 @@ DEFAULT FOR TYPE mtree_int8_array USING gist AS
 	FUNCTION	6	mtree_int8_array_picksplit	(internal, internal),
 	FUNCTION	7	mtree_int8_array_same		(mtree_int8_array, mtree_int8_array),
 	FUNCTION	8	mtree_int8_array_distance	(internal, mtree_int8_array, smallint, oid, internal),
+	FUNCTION    9   mtree_int8_array_radius     (mtree_int8_array), -- nem kell szedd ki, csak tesztelés miatt van, sehova nem kell function 9
 	FUNCTION	10	mtree_options				(internal);
 
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --

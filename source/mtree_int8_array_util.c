@@ -29,15 +29,15 @@ bool mtree_int8_array_equals(mtree_int8_array* first, mtree_int8_array* second) 
 	return true;
 }
 
-bool mtree_int8_array_overlap_distance(mtree_int8_array* first, mtree_int8_array* second, int distance) {
+bool mtree_int8_array_overlap_distance(mtree_int8_array* first, mtree_int8_array* second, long long distance) {
 	return distance <= first->coveringRadius + second->coveringRadius;
 }
 
-bool mtree_int8_array_contains_distance(mtree_int8_array* first, mtree_int8_array* second, int distance) {
+bool mtree_int8_array_contains_distance(mtree_int8_array* first, mtree_int8_array* second, long long distance) {
 	return first->coveringRadius >= distance + second->coveringRadius;
 }
 
-bool mtree_int8_array_contained_distance(mtree_int8_array* first, mtree_int8_array* second, int distance) {
+bool mtree_int8_array_contained_distance(mtree_int8_array* first, mtree_int8_array* second, long long distance) {
 	return mtree_int8_array_contains_distance(second, first, distance);
 }
 
@@ -54,8 +54,8 @@ long long get_int8_array_distance(int size, mtree_int8_array* entries[size], lon
 	return distances[i][j];
 }
 
-int int8_simple_distance(mtree_int8_array* first, mtree_int8_array* second) {
-	int distance = 0;
+long long int8_simple_distance(mtree_int8_array* first, mtree_int8_array* second) {
+	long long distance = 0;
 	unsigned char minimumLength;//, maximumLength;
 	//mtree_int8_array* longer;
 
@@ -82,8 +82,8 @@ int int8_simple_distance(mtree_int8_array* first, mtree_int8_array* second) {
 	return distance;
 }
 
-int int8_array_sum_distance(mtree_int8_array* first, mtree_int8_array* second) {
-	int distance = 0;
+long long int8_array_sum_distance(mtree_int8_array* first, mtree_int8_array* second) {
+	long long distance = 0;
 	unsigned char minimumLength, maximumLength;
 	mtree_int8_array* longer;
 
@@ -114,8 +114,8 @@ int int8_array_sum_distance(mtree_int8_array* first, mtree_int8_array* second) {
 	return distance;
 }
 
-int64 int8_array_kullback_leibler_distance(mtree_int8_array* first, mtree_int8_array* second) {
-	int64 distance = 0;
+long long int8_array_kullback_leibler_distance(mtree_int8_array* first, mtree_int8_array* second) {
+	long long distance = 0;
 	unsigned char minimumLength, maximumLength;
 	mtree_int8_array* longer;
 
@@ -147,10 +147,11 @@ int64 int8_array_kullback_leibler_distance(mtree_int8_array* first, mtree_int8_a
 }
 
 long long int8_array_taxicab_distance(mtree_int8_array* first, mtree_int8_array* second) {
-	long long distance = 0;
+	unsigned long long distance = 0;
 	
 	for (int i = 0; i < first->arrayLength; i++){
 		distance += llabs(first->data[i] - second->data[i]);
+		elog(INFO, "%lld, %lld - %lld", distance, first->data[i], second->data[i]);
 	}
 
 	return distance;

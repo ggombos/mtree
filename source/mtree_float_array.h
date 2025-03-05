@@ -10,10 +10,9 @@
 #include "access/gist.h"
 #include "mtree_gist.h"
 
-//#define MTREE_FLOAT_ARRAY_SIZE (2 * sizeof(float) + sizeof(unsigned char) + sizeof(int)) // 13 bytes
-#define MTREE_FLOAT_ARRAY_SIZE sizeof(mtree_float_array) // 13 bytes
-#define DatumGetMtreeInt8Array(x) ((mtree_float_array*) PG_DETOAST_DATUM(x))
-#define PG_GETARG_MTREE_FLOAT_ARRAY_P(x) DatumGetMtreeInt8Array(PG_GETARG_DATUM(x))
+#define MTREE_FLOAT_ARRAY_SIZE sizeof(mtree_float_array)
+#define DatumGetMtreeFloatArray(x) ((mtree_float_array*) PG_DETOAST_DATUM(x))
+#define PG_GETARG_MTREE_FLOAT_ARRAY_P(x) DatumGetMtreeFloatArray(PG_GETARG_DATUM(x))
 #define PG_RETURN_MTREE_FLOAT_ARRAY_P(x) PG_RETURN_POINTER(x)
 
 typedef struct {

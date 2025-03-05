@@ -65,7 +65,7 @@ Datum mtree_int8_consistent(PG_FUNCTION_ARGS) {
 	StrategyNumber strategyNumber = (StrategyNumber)PG_GETARG_UINT16(2);
 	bool* recheck = (bool*)PG_GETARG_POINTER(4);
 	mtree_int8* key = DatumGetMtreeInt8(entry->key);
-	int distance = mtree_int8_distance_internal(key, query);
+	long long distance = mtree_int8_distance_internal(key, query);
 
 	bool returnValue;
 	if (GIST_LEAF(entry)) {
@@ -152,14 +152,14 @@ Datum mtree_int8_union(PG_FUNCTION_ARGS) {
 		break;
 	}
 
-	int coveringRadii[searchRange];
+	long long coveringRadii[searchRange];
 
 	for (int i = 0; i < searchRange; ++i) {
 		coveringRadii[i] = 0;
 
 		for (int j = 0; j < ranges; ++j) {
-			int distance = mtree_int8_distance_internal(entries[i], entries[j]);
-			int newCoveringRadius = distance + entries[j]->coveringRadius;
+			long long distance = mtree_int8_distance_internal(entries[i], entries[j]);
+			long long newCoveringRadius = distance + entries[j]->coveringRadius;
 
 			if (coveringRadii[i] < newCoveringRadius) {
 				coveringRadii[i] = newCoveringRadius;
@@ -194,8 +194,8 @@ Datum mtree_int8_penalty(PG_FUNCTION_ARGS) {
 	mtree_int8* original = DatumGetMtreeInt8(originalEntry->key);
 	mtree_int8* new = DatumGetMtreeInt8(newEntry->key);
 
-	int distance = mtree_int8_distance_internal(original, new);
-	int newCoveringRadius = distance + new->coveringRadius;
+	long long distance = mtree_int8_distance_internal(original, new);
+	long long newCoveringRadius = distance + new->coveringRadius;
 	*penalty = (float)(newCoveringRadius < original->coveringRadius
 		? 0
 		: newCoveringRadius - original->coveringRadius);
@@ -203,9 +203,7 @@ Datum mtree_int8_penalty(PG_FUNCTION_ARGS) {
 	PG_RETURN_POINTER(penalty);
 }
 
-/* TODO: Lots of duplicate code. */
 Datum mtree_int8_picksplit(PG_FUNCTION_ARGS) {
-	elog(INFO, "Pickslipt is running...");
 	GistEntryVector* entryVector = (GistEntryVector*)PG_GETARG_POINTER(0);
 	GIST_SPLITVEC* vector = (GIST_SPLITVEC*)PG_GETARG_POINTER(1);
 	OffsetNumber maxOffset = (OffsetNumber)entryVector->n - 1;
@@ -236,7 +234,7 @@ Datum mtree_int8_picksplit(PG_FUNCTION_ARGS) {
 	int trialCount = 100;
 	long long maxDistance = -1;
 	long long minCoveringSum = -1;
-	int minCoveringMax = -1;
+	long long minCoveringMax = -1;
 	double minOverlapArea = -1;
 	long long minSumArea = -1;
 
@@ -337,8 +335,7 @@ Datum mtree_int8_picksplit(PG_FUNCTION_ARGS) {
 				}
 			}
 
-			if (minCoveringMax == -1 ||
-				MAX_2(leftRadius, rightRadius) < minCoveringMax) {
+			if (minCoveringMax == -1 || MAX_2(leftRadius, rightRadius) < minCoveringMax) {
 				minCoveringMax = MAX_2(leftRadius, rightRadius);
 				leftIndex = leftCandidateIndex;
 				rightIndex = rightCandidateIndex;
@@ -370,7 +367,7 @@ Datum mtree_int8_picksplit(PG_FUNCTION_ARGS) {
 				}
 			}
 
-			float currentOverlapArea = overlap_area(leftRadius, rightRadius, distance);
+			double currentOverlapArea = overlap_area(leftRadius, rightRadius, distance);
 			if (minOverlapArea == -1 || currentOverlapArea < minOverlapArea) {
 				minOverlapArea = currentOverlapArea;
 				leftIndex = leftCandidateIndex;

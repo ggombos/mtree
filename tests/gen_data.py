@@ -3,7 +3,7 @@ import random
 import string
 import argparse
 
-NUMBER_OF_ARRAY_ELEMENTS = 5
+NUMBER_OF_ARRAY_ELEMENTS = 3
 NUMBER_OF_CHARACTERS = 8
 DELIMITER = ','
 TYPES = ['float_array', 'float', 'int8_array', 'int8', 'text_array', 'text']

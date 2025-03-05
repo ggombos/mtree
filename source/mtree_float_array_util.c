@@ -5,19 +5,18 @@
 #include "mtree_float_array_util.h"
 #include <math.h>
 
-float mtree_float_array_distance_internal(mtree_float_array* first, mtree_float_array* second) {
+float mtree_float_array_outer_distance(mtree_float_array* first, mtree_float_array* second) {
 	float distance = float_array_euclidean_distance(first, second);
+	float outer_distance = distance - first->coveringRadius - second->coveringRadius;
 
-	float retval = (distance - first->coveringRadius) - second->coveringRadius;
-
-	if(retval < 0.0){
-		retval = 0.0;
+	if (outer_distance < 0.0){
+		outer_distance = 0.0;
 	}
 
-	return retval;
+	return outer_distance;
 }
 
-float mtree_float_array_exact_distance(mtree_float_array* first, mtree_float_array* second){
+float mtree_float_array_full_distance(mtree_float_array* first, mtree_float_array* second){
 	return float_array_euclidean_distance(first, second);
 }
 
@@ -36,13 +35,13 @@ bool mtree_float_array_equals(mtree_float_array* first, mtree_float_array* secon
 }
 
 bool mtree_float_array_overlap_distance(mtree_float_array* first, mtree_float_array* second) {
-	float exact_distance = mtree_float_array_exact_distance(first, second);
-	return exact_distance - (first->coveringRadius + second->coveringRadius) < 0;
+	float full_distance = mtree_float_array_full_distance(first, second);
+	return full_distance - (first->coveringRadius + second->coveringRadius) < 0;
 }
 
 bool mtree_float_array_contains_distance(mtree_float_array* first, mtree_float_array* second) {
-	float exact_distance = mtree_float_array_exact_distance(first, second);
-	return exact_distance + second->coveringRadius < first->coveringRadius;
+	float full_distance = mtree_float_array_full_distance(first, second);
+	return full_distance + second->coveringRadius < first->coveringRadius;
 }
 
 bool mtree_float_array_contained_distance(mtree_float_array* first, mtree_float_array* second) {
@@ -57,7 +56,7 @@ mtree_float_array* mtree_float_array_deep_copy(mtree_float_array* source) {
 
 float get_float_array_distance(int size, mtree_float_array* entries[size], float distances[size][size], int i, int j) {
 	if (distances[i][j] == -1) {
-		distances[i][j] = mtree_float_array_exact_distance(entries[i], entries[j]);
+		distances[i][j] = mtree_float_array_full_distance(entries[i], entries[j]);
 	}
 	return distances[i][j];
 }
@@ -170,7 +169,7 @@ float float_array_taxicab_distance(mtree_float_array* first, mtree_float_array* 
 	}
 
 	for (int i = 0; i < minimumLength; ++i) {
-		distance += abs(first->data[i] - second->data[i]);
+		distance += fabs(first->data[i] - second->data[i]);
 	}
 
 	return distance;
