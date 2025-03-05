@@ -6,7 +6,7 @@ import argparse
 NUMBER_OF_ARRAY_ELEMENTS = 3
 NUMBER_OF_CHARACTERS = 8
 DELIMITER = ','
-TYPES = ['float_array', 'float', 'int8_array', 'int8', 'text_array', 'text']
+TYPES = ['float_array', 'float', 'int8_array', 'int64', 'text_array', 'text']
 TREES = ['mtree', 'cube']
 
 def generate_float_data(path, number_of_rows):
@@ -115,7 +115,7 @@ def main():
         generate_float_data(args.path, number_of_rows)
     elif args.type == 'float_array':
         generate_float_array_data(args.path, number_of_rows)
-    elif args.type == 'int8':
+    elif args.type == 'int64':
         generate_int8_data(args.path, number_of_rows)
     elif args.type == 'int8_array':
         generate_int8_array_data(args.path, number_of_rows)
