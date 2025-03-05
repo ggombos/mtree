@@ -281,138 +281,138 @@ DEFAULT FOR TYPE mtree_text_array USING gist AS
 	FUNCTION	10	mtree_options				(internal);
 
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
--- mtree_int8
+-- mtree_int64
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
-CREATE TYPE mtree_int8;
+CREATE TYPE mtree_int64;
 
-CREATE OR REPLACE FUNCTION mtree_int8_input(cstring)
-RETURNS mtree_int8
+CREATE OR REPLACE FUNCTION mtree_int64_input(cstring)
+RETURNS mtree_int64
 AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
-CREATE OR REPLACE FUNCTION mtree_int8_output(mtree_int8)
+CREATE OR REPLACE FUNCTION mtree_int64_output(mtree_int64)
 RETURNS cstring
 AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
-CREATE TYPE mtree_int8 (
-	INPUT	= mtree_int8_input,
-	OUTPUT	= mtree_int8_output,
+CREATE TYPE mtree_int64 (
+	INPUT	= mtree_int64_input,
+	OUTPUT	= mtree_int64_output,
 	INTERNALLENGTH = VARIABLE,
 	STORAGE	= extended
 );
 
-CREATE OR REPLACE FUNCTION mtree_int8_consistent(internal, mtree_int8, smallint, oid, internal)
+CREATE OR REPLACE FUNCTION mtree_int64_consistent(internal, mtree_int64, smallint, oid, internal)
 RETURNS bool
 AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
-CREATE OR REPLACE FUNCTION mtree_int8_union(internal, internal)
-RETURNS mtree_int8
+CREATE OR REPLACE FUNCTION mtree_int64_union(internal, internal)
+RETURNS mtree_int64
 AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
-CREATE OR REPLACE FUNCTION mtree_int8_same(mtree_int8, mtree_int8)
+CREATE OR REPLACE FUNCTION mtree_int64_same(mtree_int64, mtree_int64)
 RETURNS bool
 AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
-CREATE OR REPLACE FUNCTION mtree_int8_penalty(internal, internal, internal)
+CREATE OR REPLACE FUNCTION mtree_int64_penalty(internal, internal, internal)
 RETURNS internal
 AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
-CREATE OR REPLACE FUNCTION mtree_int8_picksplit(internal, internal)
+CREATE OR REPLACE FUNCTION mtree_int64_picksplit(internal, internal)
 RETURNS internal
 AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
-CREATE OR REPLACE FUNCTION mtree_int8_compress(internal)
+CREATE OR REPLACE FUNCTION mtree_int64_compress(internal)
 RETURNS internal
 AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
-CREATE OR REPLACE FUNCTION mtree_int8_decompress(internal)
+CREATE OR REPLACE FUNCTION mtree_int64_decompress(internal)
 RETURNS internal
 AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
-CREATE OR REPLACE FUNCTION mtree_int8_distance(internal, mtree_int8, smallint, oid, internal)
+CREATE OR REPLACE FUNCTION mtree_int64_distance(internal, mtree_int64, smallint, oid, internal)
 RETURNS float4
 AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
-CREATE OR REPLACE FUNCTION mtree_int8_overlap_operator(mtree_int8, mtree_int8)
+CREATE OR REPLACE FUNCTION mtree_int64_overlap_operator(mtree_int64, mtree_int64)
 RETURNS bool
 AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
-CREATE OR REPLACE FUNCTION mtree_int8_contains_operator(mtree_int8, mtree_int8)
+CREATE OR REPLACE FUNCTION mtree_int64_contains_operator(mtree_int64, mtree_int64)
 RETURNS bool
 AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
-CREATE OR REPLACE FUNCTION mtree_int8_contained_operator(mtree_int8, mtree_int8)
+CREATE OR REPLACE FUNCTION mtree_int64_contained_operator(mtree_int64, mtree_int64)
 RETURNS bool
 AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
-CREATE OR REPLACE FUNCTION mtree_int8_distance_operator(mtree_int8, mtree_int8)
+CREATE OR REPLACE FUNCTION mtree_int64_distance_operator(mtree_int64, mtree_int64)
 RETURNS float4
 AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
 CREATE OPERATOR = (
-	LEFTARG		= mtree_int8,
-	RIGHTARG	= mtree_int8,
-	FUNCTION	= mtree_int8_same,
+	LEFTARG		= mtree_int64,
+	RIGHTARG	= mtree_int64,
+	FUNCTION	= mtree_int64_same,
 	COMMUTATOR	= =
 );
 
 CREATE OPERATOR #&# (
-	LEFTARG		= mtree_int8,
-	RIGHTARG	= mtree_int8,
-	FUNCTION	= mtree_int8_overlap_operator,
+	LEFTARG		= mtree_int64,
+	RIGHTARG	= mtree_int64,
+	FUNCTION	= mtree_int64_overlap_operator,
 	COMMUTATOR	= #&#
 );
 
 CREATE OPERATOR #<# (
-	LEFTARG		= mtree_int8,
-	RIGHTARG	= mtree_int8,
-	FUNCTION	= mtree_int8_contained_operator,
+	LEFTARG		= mtree_int64,
+	RIGHTARG	= mtree_int64,
+	FUNCTION	= mtree_int64_contained_operator,
 	COMMUTATOR	= #>#
 );
 
 CREATE OPERATOR #># (
-	LEFTARG		= mtree_int8,
-	RIGHTARG	= mtree_int8,
-	FUNCTION	= mtree_int8_contains_operator,
+	LEFTARG		= mtree_int64,
+	RIGHTARG	= mtree_int64,
+	FUNCTION	= mtree_int64_contains_operator,
 	COMMUTATOR	= #<#
 );
 
 CREATE OPERATOR <-> (
-	LEFTARG		= mtree_int8,
-	RIGHTARG	= mtree_int8,
-	FUNCTION	= mtree_int8_distance_operator,
+	LEFTARG		= mtree_int64,
+	RIGHTARG	= mtree_int64,
+	FUNCTION	= mtree_int64_distance_operator,
 	COMMUTATOR	= <->
 );
 
-CREATE OPERATOR CLASS gist_mtree_int8_ops
-DEFAULT FOR TYPE mtree_int8 USING gist AS
+CREATE OPERATOR CLASS gist_mtree_int64_ops
+DEFAULT FOR TYPE mtree_int64 USING gist AS
 	OPERATOR	1	=	,
 	OPERATOR	2	#&#	,
 	OPERATOR	3	#>#	,
 	OPERATOR	4	#<#	,
-	OPERATOR	15	<->						(mtree_int8, mtree_int8) FOR ORDER BY float_ops,
-	FUNCTION	1	mtree_int8_consistent	(internal, mtree_int8, smallint, oid, internal),
-	FUNCTION	2	mtree_int8_union		(internal, internal),
-	FUNCTION	3	mtree_int8_compress		(internal),
-	FUNCTION	4	mtree_int8_decompress	(internal),
-	FUNCTION	5	mtree_int8_penalty		(internal, internal, internal),
-	FUNCTION	6	mtree_int8_picksplit	(internal, internal),
-	FUNCTION	7	mtree_int8_same			(mtree_int8, mtree_int8),
-	FUNCTION	8	mtree_int8_distance		(internal, mtree_int8, smallint, oid, internal),
+	OPERATOR	15	<->						(mtree_int64, mtree_int64) FOR ORDER BY float_ops,
+	FUNCTION	1	mtree_int64_consistent	(internal, mtree_int64, smallint, oid, internal),
+	FUNCTION	2	mtree_int64_union		(internal, internal),
+	FUNCTION	3	mtree_int64_compress		(internal),
+	FUNCTION	4	mtree_int64_decompress	(internal),
+	FUNCTION	5	mtree_int64_penalty		(internal, internal, internal),
+	FUNCTION	6	mtree_int64_picksplit	(internal, internal),
+	FUNCTION	7	mtree_int64_same			(mtree_int64, mtree_int64),
+	FUNCTION	8	mtree_int64_distance		(internal, mtree_int64, smallint, oid, internal),
 	FUNCTION	10	mtree_options			(internal);
 
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --

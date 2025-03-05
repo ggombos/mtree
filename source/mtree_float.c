@@ -323,7 +323,7 @@ Datum mtree_float_picksplit(PG_FUNCTION_ARGS) {
 		break;
 	case SamplingMinCoveringMax:
 		for (int i = 0; i < trialCount; ++i) {
-			leftCandidateIndex = (random()) % (maxOffset - 1);
+			leftCandidateIndex = ((int)random()) % (maxOffset - 1);
 			rightCandidateIndex = (leftCandidateIndex + 1) + (((int)random()) % (maxOffset - leftCandidateIndex - 1));
 			float leftRadius = 0.0, rightRadius = 0.0;
 
@@ -386,9 +386,7 @@ Datum mtree_float_picksplit(PG_FUNCTION_ARGS) {
 	case SamplingMinAreaSum:
 		for (int i = 0; i < trialCount; i++) {
 			leftCandidateIndex = ((int)random()) % (maxOffset - 1);
-			rightCandidateIndex =
-				(leftCandidateIndex + 1) +
-				(((int)random()) % (maxOffset - leftCandidateIndex - 1));
+			rightCandidateIndex = (leftCandidateIndex + 1) + (((int)random()) % (maxOffset - leftCandidateIndex - 1));
 			float leftRadius = 0.0, rightRadius = 0.0;
 
 			for (int currentIndex = 0; currentIndex < maxOffset; currentIndex++) {

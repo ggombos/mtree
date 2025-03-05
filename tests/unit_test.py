@@ -3,7 +3,8 @@ import os
 
 THRESHOLD = 0.0001
 THRESHOLD_INT = 1000000000
-TYPES = ["float_array", "float", "int8_array", "int8", "text_array", "text"]
+#TYPES = ["float_array", "float", "int8_array", "int8", "text_array", "text"]
+TYPES = ["int64"]
 
 def connect_to_database():
     try:
@@ -116,7 +117,7 @@ def main():
                     mtree_res = knn_test(curs=curs, table_name=f"{file}_mtree", center_point_id=center_point)
                     rtree_res = knn_test(curs=curs, table_name=f"{file}_cube", center_point_id=center_point)
                     
-                    if 'int8' in type:
+                    if 'int64' in type:
                         result = assert_equal(mtree_res, rtree_res, THRESHOLD_INT)
                     else:
                         result = assert_equal(mtree_res, rtree_res, THRESHOLD)

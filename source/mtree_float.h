@@ -16,9 +16,9 @@
 #define PG_RETURN_MTREE_FLOAT_P(x) PG_RETURN_POINTER(x)
 
 typedef struct {
+	int level;
 	float parentDistance;
 	float coveringRadius;
-	int level;
 	float data;
 } __attribute__((packed, aligned(1))) mtree_float;
 
