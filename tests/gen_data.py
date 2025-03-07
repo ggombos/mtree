@@ -1,4 +1,3 @@
-import csv
 import random
 import string
 import argparse
@@ -39,13 +38,13 @@ def generate_float_array_data(path, number_of_rows):
                     file.write(f'{','.join(str(x) for x in value)}\n')
             print(f'{filename} is generated.')
 
-def generate_int8_data(path, number_of_rows):
+def generate_int64_data(path, number_of_rows):
     values = []
     for _ in range(number_of_rows):
         values.append(random.randint(-9223372036854775808, 9223372036854775807))
 
     for tree in TREES:
-        filename = f'int8_{number_of_rows}_{tree}.csv'
+        filename = f'int64_{number_of_rows}_{tree}.csv'
         with open(f'{path}/{filename}', 'w') as file:
             for value in values:
                 if tree == 'cube':
@@ -116,7 +115,7 @@ def main():
     elif args.type == 'float_array':
         generate_float_array_data(args.path, number_of_rows)
     elif args.type == 'int64':
-        generate_int8_data(args.path, number_of_rows)
+        generate_int64_data(args.path, number_of_rows)
     elif args.type == 'int8_array':
         generate_int8_array_data(args.path, number_of_rows)
     elif args.type == 'text':

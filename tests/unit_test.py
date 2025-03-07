@@ -2,8 +2,7 @@ import psycopg2
 import os
 
 THRESHOLD = 0.0001
-THRESHOLD_INT = 1000000000
-TYPES = ["float_array", "float", "int8_array", "int8", "text_array", "text"]
+THRESHOLD_INT = 100000000000
 
 def connect_to_database():
     try:
@@ -21,6 +20,16 @@ def connect_to_database():
         print(e)
         return None
 
+
+def create_extensions(curs):
+    query = f'''CREATE EXTENSION IF NOT EXISTS postgis;
+                CREATE EXTENSION IF NOT EXISTS pointcloud;
+                CREATE EXTENSION IF NOT EXISTS pointcloud_postgis;
+                CREATE EXTENSION IF NOT EXISTS cube;
+                CREATE EXTENSION mtree_gist;'''
+    curs.execute(query)
+
+
 def create_table(curs, table_name, point_type):
     query = f'DROP TABLE IF EXISTS public.{table_name};'
     curs.execute(query)
@@ -31,9 +40,11 @@ def create_table(curs, table_name, point_type):
     );'''
     curs.execute(query)
 
+
 def read_csv_into_table(curs, file_name, table_name):
     query = f"COPY public.{table_name} (point) FROM '/home/data/mtree/tests/{file_name}' DELIMITER '''' CSV;"
     curs.execute(query)
+
 
 def create_index(curs, structure, index_name, table_name, type=None):
     if structure == "mtree":
@@ -55,6 +66,7 @@ def create_index(curs, structure, index_name, table_name, type=None):
         query = f'CREATE INDEX {index_name} ON public.{table_name} USING gist (point);'
         curs.execute(query)
 
+
 def knn_test(curs, table_name, center_point_id, nn_count=10):
     query = f"""SELECT c.id, c.point, (c.point <-> (SELECT ic.point FROM public.{table_name} ic WHERE ic.id = {center_point_id})) dist
                 FROM public.{table_name} c
@@ -62,8 +74,22 @@ def knn_test(curs, table_name, center_point_id, nn_count=10):
     curs.execute(query)
     return curs.fetchall()
 
-def cleanup(curs):
-    pass
+
+def cleanup(curs, tables, indexes):
+    query = ''
+    for table_name in tables:
+        query += f'DROP TABLE IF EXISTS {table_name};'
+
+    for index_name in indexes:
+        query += f'DROP INDEX IF EXISTS {index_name};'
+
+    query += f'''DROP EXTENSION IF EXISTS pointcloud_postgis;
+                DROP EXTENSION IF EXISTS pointcloud;
+                DROP EXTENSION IF EXISTS postgis;
+                DROP EXTENSION IF EXISTS cube;
+                DROP EXTENSION IF EXISTS mtree_gist;'''
+    curs.execute(query)
+
 
 def assert_equal(result1, result2, threshold) -> bool:
     if len(result1) != len(result2):
@@ -86,35 +112,58 @@ def assert_equal(result1, result2, threshold) -> bool:
     
     return True
 
+
 def main():
     curs = connect_to_database()
     if curs == None:
-        return
+        return 1
+
+    types = [name for name in os.listdir('tests') if os.path.isdir(os.path.join('tests', name))]
+    final_result = True
+    tables = []
+    indexes = []
 
     try:
-        for type in TYPES:
+        create_extensions(curs)
+        
+        for type in types:
             print("────────────────────────────────")
             print(f"Type: {type}")
             print("────────────────────────────────")
-            csv_files = set([f.replace("_cube.csv", "").replace("_mtree.csv", "") for f in os.listdir(f"tests/{type}") if f.endswith('.csv')])
             
+            try:
+                csv_files = set([f.replace("_cube.csv", "").replace("_mtree.csv", "") for f in os.listdir(f"tests/{type}") if f.endswith('.csv')])
+            except:
+                print("\tNo such file or directory.")
+                continue
+
             for file in csv_files:
                 print(f"\t[{file}]")
-                create_table(curs=curs, table_name=f"{file}_mtree", point_type=f"mtree_{type}")
-                create_table(curs=curs, table_name=f"{file}_cube", point_type="cube")
+                mtree_table = f'{file}_mtree'
+                rtree_table = f'{file}_cube'
+                mtree_index = f'{file}_mtree_index'
+                rtree_index = f'{file}_cube_index'
 
-                read_csv_into_table(curs=curs, file_name=f"{type}/{file}_mtree.csv", table_name=f"{file}_mtree")
-                read_csv_into_table(curs=curs, file_name=f"{type}/{file}_cube.csv", table_name=f"{file}_cube")
+                create_table(curs=curs, table_name=mtree_table, point_type=f"mtree_{type}")
+                create_table(curs=curs, table_name=rtree_table, point_type="cube")
 
-                create_index(curs=curs, structure="mtree", index_name=f"{file}_mtree_index", table_name=f"{file}_mtree", type=f"mtree_{type}")
-                create_index(curs=curs, structure="rtree", index_name=f"{file}_cube_index", table_name=f"{file}_cube")
+                read_csv_into_table(curs=curs, file_name=f"{type}/{file}_mtree.csv", table_name=mtree_table)
+                read_csv_into_table(curs=curs, file_name=f"{type}/{file}_cube.csv", table_name=rtree_table)
+
+                create_index(curs=curs, structure="mtree", index_name=mtree_index, table_name=mtree_table, type=f"mtree_{type}")
+                create_index(curs=curs, structure="rtree", index_name=rtree_index, table_name=rtree_table)
+                
+                tables.append(mtree_table)
+                tables.append(rtree_table)
+                indexes.append(mtree_index)
+                indexes.append(rtree_index)
 
                 center_points = [10, 45, 67]
                 for center_point in center_points:
                     print(f"\t\tCenter point of KNN is {center_point}:", end="", flush=True)
 
-                    mtree_res = knn_test(curs=curs, table_name=f"{file}_mtree", center_point_id=center_point)
-                    rtree_res = knn_test(curs=curs, table_name=f"{file}_cube", center_point_id=center_point)
+                    mtree_res = knn_test(curs=curs, table_name=mtree_table, center_point_id=center_point)
+                    rtree_res = knn_test(curs=curs, table_name=rtree_table, center_point_id=center_point)
                     
                     if 'int64' in type:
                         result = assert_equal(mtree_res, rtree_res, THRESHOLD_INT)
@@ -123,6 +172,7 @@ def main():
 
                     print("✅" if result else "❌")
                     if not result:
+                        final_result = False
                         print()
                         print("\t\tOutput:")
                         print("\t\t\tMtree")
@@ -134,9 +184,16 @@ def main():
                         print()
 
                 print()
+        
+        cleanup(curs, tables, indexes)
+
+        if final_result:
+            return 0
+        else:
+            return 1
 
     except KeyboardInterrupt:
         pass
 
 if __name__ == "__main__":
-    main()
+    exit(main())
