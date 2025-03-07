@@ -2,26 +2,23 @@
 
 set -e
 
-readonly PROPERTIES_FILE="./script/mtree_gist.properties"
-
-function read_property() {
-  PROPERTY_KEY=$1
-  PROPERTY_VALUE=$(cat ${PROPERTIES_FILE} | grep "${PROPERTY_KEY}" | cut -d '=' -f 2 | tr -d '\n')
-  echo "${PROPERTY_VALUE}"
-}
-
-SOURCE_DIRECTORY="$(read_property "mtree.source")/source"
-POSTGRESQL_INCLUDE_DIRECTORY="$(read_property "postgresql.include")"
-POSTGRESQL_EXTENSION_DIRECTORY="$(read_property "postgresql.extension")"
-POSTGRESQL_LIBRARY_DIRECTORY="$(read_property "postgresql.lib")"
+# Source code directory of the M-tree index
+readonly SOURCE_DIRECTORY="/home/data/mtree/source"
+# Include directory
+# readonly POSTGRESQL_INCLUDE_DIRECTORY="/home/data/mtree_gist/postgre/include/postgresql/server"
+readonly POSTGRESQL_INCLUDE_DIRECTORY="/usr/include/postgresql/15/server"
+# PostgreSQL home of SQL and control files
+readonly POSTGRESQL_EXTENSION_DIRECTORY="/usr/share/postgresql/15/extension"
+# PostgreSQL home of shared object libraries
+readonly POSTGRESQL_LIBRARY_DIRECTORY="/usr/share/postgresql/15/postgre"
 
 readonly FILENAMES=(
   "mtree_text"
   "mtree_text_util"
   "mtree_text_array"
   "mtree_text_array_util"
-  "mtree_int8"
-  "mtree_int8_util"
+  "mtree_int64"
+  "mtree_int64_util"
   "mtree_int8_array"
   "mtree_int8_array_util"
   "mtree_float"
@@ -33,7 +30,7 @@ readonly FILENAMES=(
 )
 
 function compile_file() {
-  cc -fPIC -c -I "${POSTGRESQL_INCLUDE_DIRECTORY}" "${SOURCE_DIRECTORY}/$1.c" -o "${SOURCE_DIRECTORY}/$1.o"
+  cc -Wall -fPIC -c -I "${POSTGRESQL_INCLUDE_DIRECTORY}" "${SOURCE_DIRECTORY}/$1.c" -o "${SOURCE_DIRECTORY}/$1.o"
 }
 
 function remove_file() {
@@ -50,7 +47,6 @@ function create_parameter_list() {
 }
 
 function create_and_copy_so() {
-  # shellcheck disable=SC2046
   cc -shared -o "${SOURCE_DIRECTORY}/mtree_gist.so" $(create_parameter_list)
   cp "${SOURCE_DIRECTORY}/mtree_gist.so" "${POSTGRESQL_LIBRARY_DIRECTORY}/mtree_gist.so"
   rm "${SOURCE_DIRECTORY}/mtree_gist.so"
@@ -63,6 +59,16 @@ function copy_sql_and_control() {
   cp "${SOURCE_DIRECTORY}/mtree_gist_tmp.control" "${POSTGRESQL_EXTENSION_DIRECTORY}/mtree_gist.control"
   rm "${SOURCE_DIRECTORY}/mtree_gist_tmp.control"
 }
+
+function createSQL() {
+	cat ../source/mtree_gist--1.0.empty.sql > ../source/mtree_gist--1.0.sql
+	for filename in "../source/typesSQL"/*
+	do
+		cat "${filename}" >> ../source/mtree_gist--1.0.sql
+	done	
+}
+
+# createSQL
 
 for filename in "${FILENAMES[@]}";
 do

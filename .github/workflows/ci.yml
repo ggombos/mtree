@@ -45,7 +45,7 @@ jobs:
 
       - name: Build the Code
         run: |
-          docker exec labor_postgresql bash -c "cd /home/data/mtree && chmod +x script/gg/installGG.sh && script/gg/installGG.sh"
+          docker exec labor_postgresql bash -c "cd /home/data/mtree && bash script/install.sh"
 
       - name: Run Unit Tests in Docker
         run: |
