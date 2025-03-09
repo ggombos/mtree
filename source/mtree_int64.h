@@ -9,8 +9,8 @@
 #include "access/gist.h"
 #include "mtree_gist.h"
 
-#define MTREE_INT64_SIZE sizeof(mtree_int64)
-#define DatumGetMtreeInt8(x) ((mtree_int64 *) PG_DETOAST_DATUM(x))
+#define MTREE_INT64_SIZE		   sizeof(mtree_int64)
+#define DatumGetMtreeInt8(x)	   ((mtree_int64 *)PG_DETOAST_DATUM(x))
 #define PG_GETARG_MTREE_INT64_P(x) DatumGetMtreeInt8(PG_GETARG_DATUM(x))
 #define PG_RETURN_MTREE_INT64_P(x) PG_RETURN_POINTER(x)
 

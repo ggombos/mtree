@@ -3,24 +3,28 @@
  */
 
 #include "mtree_float_array_util.h"
+
 #include <math.h>
 
-float mtree_float_array_outer_distance(mtree_float_array* first, mtree_float_array* second) {
+float mtree_float_array_outer_distance(mtree_float_array* first, mtree_float_array* second)
+{
 	float distance = float_array_euclidean_distance(first, second);
 	float outer_distance = distance - first->coveringRadius - second->coveringRadius;
 
-	if (outer_distance < 0.0){
+	if (outer_distance < 0.0) {
 		outer_distance = 0.0;
 	}
 
 	return outer_distance;
 }
 
-float mtree_float_array_full_distance(mtree_float_array* first, mtree_float_array* second){
+float mtree_float_array_full_distance(mtree_float_array* first, mtree_float_array* second)
+{
 	return float_array_euclidean_distance(first, second);
 }
 
-bool mtree_float_array_equals(mtree_float_array* first, mtree_float_array* second) {
+bool mtree_float_array_equals(mtree_float_array* first, mtree_float_array* second)
+{
 	if (first->arrayLength != second->arrayLength) {
 		return false;
 	}
@@ -34,34 +38,40 @@ bool mtree_float_array_equals(mtree_float_array* first, mtree_float_array* secon
 	return true;
 }
 
-bool mtree_float_array_overlap_distance(mtree_float_array* first, mtree_float_array* second) {
+bool mtree_float_array_overlap_distance(mtree_float_array* first, mtree_float_array* second)
+{
 	float full_distance = mtree_float_array_full_distance(first, second);
 	return full_distance - (first->coveringRadius + second->coveringRadius) < 0;
 }
 
-bool mtree_float_array_contains_distance(mtree_float_array* first, mtree_float_array* second) {
+bool mtree_float_array_contains_distance(mtree_float_array* first, mtree_float_array* second)
+{
 	float full_distance = mtree_float_array_full_distance(first, second);
 	return full_distance + second->coveringRadius < first->coveringRadius;
 }
 
-bool mtree_float_array_contained_distance(mtree_float_array* first, mtree_float_array* second) {
+bool mtree_float_array_contained_distance(mtree_float_array* first, mtree_float_array* second)
+{
 	return mtree_float_array_contains_distance(second, first);
 }
 
-mtree_float_array* mtree_float_array_deep_copy(mtree_float_array* source) {
+mtree_float_array* mtree_float_array_deep_copy(mtree_float_array* source)
+{
 	mtree_float_array* destination = (mtree_float_array*)palloc(VARSIZE_ANY(source));
 	memcpy(destination, source, VARSIZE_ANY(source));
 	return destination;
 }
 
-float get_float_array_distance(int size, mtree_float_array* entries[size], float distances[size][size], int i, int j) {
+float get_float_array_distance(int size, mtree_float_array* entries[size], float distances[size][size], int i, int j)
+{
 	if (distances[i][j] == -1) {
 		distances[i][j] = mtree_float_array_full_distance(entries[i], entries[j]);
 	}
 	return distances[i][j];
 }
 
-float float_array_sum_distance(mtree_float_array* first, mtree_float_array* second) {
+float float_array_sum_distance(mtree_float_array* first, mtree_float_array* second)
+{
 	float distance = 0.0;
 	unsigned char minimumLength, maximumLength;
 	mtree_float_array* longer;
@@ -70,8 +80,7 @@ float float_array_sum_distance(mtree_float_array* first, mtree_float_array* seco
 		minimumLength = first->arrayLength;
 		maximumLength = second->arrayLength;
 		longer = second;
-	}
-	else {
+	} else {
 		minimumLength = second->arrayLength;
 		maximumLength = first->arrayLength;
 		longer = first;
@@ -79,9 +88,9 @@ float float_array_sum_distance(mtree_float_array* first, mtree_float_array* seco
 
 	for (unsigned char i = 0; i < minimumLength; ++i) {
 		if (first->data[i] + second->data[i] != 0.0) {
-			distance += (((first->data[i] - second->data[i]) * (first->data[i] - second->data[i])) / (first->data[i] + second->data[i]));
-		}
-		else {
+			distance += (((first->data[i] - second->data[i]) * (first->data[i] - second->data[i])) /
+						 (first->data[i] + second->data[i]));
+		} else {
 			distance += (((first->data[i] - second->data[i]) * (first->data[i] - second->data[i])));
 		}
 	}
@@ -93,7 +102,8 @@ float float_array_sum_distance(mtree_float_array* first, mtree_float_array* seco
 	return fabs(distance);
 }
 
-float float_array_kullback_leibler_distance(mtree_float_array* first, mtree_float_array* second) {
+float float_array_kullback_leibler_distance(mtree_float_array* first, mtree_float_array* second)
+{
 	float distance = 0;
 	unsigned char minimumLength, maximumLength;
 	mtree_float_array* longer;
@@ -102,8 +112,7 @@ float float_array_kullback_leibler_distance(mtree_float_array* first, mtree_floa
 		minimumLength = first->arrayLength;
 		maximumLength = second->arrayLength;
 		longer = second;
-	}
-	else {
+	} else {
 		minimumLength = second->arrayLength;
 		maximumLength = first->arrayLength;
 		longer = first;
@@ -112,8 +121,7 @@ float float_array_kullback_leibler_distance(mtree_float_array* first, mtree_floa
 	for (unsigned char i = 0; i < minimumLength; ++i) {
 		if (second->data[i] != 0) {
 			distance += ((first->data[i] - second->data[i]) * log(first->data[i] / second->data[i]));
-		}
-		else {
+		} else {
 			distance += ((first->data[i] - second->data[i]) * log(first->data[i]));
 		}
 	}
@@ -125,7 +133,8 @@ float float_array_kullback_leibler_distance(mtree_float_array* first, mtree_floa
 	return distance;
 }
 
-float float_array_euclidean_distance(mtree_float_array* first, mtree_float_array* second){
+float float_array_euclidean_distance(mtree_float_array* first, mtree_float_array* second)
+{
 	float distance = 0.0;
 	int minimumLength, maximumLength;
 	mtree_float_array* longer;
@@ -134,8 +143,7 @@ float float_array_euclidean_distance(mtree_float_array* first, mtree_float_array
 		minimumLength = first->arrayLength;
 		maximumLength = second->arrayLength;
 		longer = second;
-	}
-	else {
+	} else {
 		minimumLength = second->arrayLength;
 		maximumLength = first->arrayLength;
 		longer = first;
@@ -152,20 +160,20 @@ float float_array_euclidean_distance(mtree_float_array* first, mtree_float_array
 	return sqrt(distance);
 }
 
-float float_array_taxicab_distance(mtree_float_array* first, mtree_float_array* second){
+float float_array_taxicab_distance(mtree_float_array* first, mtree_float_array* second)
+{
 	float distance = 0.0;
-	int minimumLength;//, maximumLength;
-	//mtree_float_array* longer;
+	int minimumLength;	//, maximumLength;
+	// mtree_float_array* longer;
 
 	if (first->arrayLength <= second->arrayLength) {
 		minimumLength = first->arrayLength;
-		//maximumLength = second->arrayLength;
-		//longer = second;
-	}
-	else {
+		// maximumLength = second->arrayLength;
+		// longer = second;
+	} else {
 		minimumLength = second->arrayLength;
-		//maximumLength = first->arrayLength;
-		//longer = first;
+		// maximumLength = first->arrayLength;
+		// longer = first;
 	}
 
 	for (int i = 0; i < minimumLength; ++i) {
