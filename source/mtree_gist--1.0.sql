@@ -65,7 +65,7 @@ RETURNS float4
 AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
-CREATE OR REPLACE FUNCTION mtree_text_operator_overlap(mtree_text, mtree_text)
+CREATE OR REPLACE FUNCTION mtree_text_overlap_operator(mtree_text, mtree_text)
 RETURNS bool
 AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
@@ -93,7 +93,7 @@ LANGUAGE C STRICT IMMUTABLE;
 CREATE OPERATOR #&# (
 	LEFTARG		= mtree_text,
 	RIGHTARG	= mtree_text,
-	FUNCTION	= mtree_text_operator_overlap,
+	FUNCTION	= mtree_text_overlap_operator,
 	COMMUTATOR	= #&#
 );
 
