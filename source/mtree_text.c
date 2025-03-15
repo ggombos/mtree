@@ -232,7 +232,7 @@ Datum mtree_text_picksplit(PG_FUNCTION_ARGS)
 	}
 
 	int distances[maxOffset][maxOffset];
-	init_distances(maxOffset, *distances);
+	init_distances_int(maxOffset, *distances);
 
 	int leftIndex, rightIndex, leftCandidateIndex, rightCandidateIndex;
 	int trialCount = 100;

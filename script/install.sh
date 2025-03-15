@@ -17,10 +17,10 @@ readonly FILENAMES=(
   "mtree_text_util"
   "mtree_text_array"
   "mtree_text_array_util"
-  "mtree_int64"
-  "mtree_int64_util"
-  "mtree_int8_array"
-  "mtree_int8_array_util"
+  "mtree_int32"
+  "mtree_int32_util"
+  "mtree_int32_array"
+  "mtree_int32_array_util"
   "mtree_float"
   "mtree_float_util"
   "mtree_float_array"
@@ -30,7 +30,7 @@ readonly FILENAMES=(
 )
 
 function compile_file() {
-  cc -Wall -fPIC -c -I "${POSTGRESQL_INCLUDE_DIRECTORY}" "${SOURCE_DIRECTORY}/$1.c" -o "${SOURCE_DIRECTORY}/$1.o"
+  cc -Wall -Werror -fPIC -c -I "${POSTGRESQL_INCLUDE_DIRECTORY}" "${SOURCE_DIRECTORY}/$1.c" -o "${SOURCE_DIRECTORY}/$1.o"
 }
 
 function remove_file() {

@@ -37,7 +37,7 @@ int string_distance(const char* a, const char* b)
 	return column[lengthOfA];
 }
 
-void init_distances(const int size, long long* distances)
+void init_distances_long_long(const int size, long long* distances)
 {
 	for (int i = 0; i < size; ++i)
 	{
@@ -59,13 +59,13 @@ void init_distances_float(const int size, float* distances)
 	}
 }
 
-void init_distances_int128(const int size, float* distances)
+void init_distances_int(const int size, int* distances)
 {
 	for (int i = 0; i < size; ++i)
 	{
 		for (int j = 0; j < size; ++j)
 		{
-			distances[i * size + j] = -1.0;
+			distances[i * size + j] = -1;
 		}
 	}
 }

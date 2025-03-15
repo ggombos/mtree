@@ -1,41 +1,41 @@
 /*
- * contrib/mtree_gist/mtree_int64.c
+ * contrib/mtree_gist/mtree_int32.c
  */
 
-#include "mtree_int64.h"
+#include "mtree_int32.h"
 
-#include "mtree_int64_util.h"
+#include "mtree_int32_util.h"
 #include "mtree_util.h"
 
-PG_FUNCTION_INFO_V1(mtree_int64_input);
-PG_FUNCTION_INFO_V1(mtree_int64_output);
+PG_FUNCTION_INFO_V1(mtree_int32_input);
+PG_FUNCTION_INFO_V1(mtree_int32_output);
 
-PG_FUNCTION_INFO_V1(mtree_int64_consistent);
-PG_FUNCTION_INFO_V1(mtree_int64_union);
-PG_FUNCTION_INFO_V1(mtree_int64_same);
+PG_FUNCTION_INFO_V1(mtree_int32_consistent);
+PG_FUNCTION_INFO_V1(mtree_int32_union);
+PG_FUNCTION_INFO_V1(mtree_int32_same);
 
-PG_FUNCTION_INFO_V1(mtree_int64_penalty);
-PG_FUNCTION_INFO_V1(mtree_int64_picksplit);
+PG_FUNCTION_INFO_V1(mtree_int32_penalty);
+PG_FUNCTION_INFO_V1(mtree_int32_picksplit);
 
-PG_FUNCTION_INFO_V1(mtree_int64_compress);
-PG_FUNCTION_INFO_V1(mtree_int64_decompress);
+PG_FUNCTION_INFO_V1(mtree_int32_compress);
+PG_FUNCTION_INFO_V1(mtree_int32_decompress);
 
-PG_FUNCTION_INFO_V1(mtree_int64_distance);
+PG_FUNCTION_INFO_V1(mtree_int32_distance);
 
-PG_FUNCTION_INFO_V1(mtree_int64_contains_operator);
-PG_FUNCTION_INFO_V1(mtree_int64_contained_operator);
-PG_FUNCTION_INFO_V1(mtree_int64_distance_operator);
-PG_FUNCTION_INFO_V1(mtree_int64_overlap_operator);
+PG_FUNCTION_INFO_V1(mtree_int32_contains_operator);
+PG_FUNCTION_INFO_V1(mtree_int32_contained_operator);
+PG_FUNCTION_INFO_V1(mtree_int32_distance_operator);
+PG_FUNCTION_INFO_V1(mtree_int32_overlap_operator);
 
-Datum mtree_int64_input(PG_FUNCTION_ARGS)
+Datum mtree_int32_input(PG_FUNCTION_ARGS)
 {
 	char* input = PG_GETARG_CSTRING(0);
 
-	mtree_int64* result = (mtree_int64*)palloc(MTREE_INT64_SIZE);
+	mtree_int32* result = (mtree_int32*)palloc(MTREE_INT32_SIZE);
 	result->coveringRadius = 0;
 	result->parentDistance = 0;
 
-	SET_VARSIZE(result, MTREE_INT64_SIZE);
+	SET_VARSIZE(result, MTREE_INT32_SIZE);
 
 	char* tmp;
 	result->data = strtol(input, &tmp, 10);
@@ -43,29 +43,29 @@ Datum mtree_int64_input(PG_FUNCTION_ARGS)
 	PG_RETURN_POINTER(result);
 }
 
-Datum mtree_int64_output(PG_FUNCTION_ARGS)
+Datum mtree_int32_output(PG_FUNCTION_ARGS)
 {
-	mtree_int64* output = PG_GETARG_MTREE_INT64_P(0);
+	mtree_int32* output = PG_GETARG_MTREE_INT32_P(0);
 	char* result;
 
 	if (output->coveringRadius == 0) {
-		result = psprintf("%lld", output->data);
+		result = psprintf("%d", output->data);
 	} else {
-		result = psprintf("coveringRadius|%lld parentDistance|%lld data|%lld", output->coveringRadius,
+		result = psprintf("coveringRadius|%lld parentDistance|%lld data|%d", output->coveringRadius,
 						  output->parentDistance, output->data);
 	}
 
 	PG_RETURN_CSTRING(result);
 }
 
-Datum mtree_int64_consistent(PG_FUNCTION_ARGS)
+Datum mtree_int32_consistent(PG_FUNCTION_ARGS)
 {
 	GISTENTRY* entry = (GISTENTRY*)PG_GETARG_POINTER(0);
-	mtree_int64* query = PG_GETARG_MTREE_INT64_P(1);
+	mtree_int32* query = PG_GETARG_MTREE_INT32_P(1);
 	StrategyNumber strategyNumber = (StrategyNumber)PG_GETARG_UINT16(2);
 	bool* recheck = (bool*)PG_GETARG_POINTER(4);
-	mtree_int64* key = DatumGetMtreeInt8(entry->key);
-	// long long distance = mtree_int64_outer_distance(key, query);
+	mtree_int32* key = DatumGetMtreeInt32(entry->key);
+	// long long distance = mtree_int32_outer_distance(key, query);
 
 	*recheck = false;
 
@@ -73,16 +73,16 @@ Datum mtree_int64_consistent(PG_FUNCTION_ARGS)
 	if (GIST_LEAF(entry)) {
 		switch (strategyNumber) {
 			case GIST_SN_SAME:
-				returnValue = mtree_int64_equals(key, query);
+				returnValue = mtree_int32_equals(key, query);
 				break;
 			case GIST_SN_OVERLAPS:
-				returnValue = mtree_int64_overlap_distance(key, query);
+				returnValue = mtree_int32_overlap_distance(key, query);
 				break;
 			case GIST_SN_CONTAINS:
-				returnValue = mtree_int64_contains_distance(key, query);
+				returnValue = mtree_int32_contains_distance(key, query);
 				break;
 			case GIST_SN_CONTAINED_BY:
-				returnValue = mtree_int64_contained_distance(key, query);
+				returnValue = mtree_int32_contained_distance(key, query);
 				break;
 			default:
 				ereport(ERROR, errcode(ERRCODE_SYNTAX_ERROR),
@@ -92,20 +92,16 @@ Datum mtree_int64_consistent(PG_FUNCTION_ARGS)
 	} else {
 		switch (strategyNumber) {
 			case GIST_SN_SAME:
-				returnValue = mtree_int64_contains_distance(key, query);
-				*recheck = true;
+				returnValue = mtree_int32_contains_distance(key, query);
 				break;
 			case GIST_SN_OVERLAPS:
-				returnValue = mtree_int64_overlap_distance(key, query);
-				*recheck = !mtree_int64_contained_distance(key, query);
+				returnValue = mtree_int32_overlap_distance(key, query);
 				break;
 			case GIST_SN_CONTAINS:
-				returnValue = mtree_int64_contains_distance(key, query);
-				*recheck = true;
+				returnValue = mtree_int32_contains_distance(key, query);
 				break;
 			case GIST_SN_CONTAINED_BY:
-				returnValue = mtree_int64_overlap_distance(key, query);
-				*recheck = !mtree_int64_contained_distance(key, query);
+				returnValue = mtree_int32_overlap_distance(key, query);
 				break;
 			default:
 				ereport(ERROR, errcode(ERRCODE_SYNTAX_ERROR),
@@ -117,27 +113,27 @@ Datum mtree_int64_consistent(PG_FUNCTION_ARGS)
 	PG_RETURN_BOOL(returnValue);
 }
 
-Datum mtree_int64_union(PG_FUNCTION_ARGS)
+Datum mtree_int32_union(PG_FUNCTION_ARGS)
 {
 	GistEntryVector* entryVector = (GistEntryVector*)PG_GETARG_POINTER(0);
 	GISTENTRY* entry = entryVector->vector;
 	int ranges = entryVector->n;
 
-	mtree_int64* entries[ranges];
+	mtree_int32* entries[ranges];
 	for (int i = 0; i < ranges; ++i) {
-		entries[i] = DatumGetMtreeInt8(entry[i].key);
+		entries[i] = DatumGetMtreeInt32(entry[i].key);
 	}
 
 	/*int searchRange;
 
-	MtreeUnionStrategy UNION_STRATEGY_INT64 = MinMaxDistance;
+	MtreeUnionStrategy UNION_STRATEGY_INT32 = MinMaxDistance;
 	if (PG_HAS_OPCLASS_OPTIONS())
 	{
 		MtreeOptions* options = (MtreeOptions *) PG_GET_OPCLASS_OPTIONS();
-		UNION_STRATEGY_INT64 = options->union_strategy;
+		UNION_STRATEGY_INT32 = options->union_strategy;
 	}
 
-	switch (UNION_STRATEGY_INT64) {
+	switch (UNION_STRATEGY_INT32) {
 	case First:
 		searchRange = 1;
 		break;
@@ -147,7 +143,7 @@ Datum mtree_int64_union(PG_FUNCTION_ARGS)
 	default:
 		ereport(ERROR,
 			errcode(ERRCODE_SYNTAX_ERROR),
-			errmsg("Invalid StrategyNumber for union function: %u", UNION_STRATEGY_INT64));
+			errmsg("Invalid StrategyNumber for union function: %u", UNION_STRATEGY_INT32));
 		break;
 	}
 
@@ -157,7 +153,7 @@ Datum mtree_int64_union(PG_FUNCTION_ARGS)
 		coveringRadii[i] = 0;
 
 		for (int j = 0; j < ranges; ++j) {
-			long long distance = mtree_int64_outer_distance(entries[i], entries[j]);
+			long long distance = mtree_int32_outer_distance(entries[i], entries[j]);
 			long long newCoveringRadius = distance + entries[j]->coveringRadius;
 
 			if (coveringRadii[i] < newCoveringRadius) {
@@ -174,41 +170,37 @@ Datum mtree_int64_union(PG_FUNCTION_ARGS)
 		}
 	}*/
 
-	// mtree_int64* out = mtree_int64_deep_copy(entries[minimumIndex]);
+	// mtree_int32* out = mtree_int32_deep_copy(entries[minimumIndex]);
 	// out->coveringRadius = coveringRadii[minimumIndex];
 
-	mtree_int64* out = mtree_int64_deep_copy(entries[0]);
-	out->coveringRadius += mtree_int64_outer_distance(entries[0], entries[1]);
+	mtree_int32* out = mtree_int32_deep_copy(entries[0]);
+	out->coveringRadius += mtree_int32_outer_distance(entries[0], entries[1]);
 
-	PG_RETURN_MTREE_INT64_P(out);
+	PG_RETURN_MTREE_INT32_P(out);
 }
 
-Datum mtree_int64_same(PG_FUNCTION_ARGS)
+Datum mtree_int32_same(PG_FUNCTION_ARGS)
 {
-	mtree_int64* first = PG_GETARG_MTREE_INT64_P(0);
-	mtree_int64* second = PG_GETARG_MTREE_INT64_P(1);
-	PG_RETURN_BOOL(mtree_int64_equals(first, second));
+	mtree_int32* first = PG_GETARG_MTREE_INT32_P(0);
+	mtree_int32* second = PG_GETARG_MTREE_INT32_P(1);
+	PG_RETURN_BOOL(mtree_int32_equals(first, second));
 }
 
-Datum mtree_int64_penalty(PG_FUNCTION_ARGS)
+Datum mtree_int32_penalty(PG_FUNCTION_ARGS)
 {
 	GISTENTRY* originalEntry = (GISTENTRY*)PG_GETARG_POINTER(0);
 	GISTENTRY* newEntry = (GISTENTRY*)PG_GETARG_POINTER(1);
 	float* penalty = (float*)PG_GETARG_POINTER(2);
-	mtree_int64* original = DatumGetMtreeInt8(originalEntry->key);
-	mtree_int64* new = DatumGetMtreeInt8(newEntry->key);
+	mtree_int32* original = DatumGetMtreeInt32(originalEntry->key);
+	mtree_int32* new = DatumGetMtreeInt32(newEntry->key);
 
-	long long distance = mtree_int64_outer_distance(original, new);
+	long long distance = mtree_int32_outer_distance(original, new);
 	*penalty = distance;
-	// long long newCoveringRadius = distance + new->coveringRadius;
-	//*penalty = (float)(newCoveringRadius < original->coveringRadius
-	//	? 0
-	//	: newCoveringRadius - original->coveringRadius);
 
 	PG_RETURN_POINTER(penalty);
 }
 
-Datum mtree_int64_picksplit(PG_FUNCTION_ARGS)
+Datum mtree_int32_picksplit(PG_FUNCTION_ARGS)
 {
 	GistEntryVector* entryVector = (GistEntryVector*)PG_GETARG_POINTER(0);
 	GIST_SPLITVEC* vector = (GIST_SPLITVEC*)PG_GETARG_POINTER(1);
@@ -225,13 +217,13 @@ Datum mtree_int64_picksplit(PG_FUNCTION_ARGS)
 	right = vector->spl_right;
 	vector->spl_nright = 0;
 
-	mtree_int64* entries[maxOffset];
+	mtree_int32* entries[maxOffset];
 	for (OffsetNumber i = FirstOffsetNumber; i <= maxOffset; i = OffsetNumberNext(i)) {
-		entries[i - FirstOffsetNumber] = DatumGetMtreeInt8(entryVector->vector[i].key);
+		entries[i - FirstOffsetNumber] = DatumGetMtreeInt32(entryVector->vector[i].key);
 	}
 
 	long long distances[maxOffset][maxOffset];
-	init_distances(maxOffset, *distances);
+	init_distances_long_long(maxOffset, *distances);
 
 	int leftIndex, rightIndex, leftCandidateIndex, rightCandidateIndex;
 	int trialCount = 100;
@@ -268,7 +260,7 @@ Datum mtree_int64_picksplit(PG_FUNCTION_ARGS)
 		case MaxDistanceFromFirst:
 			maxDistance = -1;
 			for (int r = 0; r < maxOffset; ++r) {
-				long long distance = get_int64_distance(maxOffset, entries, distances, 0, r);
+				long long distance = get_int32_distance(maxOffset, entries, distances, 0, r);
 				if (distance > maxDistance) {
 					maxDistance = distance;
 					rightCandidateIndex = r;
@@ -280,7 +272,7 @@ Datum mtree_int64_picksplit(PG_FUNCTION_ARGS)
 		case MaxDistancePair:
 			for (OffsetNumber l = 0; l < maxOffset; ++l) {
 				for (OffsetNumber r = l; r < maxOffset; ++r) {
-					long long distance = get_int64_distance(maxOffset, entries, distances, l, r);
+					long long distance = get_int32_distance(maxOffset, entries, distances, l, r);
 					if (distance > maxDistance) {
 						maxDistance = distance;
 						leftCandidateIndex = l;
@@ -300,9 +292,9 @@ Datum mtree_int64_picksplit(PG_FUNCTION_ARGS)
 
 				for (int currentIndex = 0; currentIndex < maxOffset; currentIndex++) {
 					long long distanceLeft =
-						get_int64_distance(maxOffset, entries, distances, leftCandidateIndex, currentIndex);
+						get_int32_distance(maxOffset, entries, distances, leftCandidateIndex, currentIndex);
 					long long distanceRight =
-						get_int64_distance(maxOffset, entries, distances, rightCandidateIndex, currentIndex);
+						get_int32_distance(maxOffset, entries, distances, rightCandidateIndex, currentIndex);
 
 					if (distanceLeft < distanceRight) {
 						if (distanceLeft + entries[currentIndex]->coveringRadius > leftRadius) {
@@ -331,9 +323,9 @@ Datum mtree_int64_picksplit(PG_FUNCTION_ARGS)
 
 				for (int currentIndex = 0; currentIndex < maxOffset; ++currentIndex) {
 					long long distanceLeft =
-						get_int64_distance(maxOffset, entries, distances, leftCandidateIndex, currentIndex);
+						get_int32_distance(maxOffset, entries, distances, leftCandidateIndex, currentIndex);
 					long long distanceRight =
-						get_int64_distance(maxOffset, entries, distances, rightCandidateIndex, currentIndex);
+						get_int32_distance(maxOffset, entries, distances, rightCandidateIndex, currentIndex);
 
 					if (distanceLeft < distanceRight) {
 						if (distanceLeft + entries[currentIndex]->coveringRadius > leftRadius) {
@@ -359,14 +351,14 @@ Datum mtree_int64_picksplit(PG_FUNCTION_ARGS)
 				rightCandidateIndex =
 					(leftCandidateIndex + 1) + (((int)random()) % (maxOffset - leftCandidateIndex - 1));
 				long long distance =
-					get_int64_distance(maxOffset, entries, distances, leftCandidateIndex, rightCandidateIndex);
+					get_int32_distance(maxOffset, entries, distances, leftCandidateIndex, rightCandidateIndex);
 				long long leftRadius = 0, rightRadius = 0;
 
 				for (int currentIndex = 0; currentIndex < maxOffset; currentIndex++) {
 					long long distanceLeft =
-						get_int64_distance(maxOffset, entries, distances, leftCandidateIndex, currentIndex);
+						get_int32_distance(maxOffset, entries, distances, leftCandidateIndex, currentIndex);
 					long long distanceRight =
-						get_int64_distance(maxOffset, entries, distances, rightCandidateIndex, currentIndex);
+						get_int32_distance(maxOffset, entries, distances, rightCandidateIndex, currentIndex);
 
 					if (distanceLeft < distanceRight) {
 						if (distanceLeft + entries[currentIndex]->coveringRadius > leftRadius) {
@@ -396,9 +388,9 @@ Datum mtree_int64_picksplit(PG_FUNCTION_ARGS)
 
 				for (int currentIndex = 0; currentIndex < maxOffset; currentIndex++) {
 					long long distanceLeft =
-						get_int64_distance(maxOffset, entries, distances, leftCandidateIndex, currentIndex);
+						get_int32_distance(maxOffset, entries, distances, leftCandidateIndex, currentIndex);
 					long long distanceRight =
-						get_int64_distance(maxOffset, entries, distances, rightCandidateIndex, currentIndex);
+						get_int32_distance(maxOffset, entries, distances, rightCandidateIndex, currentIndex);
 
 					if (distanceLeft < distanceRight) {
 						if (distanceLeft + entries[currentIndex]->coveringRadius > leftRadius) {
@@ -425,13 +417,13 @@ Datum mtree_int64_picksplit(PG_FUNCTION_ARGS)
 			break;
 	}
 
-	mtree_int64* unionLeft = mtree_int64_deep_copy(entries[leftIndex]);
-	mtree_int64* unionRight = mtree_int64_deep_copy(entries[rightIndex]);
-	mtree_int64* current;
+	mtree_int32* unionLeft = mtree_int32_deep_copy(entries[leftIndex]);
+	mtree_int32* unionRight = mtree_int32_deep_copy(entries[rightIndex]);
+	mtree_int32* current;
 
 	for (OffsetNumber i = FirstOffsetNumber; i <= maxOffset; i = OffsetNumberNext(i)) {
-		long long distanceLeft = get_int64_distance(maxOffset, entries, distances, leftIndex, i - 1);
-		long long distanceRight = get_int64_distance(maxOffset, entries, distances, rightIndex, i - 1);
+		long long distanceLeft = get_int32_distance(maxOffset, entries, distances, leftIndex, i - 1);
+		long long distanceRight = get_int32_distance(maxOffset, entries, distances, rightIndex, i - 1);
 		current = entries[i - 1];
 
 		if (distanceLeft < distanceRight) {
@@ -457,56 +449,56 @@ Datum mtree_int64_picksplit(PG_FUNCTION_ARGS)
 	PG_RETURN_POINTER(vector);
 }
 
-Datum mtree_int64_compress(PG_FUNCTION_ARGS)
+Datum mtree_int32_compress(PG_FUNCTION_ARGS)
 {
 	PG_RETURN_POINTER(PG_GETARG_POINTER(0));
 }
 
-Datum mtree_int64_decompress(PG_FUNCTION_ARGS)
+Datum mtree_int32_decompress(PG_FUNCTION_ARGS)
 {
 	PG_RETURN_POINTER(PG_GETARG_POINTER(0));
 }
 
-Datum mtree_int64_distance(PG_FUNCTION_ARGS)
+Datum mtree_int32_distance(PG_FUNCTION_ARGS)
 {
 	GISTENTRY* entry = (GISTENTRY*)PG_GETARG_POINTER(0);
-	mtree_int64* query = PG_GETARG_MTREE_INT64_P(1);
-	mtree_int64* key = DatumGetMtreeInt8(entry->key);
+	mtree_int32* query = PG_GETARG_MTREE_INT32_P(1);
+	mtree_int32* key = DatumGetMtreeInt32(entry->key);
 
-	PG_RETURN_FLOAT4((float4)mtree_int64_outer_distance(query, key));
+	PG_RETURN_FLOAT4((float4)mtree_int32_outer_distance(query, key));
 }
 
-Datum mtree_int64_distance_operator(PG_FUNCTION_ARGS)
+Datum mtree_int32_distance_operator(PG_FUNCTION_ARGS)
 {
-	mtree_int64* first = PG_GETARG_MTREE_INT64_P(0);
-	mtree_int64* second = PG_GETARG_MTREE_INT64_P(1);
+	mtree_int32* first = PG_GETARG_MTREE_INT32_P(0);
+	mtree_int32* second = PG_GETARG_MTREE_INT32_P(1);
 
-	PG_RETURN_FLOAT4((float4)mtree_int64_outer_distance(first, second));
+	PG_RETURN_FLOAT4((float4)mtree_int32_outer_distance(first, second));
 }
 
-Datum mtree_int64_overlap_operator(PG_FUNCTION_ARGS)
+Datum mtree_int32_overlap_operator(PG_FUNCTION_ARGS)
 {
-	mtree_int64* first = PG_GETARG_MTREE_INT64_P(0);
-	mtree_int64* second = PG_GETARG_MTREE_INT64_P(1);
-	bool result = mtree_int64_overlap_distance(first, second);
+	mtree_int32* first = PG_GETARG_MTREE_INT32_P(0);
+	mtree_int32* second = PG_GETARG_MTREE_INT32_P(1);
+	bool result = mtree_int32_overlap_distance(first, second);
 
 	PG_RETURN_BOOL(result);
 }
 
-Datum mtree_int64_contains_operator(PG_FUNCTION_ARGS)
+Datum mtree_int32_contains_operator(PG_FUNCTION_ARGS)
 {
-	mtree_int64* first = PG_GETARG_MTREE_INT64_P(0);
-	mtree_int64* second = PG_GETARG_MTREE_INT64_P(1);
-	bool result = mtree_int64_contains_distance(first, second);
+	mtree_int32* first = PG_GETARG_MTREE_INT32_P(0);
+	mtree_int32* second = PG_GETARG_MTREE_INT32_P(1);
+	bool result = mtree_int32_contains_distance(first, second);
 
 	PG_RETURN_BOOL(result);
 }
 
-Datum mtree_int64_contained_operator(PG_FUNCTION_ARGS)
+Datum mtree_int32_contained_operator(PG_FUNCTION_ARGS)
 {
-	mtree_int64* first = PG_GETARG_MTREE_INT64_P(0);
-	mtree_int64* second = PG_GETARG_MTREE_INT64_P(1);
-	bool result = mtree_int64_contains_distance(second, first);
+	mtree_int32* first = PG_GETARG_MTREE_INT32_P(0);
+	mtree_int32* second = PG_GETARG_MTREE_INT32_P(1);
+	bool result = mtree_int32_contains_distance(second, first);
 
 	PG_RETURN_BOOL(result);
 }

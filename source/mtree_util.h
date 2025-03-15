@@ -12,8 +12,9 @@
 #define MIN3(a, b, c) ((a) < (b) ? ((a) < (c) ? (a) : (c)) : ((b) < (c) ? (b) : (c)))
 
 int string_distance(const char*, const char*);
-void init_distances(const int, long long*);
+void init_distances_long_long(const int, long long*);
 void init_distances_float(const int, float*);
+void init_distances_int(const int, int*);
 double overlap_area(const long long, const long long, const long long);
 double overlap_area_float(float, float, float);
 

@@ -52,7 +52,7 @@ Datum mtree_float_array_input(PG_FUNCTION_ARGS)
 		previousInteger = input[i];
 	}
 
-	size_t size = MTREE_FLOAT_ARRAY_SIZE + arrayLength * sizeof(int64) + 1;
+	size_t size = MTREE_FLOAT_ARRAY_SIZE + arrayLength * sizeof(long long) + 1;
 	mtree_float_array* result = (mtree_float_array*)palloc(size);
 
 	char* arrayElement = strtok(input, ",");
@@ -587,13 +587,6 @@ Datum mtree_float_array_distance_operator(PG_FUNCTION_ARGS)
 	mtree_float_array* second = PG_GETARG_MTREE_FLOAT_ARRAY_P(1);
 
 	PG_RETURN_FLOAT4((float4)mtree_float_array_outer_distance(first, second));
-}
-
-Datum mtree_float_array_radius(PG_FUNCTION_ARGS)
-{
-	mtree_float_array* node = PG_GETARG_MTREE_FLOAT_ARRAY_P(0);
-
-	PG_RETURN_FLOAT4((float4)node->coveringRadius);
 }
 
 Datum mtree_float_array_overlap_operator(PG_FUNCTION_ARGS)

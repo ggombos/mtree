@@ -2,7 +2,8 @@ import psycopg2
 import os
 
 THRESHOLD = 0.0001
-THRESHOLD_INT = 100000000000
+THRESHOLD_INT = 100
+KNN_CENTER_POINTS = [3, 8, 10, 23, 45, 56, 67, 87, 99]
 
 def connect_to_database():
     try:
@@ -158,14 +159,13 @@ def main():
                 indexes.append(mtree_index)
                 indexes.append(rtree_index)
 
-                center_points = [10, 45, 67]
-                for center_point in center_points:
+                for center_point in KNN_CENTER_POINTS:
                     print(f"\t\tCenter point of KNN is {center_point}:", end="", flush=True)
 
                     mtree_res = knn_test(curs=curs, table_name=mtree_table, center_point_id=center_point)
                     rtree_res = knn_test(curs=curs, table_name=rtree_table, center_point_id=center_point)
                     
-                    if 'int64' in type:
+                    if 'int32' in type:
                         result = assert_equal(mtree_res, rtree_res, THRESHOLD_INT)
                     else:
                         result = assert_equal(mtree_res, rtree_res, THRESHOLD)

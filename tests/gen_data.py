@@ -5,7 +5,7 @@ import argparse
 NUMBER_OF_ARRAY_ELEMENTS = 3
 NUMBER_OF_CHARACTERS = 8
 DELIMITER = ','
-TYPES = ['float_array', 'float', 'int8_array', 'int64', 'text_array', 'text']
+TYPES = ['float_array', 'float', 'int32_array', 'int32', 'text_array', 'text']
 TREES = ['mtree', 'cube']
 
 def generate_float_data(path, number_of_rows):
@@ -38,13 +38,13 @@ def generate_float_array_data(path, number_of_rows):
                     file.write(f'{','.join(str(x) for x in value)}\n')
             print(f'{filename} is generated.')
 
-def generate_int64_data(path, number_of_rows):
+def generate_int32_data(path, number_of_rows):
     values = []
     for _ in range(number_of_rows):
-        values.append(random.randint(-9223372036854775808, 9223372036854775807))
+        values.append(random.randint(-2147483648, 2147483647))
 
     for tree in TREES:
-        filename = f'int64_{number_of_rows}_{tree}.csv'
+        filename = f'int32_{number_of_rows}_{tree}.csv'
         with open(f'{path}/{filename}', 'w') as file:
             for value in values:
                 if tree == 'cube':
@@ -53,13 +53,13 @@ def generate_int64_data(path, number_of_rows):
                     file.write(f'{value}\n')
             print(f'{filename} is generated.')
 
-def generate_int8_array_data(path, number_of_rows):
+def generate_int32_array_data(path, number_of_rows):
     values = []
     for _ in range(number_of_rows):
-        values.append([random.randint(-9223372036854775808, 9223372036854775807) for _ in range(NUMBER_OF_ARRAY_ELEMENTS)])
+        values.append([random.randint(-2147483648, 2147483647) for _ in range(NUMBER_OF_ARRAY_ELEMENTS)])
 
     for tree in TREES:
-        filename = f'int8_array_{number_of_rows}_{tree}.csv'
+        filename = f'int32_array_{number_of_rows}_{tree}.csv'
         with open(f'{path}/{filename}', 'w') as file:
             for value in values:
                 if tree == 'cube':
@@ -114,10 +114,10 @@ def main():
         generate_float_data(args.path, number_of_rows)
     elif args.type == 'float_array':
         generate_float_array_data(args.path, number_of_rows)
-    elif args.type == 'int64':
-        generate_int64_data(args.path, number_of_rows)
-    elif args.type == 'int8_array':
-        generate_int8_array_data(args.path, number_of_rows)
+    elif args.type == 'int32':
+        generate_int32_data(args.path, number_of_rows)
+    elif args.type == 'int32_array':
+        generate_int32_array_data(args.path, number_of_rows)
     elif args.type == 'text':
         generate_text_data(args.path, number_of_rows)
     elif args.type == 'text_array':
