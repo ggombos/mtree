@@ -4,10 +4,10 @@
 
 #include "mtree_float_util.h"
 
-float mtree_float_outer_distance(mtree_float* first, mtree_float* second)
+double mtree_float_outer_distance(mtree_float* first, mtree_float* second)
 {
-	float distance = fabs(first->data - second->data);
-	float outer_distance = distance - first->coveringRadius - second->coveringRadius;
+	double distance = fabs(first->data - second->data);
+	double outer_distance = distance - first->coveringRadius - second->coveringRadius;
 
 	if (outer_distance < 0.0) {
 		outer_distance = 0.0;
@@ -16,7 +16,7 @@ float mtree_float_outer_distance(mtree_float* first, mtree_float* second)
 	return outer_distance;
 }
 
-float mtree_float_full_distance(mtree_float* first, mtree_float* second)
+double mtree_float_full_distance(mtree_float* first, mtree_float* second)
 {
 	return fabs(first->data - second->data);
 }
@@ -28,13 +28,13 @@ bool mtree_float_equals(mtree_float* first, mtree_float* second)
 
 bool mtree_float_overlap_distance(mtree_float* first, mtree_float* second)
 {
-	float full_distance = mtree_float_full_distance(first, second);
+	double full_distance = mtree_float_full_distance(first, second);
 	return full_distance - (first->coveringRadius + second->coveringRadius) < 0;
 }
 
 bool mtree_float_contains_distance(mtree_float* first, mtree_float* second)
 {
-	float full_distance = mtree_float_full_distance(first, second);
+	double full_distance = mtree_float_full_distance(first, second);
 	return full_distance + second->coveringRadius < first->coveringRadius;
 }
 
@@ -50,7 +50,7 @@ mtree_float* mtree_float_deep_copy(mtree_float* source)
 	return destination;
 }
 
-float get_float_distance(int size, mtree_float* entries[size], float distances[size][size], int i, int j)
+double get_float_distance(int size, mtree_float* entries[size], double distances[size][size], int i, int j)
 {
 	if (distances[i][j] == -1) {
 		distances[i][j] = mtree_float_full_distance(entries[i], entries[j]);

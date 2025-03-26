@@ -7,18 +7,18 @@
 
 #include "mtree_int32_array.h"
 
-long long mtree_int32_array_outer_distance(mtree_int32_array* first, mtree_int32_array* second);
-long long mtree_int32_array_full_distance(mtree_int32_array* first, mtree_int32_array* second);
+double mtree_int32_array_outer_distance(mtree_int32_array* first, mtree_int32_array* second);
+double mtree_int32_array_full_distance(mtree_int32_array* first, mtree_int32_array* second);
 bool mtree_int32_array_equals(mtree_int32_array* first, mtree_int32_array* second);
 bool mtree_int32_array_overlap_distance(mtree_int32_array* first, mtree_int32_array* second);
 bool mtree_int32_array_contains_distance(mtree_int32_array* first, mtree_int32_array* second);
 bool mtree_int32_array_contained_distance(mtree_int32_array* first, mtree_int32_array* second);
 mtree_int32_array* mtree_int32_array_deep_copy(mtree_int32_array* source);
-long long get_int32_array_distance(int size, mtree_int32_array* entries[size], long long distances[size][size], int i, int j);
+double get_int32_array_distance(int size, mtree_int32_array* entries[size], double distances[size][size], int i, int j);
 
-long long int32_simple_distance(mtree_int32_array* first, mtree_int32_array* second);
-long long int32_array_sum_distance(mtree_int32_array* first, mtree_int32_array* second);
-long long int32_array_kullback_leibler_distance(mtree_int32_array* first, mtree_int32_array* second);
-long long int32_array_euclidean_distance(mtree_int32_array* first, mtree_int32_array* second);
+double int32_simple_distance(mtree_int32_array* first, mtree_int32_array* second);
+double int32_array_sum_distance(mtree_int32_array* first, mtree_int32_array* second);
+double int32_array_kullback_leibler_distance(mtree_int32_array* first, mtree_int32_array* second);
+double int32_array_euclidean_distance(mtree_int32_array* first, mtree_int32_array* second);
 
 #endif

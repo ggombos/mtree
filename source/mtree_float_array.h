@@ -17,8 +17,8 @@
 #define PG_RETURN_MTREE_FLOAT_ARRAY_P(x) PG_RETURN_POINTER(x)
 
 typedef struct {
-	float parentDistance;
-	float coveringRadius;
+	double parentDistance;
+	double coveringRadius;
 	unsigned char arrayLength;
 	int level;
 	float data[FLEXIBLE_ARRAY_MEMBER];

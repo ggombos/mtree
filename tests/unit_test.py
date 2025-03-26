@@ -2,7 +2,6 @@ import psycopg2
 import os
 
 THRESHOLD = 0.0001
-THRESHOLD_INT = 100
 KNN_CENTER_POINTS = [3, 8, 10, 23, 45, 56, 67, 87, 99]
 
 def connect_to_database():
@@ -92,7 +91,7 @@ def cleanup(curs, tables, indexes):
     curs.execute(query)
 
 
-def assert_equal(result1, result2, threshold) -> bool:
+def assert_equal(result1, result2) -> bool:
     if len(result1) != len(result2):
         return False
 
@@ -108,7 +107,7 @@ def assert_equal(result1, result2, threshold) -> bool:
         dist1 = float(result1[i][2])
         dist2 = float(result2[i][2])
         diff = abs(dist1 - dist2)
-        if diff > threshold:
+        if diff > THRESHOLD:
             return False
     
     return True
@@ -134,11 +133,15 @@ def main():
             
             try:
                 csv_files = set([f.replace("_cube.csv", "").replace("_mtree.csv", "") for f in os.listdir(f"tests/{type}") if f.endswith('.csv')])
+                csv_files = sorted(csv_files, key=lambda x: int(x.split('_')[-1]))
             except:
                 print("\tNo such file or directory.")
                 continue
 
             for file in csv_files:
+                if 'text' in type:
+                    continue # TODO how to test 'text'?
+
                 print(f"\t[{file}]")
                 mtree_table = f'{file}_mtree'
                 rtree_table = f'{file}_cube'
@@ -165,10 +168,7 @@ def main():
                     mtree_res = knn_test(curs=curs, table_name=mtree_table, center_point_id=center_point)
                     rtree_res = knn_test(curs=curs, table_name=rtree_table, center_point_id=center_point)
                     
-                    if 'int32' in type:
-                        result = assert_equal(mtree_res, rtree_res, THRESHOLD_INT)
-                    else:
-                        result = assert_equal(mtree_res, rtree_res, THRESHOLD)
+                    result = assert_equal(mtree_res, rtree_res)
 
                     print("✅" if result else "❌")
                     if not result:

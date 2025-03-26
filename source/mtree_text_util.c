@@ -6,10 +6,10 @@
 
 #include "mtree_util.h"
 
-int mtree_text_outer_distance(mtree_text* first, mtree_text* second)
+double mtree_text_outer_distance(mtree_text* first, mtree_text* second)
 {
-	int distance = string_distance(first->vl_data, second->vl_data);
-	int outer_distance = distance - first->coveringRadius - second->coveringRadius;
+	double distance = string_distance(first->vl_data, second->vl_data);
+	double outer_distance = distance - first->coveringRadius - second->coveringRadius;
 
 	if (outer_distance < 0.0) {
 		outer_distance = 0.0;
@@ -17,7 +17,7 @@ int mtree_text_outer_distance(mtree_text* first, mtree_text* second)
 
 	return outer_distance;
 }
-int mtree_text_full_distance(mtree_text* first, mtree_text* second)
+double mtree_text_full_distance(mtree_text* first, mtree_text* second)
 {
 	return string_distance(first->vl_data, second->vl_data);
 }
@@ -29,13 +29,13 @@ bool mtree_text_equals(mtree_text* first, mtree_text* second)
 
 bool mtree_text_overlap_distance(mtree_text* first, mtree_text* second)
 {
-	int full_distance = mtree_text_full_distance(first, second);
+	double full_distance = mtree_text_full_distance(first, second);
 	return full_distance - (first->coveringRadius + second->coveringRadius) < 0;
 }
 
 bool mtree_text_contains_distance(mtree_text* first, mtree_text* second)
 {
-	int full_distance = mtree_text_full_distance(first, second);
+	double full_distance = mtree_text_full_distance(first, second);
 	return full_distance + second->coveringRadius < first->coveringRadius;
 }
 
@@ -51,7 +51,7 @@ mtree_text* mtree_text_deep_copy(mtree_text* source)
 	return destination;
 }
 
-int get_distance(int size, mtree_text* entries[size], int distances[size][size], int i, int j)
+double get_distance(int size, mtree_text* entries[size], double distances[size][size], int i, int j)
 {
 	if (distances[i][j] == -1) {
 		distances[i][j] = mtree_text_full_distance(entries[i], entries[j]);

@@ -18,8 +18,8 @@
 
 typedef struct {
 	int level;
-	float parentDistance;
-	float coveringRadius;
+	double parentDistance;
+	double coveringRadius;
 	float data;
 } __attribute__((packed, aligned(1))) mtree_float;
 

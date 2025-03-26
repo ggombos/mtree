@@ -61,7 +61,7 @@ AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT;
 
 CREATE OR REPLACE FUNCTION mtree_text_distance(internal, mtree_text, smallint, oid, internal)
-RETURNS float4
+RETURNS float8
 AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
@@ -86,7 +86,7 @@ AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
 CREATE OR REPLACE FUNCTION mtree_text_operator_distance(mtree_text, mtree_text)
-RETURNS float4
+RETURNS float8
 AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
@@ -199,7 +199,7 @@ AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT;
 
 CREATE OR REPLACE FUNCTION mtree_text_array_distance(internal, mtree_text_array, smallint, oid, internal)
-RETURNS float4
+RETURNS float8
 AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
@@ -224,7 +224,7 @@ AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
 CREATE OR REPLACE FUNCTION mtree_text_array_distance_operator(mtree_text_array, mtree_text_array)
-RETURNS float4
+RETURNS float8
 AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
@@ -339,7 +339,7 @@ AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
 CREATE OR REPLACE FUNCTION mtree_int32_distance(internal, mtree_int32, smallint, oid, internal)
-RETURNS float4
+RETURNS float8
 AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
@@ -359,7 +359,7 @@ AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
 CREATE OR REPLACE FUNCTION mtree_int32_distance_operator(mtree_int32, mtree_int32)
-RETURNS float4
+RETURNS float8
 AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
@@ -474,7 +474,7 @@ AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
 CREATE OR REPLACE FUNCTION mtree_int32_array_distance(internal, mtree_int32_array, smallint, oid, internal)
-RETURNS float4
+RETURNS float8
 AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
@@ -494,7 +494,7 @@ AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
 CREATE OR REPLACE FUNCTION mtree_int32_array_distance_operator(mtree_int32_array, mtree_int32_array)
-RETURNS float4
+RETURNS float8
 AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
@@ -609,7 +609,7 @@ AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
 CREATE OR REPLACE FUNCTION mtree_float_distance(internal, mtree_float, smallint, oid, internal)
-RETURNS float4
+RETURNS float8
 AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
@@ -629,7 +629,7 @@ AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
 CREATE OR REPLACE FUNCTION mtree_float_distance_operator(mtree_float, mtree_float)
-RETURNS float4
+RETURNS float8
 AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
@@ -744,7 +744,7 @@ AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
 CREATE OR REPLACE FUNCTION mtree_float_array_distance(internal, mtree_float_array, smallint, oid, internal)
-RETURNS float4
+RETURNS float8
 AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
@@ -764,7 +764,7 @@ AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 
 CREATE OR REPLACE FUNCTION mtree_float_array_distance_operator(mtree_float_array, mtree_float_array)
-RETURNS float4
+RETURNS float8
 AS 'MODULE_PATHNAME'
 LANGUAGE C STRICT IMMUTABLE;
 

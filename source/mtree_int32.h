@@ -16,8 +16,8 @@
 
 typedef struct {
 	int level;
-	long long parentDistance;
-	long long coveringRadius;
+	double parentDistance;
+	double coveringRadius;
 	int data;
 } __attribute__((packed, aligned(1))) mtree_int32;
 

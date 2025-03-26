@@ -6,25 +6,25 @@
 
 #include "mtree_util.h"
 
-int mtree_text_array_outer_distance(mtree_text_array* first, mtree_text_array* second)
+double mtree_text_array_outer_distance(mtree_text_array* first, mtree_text_array* second)
 {
 	return simple_text_array_distance(first, second);
 	// return weighted_text_array_distance(first, second);
 
 	// ez nem jo semmire
-	//  float dist = PCC(first, second);
+	//  double dist = PCC(first, second);
 	//  az a probléma hogy nem foglalkozik a nem kozos elemekkel
-	//  float dist = ExtendedJaccard(first,second);
+	//  double dist = ExtendedJaccard(first,second);
 
-	// float dist = Euclidean(first,second);
-	// float dist = Hamming(first,second);
-	// float dist = Manhatan(first,second);
-	// float dist = SimED(first,second);
-	// float dist = Cosine(first,second);
-	// float dist = Jaccard(first,second);
-	// float dist = TMJ(first,second);
-	// float dist = MSD(first,second);
-	float dist = RA(first, second);
+	// double dist = Euclidean(first,second);
+	// double dist = Hamming(first,second);
+	// double dist = Manhatan(first,second);
+	// double dist = SimED(first,second);
+	// double dist = Cosine(first,second);
+	// double dist = Jaccard(first,second);
+	// double dist = TMJ(first,second);
+	// double dist = MSD(first,second);
+	double dist = RA(first, second);
 
 	// ha a nem közös tagokkal is akarunk foglalkozni
 	dist += (1.0 - dist) * notCoTagsDistance(first, second);
@@ -35,7 +35,7 @@ int mtree_text_array_outer_distance(mtree_text_array* first, mtree_text_array* s
 	return dist;
 }
 
-int mtree_text_array_full_distance(mtree_text_array* first, mtree_text_array* second)
+double mtree_text_array_full_distance(mtree_text_array* first, mtree_text_array* second)
 {
 	return simple_text_array_distance(first, second);
 }
@@ -57,13 +57,13 @@ bool mtree_text_array_equals(mtree_text_array* first, mtree_text_array* second)
 
 bool mtree_text_array_overlap_distance(mtree_text_array* first, mtree_text_array* second)
 {
-	int full_distance = mtree_text_array_full_distance(first, second);
+	double full_distance = mtree_text_array_full_distance(first, second);
 	return full_distance - (first->coveringRadius + second->coveringRadius) < 0;
 }
 
 bool mtree_text_array_contains_distance(mtree_text_array* first, mtree_text_array* second)
 {
-	int full_distance = mtree_text_array_full_distance(first, second);
+	double full_distance = mtree_text_array_full_distance(first, second);
 	return full_distance + second->coveringRadius < first->coveringRadius;
 }
 
@@ -79,7 +79,7 @@ mtree_text_array* mtree_text_array_deep_copy(mtree_text_array* source)
 	return destination;
 }
 
-int get_text_array_distance(int size, mtree_text_array* entries[size], int distances[size][size], int i, int j)
+double get_text_array_distance(int size, mtree_text_array* entries[size], double distances[size][size], int i, int j)
 {
 	if (distances[i][j] == -1) {
 		distances[i][j] = mtree_text_array_full_distance(entries[i], entries[j]);
@@ -87,9 +87,9 @@ int get_text_array_distance(int size, mtree_text_array* entries[size], int dista
 	return distances[i][j];
 }
 
-int simple_text_array_distance(mtree_text_array* first, mtree_text_array* second)
+double simple_text_array_distance(mtree_text_array* first, mtree_text_array* second)
 {
-	int sum = 0.0;
+	double sum = 0.0;
 	unsigned char arrayLength = first->arrayLength;
 
 	if (second->arrayLength < arrayLength) {
@@ -119,7 +119,7 @@ int simple_text_array_distance(mtree_text_array* first, mtree_text_array* second
  * This distance function is used for song similarity queries with the
  * Million Songs Dataset.
  */
-float weighted_text_array_distance(mtree_text_array* first, mtree_text_array* second)
+double weighted_text_array_distance(mtree_text_array* first, mtree_text_array* second)
 {
 	unsigned char lengthOfFirstArray = first->arrayLength;
 	unsigned char lengthOfSecondArray = second->arrayLength;
@@ -127,7 +127,7 @@ float weighted_text_array_distance(mtree_text_array* first, mtree_text_array* se
 	char* separator = "###";
 	char* saveFirst;
 	char* saveSecond;
-	float sum = 0.0;
+	double sum = 0.0;
 
 	for (unsigned char i = 0; i < lengthOfFirstArray; ++i) {
 		char* firstData = calloc(strlen(first->data[i]) + 1, sizeof(char));
@@ -172,15 +172,15 @@ float weighted_text_array_distance(mtree_text_array* first, mtree_text_array* se
 
 // Pearson correlation coefficient (PCC)
 // def PCC_new(u,v):
-float PCC(mtree_text_array* first, mtree_text_array* second)
+double PCC(mtree_text_array* first, mtree_text_array* second)
 {
 	unsigned char lengthOfFirstArray = first->arrayLength;
 	unsigned char lengthOfSecondArray = second->arrayLength;
-	float avg_first = 0.0;
-	float avg_second = 0.0;
-	float a = 0.0;
-	float b = 0.0;
-	float c = 0.0;
+	double avg_first = 0.0;
+	double avg_second = 0.0;
+	double a = 0.0;
+	double b = 0.0;
+	double c = 0.0;
 
 	char* separator = "###";
 	char* saveFirst;
@@ -193,10 +193,10 @@ float PCC(mtree_text_array* first, mtree_text_array* second)
 		strcpy(firstData, first->data[i]);
 
 		// char* firstTagName = strtok_r(firstData, separator, &saveFirst);
-		float firstTagRelevance = atoi(strtok_r(NULL, separator, &saveFirst));
-		avg_first += (float)firstTagRelevance;
+		double firstTagRelevance = atoi(strtok_r(NULL, separator, &saveFirst));
+		avg_first += (double)firstTagRelevance;
 	}
-	avg_first = avg_first / (float)lengthOfFirstArray;
+	avg_first = avg_first / (double)lengthOfFirstArray;
 
 	for (unsigned char i = 0; i < lengthOfSecondArray; ++i) {
 		char* secondData = calloc(strlen(second->data[i]) + 1, sizeof(char));
@@ -204,10 +204,10 @@ float PCC(mtree_text_array* first, mtree_text_array* second)
 		strcpy(secondData, second->data[i]);
 
 		// char* secondTagName = strtok_r(secondData, separator, &saveSecond);
-		float secondTagRelevance = atoi(strtok_r(NULL, separator, &saveSecond));
-		avg_second += (float)secondTagRelevance;
+		double secondTagRelevance = atoi(strtok_r(NULL, separator, &saveSecond));
+		avg_second += (double)secondTagRelevance;
 	}
-	avg_second = avg_second / (float)lengthOfSecondArray;
+	avg_second = avg_second / (double)lengthOfSecondArray;
 
 	for (unsigned char i = 0; i < lengthOfFirstArray; ++i) {
 		char* firstData = calloc(strlen(first->data[i]) + 1, sizeof(char));
@@ -215,17 +215,17 @@ float PCC(mtree_text_array* first, mtree_text_array* second)
 		strcpy(firstData, first->data[i]);
 
 		char* firstTagName = strtok_r(firstData, separator, &saveFirst);
-		float firstTagRelevance = (float)atoi(strtok_r(NULL, separator, &saveFirst));
+		double firstTagRelevance = (double)atoi(strtok_r(NULL, separator, &saveFirst));
 
 		bool isMatchingTag = false;
-		float secondTagRelevance;
+		double secondTagRelevance;
 		for (unsigned char j = 0; j < lengthOfSecondArray; ++j) {
 			char* secondData = calloc(strlen(second->data[j]) + 1, sizeof(char));
 			char* secondDataStart = secondData;
 			strcpy(secondData, second->data[j]);
 
 			char* secondTagName = strtok_r(secondData, separator, &saveSecond);
-			secondTagRelevance = (float)atoi(strtok_r(NULL, separator, &saveSecond));
+			secondTagRelevance = (double)atoi(strtok_r(NULL, separator, &saveSecond));
 
 			if (strcmp(firstTagName, secondTagName) == 0) {
 				isMatchingTag = true;
@@ -260,13 +260,13 @@ float PCC(mtree_text_array* first, mtree_text_array* second)
 
 // Cosine
 // def cosine(u,v):
-float Cosine(mtree_text_array* first, mtree_text_array* second)
+double Cosine(mtree_text_array* first, mtree_text_array* second)
 {
 	unsigned char lengthOfFirstArray = first->arrayLength;
 	unsigned char lengthOfSecondArray = second->arrayLength;
-	float a = 0.0;
-	float b = 0.0;
-	float c = 0.0;
+	double a = 0.0;
+	double b = 0.0;
+	double c = 0.0;
 
 	char* separator = "###";
 	char* saveFirst;
@@ -278,8 +278,8 @@ float Cosine(mtree_text_array* first, mtree_text_array* second)
 		strcpy(firstData, first->data[i]);
 
 		// char* firstTagName = strtok_r(firstData, separator, &saveFirst);
-		float firstTagRelevance = atoi(strtok_r(NULL, separator, &saveFirst));
-		b += (float)firstTagRelevance * (float)firstTagRelevance;
+		double firstTagRelevance = atoi(strtok_r(NULL, separator, &saveFirst));
+		b += (double)firstTagRelevance * (double)firstTagRelevance;
 	}
 	b = sqrtf(b);
 
@@ -289,8 +289,8 @@ float Cosine(mtree_text_array* first, mtree_text_array* second)
 		strcpy(secondData, second->data[i]);
 
 		// char* secondTagName = strtok_r(secondData, separator, &saveSecond);
-		float secondTagRelevance = atoi(strtok_r(NULL, separator, &saveSecond));
-		c += (float)secondTagRelevance * (float)secondTagRelevance;
+		double secondTagRelevance = atoi(strtok_r(NULL, separator, &saveSecond));
+		c += (double)secondTagRelevance * (double)secondTagRelevance;
 	}
 	c = sqrtf(c);
 
@@ -300,17 +300,17 @@ float Cosine(mtree_text_array* first, mtree_text_array* second)
 		strcpy(firstData, first->data[i]);
 
 		char* firstTagName = strtok_r(firstData, separator, &saveFirst);
-		float firstTagRelevance = (float)atoi(strtok_r(NULL, separator, &saveFirst));
+		double firstTagRelevance = (double)atoi(strtok_r(NULL, separator, &saveFirst));
 
 		bool isMatchingTag = false;
-		float secondTagRelevance;
+		double secondTagRelevance;
 		for (unsigned char j = 0; j < lengthOfSecondArray; ++j) {
 			char* secondData = calloc(strlen(second->data[j]) + 1, sizeof(char));
 			char* secondDataStart = secondData;
 			strcpy(secondData, second->data[j]);
 
 			char* secondTagName = strtok_r(secondData, separator, &saveSecond);
-			secondTagRelevance = (float)atoi(strtok_r(NULL, separator, &saveSecond));
+			secondTagRelevance = (double)atoi(strtok_r(NULL, separator, &saveSecond));
 
 			if (strcmp(firstTagName, secondTagName) == 0) {
 				isMatchingTag = true;
@@ -339,11 +339,11 @@ float Cosine(mtree_text_array* first, mtree_text_array* second)
 
 // Jaccard
 // def Jaccard(u,v):
-float Jaccard(mtree_text_array* first, mtree_text_array* second)
+double Jaccard(mtree_text_array* first, mtree_text_array* second)
 {
 	unsigned char lengthOfFirstArray = first->arrayLength;
 	unsigned char lengthOfSecondArray = second->arrayLength;
-	float a = 0.0;
+	double a = 0.0;
 
 	char* separator = "###";
 	char* saveFirst;
@@ -355,16 +355,16 @@ float Jaccard(mtree_text_array* first, mtree_text_array* second)
 		strcpy(firstData, first->data[i]);
 
 		char* firstTagName = strtok_r(firstData, separator, &saveFirst);
-		// float firstTagRelevance = (float)atoi(strtok_r(NULL, separator, &saveFirst));
+		// double firstTagRelevance = (double)atoi(strtok_r(NULL, separator, &saveFirst));
 
-		// float secondTagRelevance;
+		// double secondTagRelevance;
 		for (unsigned char j = 0; j < lengthOfSecondArray; ++j) {
 			char* secondData = calloc(strlen(second->data[j]) + 1, sizeof(char));
 			char* secondDataStart = secondData;
 			strcpy(secondData, second->data[j]);
 
 			char* secondTagName = strtok_r(secondData, separator, &saveSecond);
-			// secondTagRelevance = (float)atoi(strtok_r(NULL, separator, &saveSecond));
+			// secondTagRelevance = (double)atoi(strtok_r(NULL, separator, &saveSecond));
 
 			if (strcmp(firstTagName, secondTagName) == 0) {
 				a++;
@@ -376,16 +376,16 @@ float Jaccard(mtree_text_array* first, mtree_text_array* second)
 		free(firstDataStart);
 	}
 
-	return 1.0 - (a / ((float)lengthOfFirstArray + (float)lengthOfSecondArray - a));
+	return 1.0 - (a / ((double)lengthOfFirstArray + (double)lengthOfSecondArray - a));
 }
 
 // weighted Jaccard
 // def WJaccard(u,v):
-float ExtendedJaccard(mtree_text_array* first, mtree_text_array* second)
+double ExtendedJaccard(mtree_text_array* first, mtree_text_array* second)
 {
 	unsigned char lengthOfFirstArray = first->arrayLength;
 	unsigned char lengthOfSecondArray = second->arrayLength;
-	float a = 0.0;
+	double a = 0.0;
 
 	char* separator = "###";
 	char* saveFirst;
@@ -397,16 +397,16 @@ float ExtendedJaccard(mtree_text_array* first, mtree_text_array* second)
 		strcpy(firstData, first->data[i]);
 
 		char* firstTagName = strtok_r(firstData, separator, &saveFirst);
-		float firstTagRelevance = (float)atoi(strtok_r(NULL, separator, &saveFirst));
+		double firstTagRelevance = (double)atoi(strtok_r(NULL, separator, &saveFirst));
 
-		float secondTagRelevance;
+		double secondTagRelevance;
 		for (unsigned char j = 0; j < lengthOfSecondArray; ++j) {
 			char* secondData = calloc(strlen(second->data[j]) + 1, sizeof(char));
 			char* secondDataStart = secondData;
 			strcpy(secondData, second->data[j]);
 
 			char* secondTagName = strtok_r(secondData, separator, &saveSecond);
-			secondTagRelevance = (float)atoi(strtok_r(NULL, separator, &saveSecond));
+			secondTagRelevance = (double)atoi(strtok_r(NULL, separator, &saveSecond));
 
 			if (strcmp(firstTagName, secondTagName) == 0) {
 				a += (firstTagRelevance * secondTagRelevance) /
@@ -425,13 +425,13 @@ float ExtendedJaccard(mtree_text_array* first, mtree_text_array* second)
 
 // Triangle Multiplying Jaccard (TMJ)
 // def tmj(u,v):
-float TMJ(mtree_text_array* first, mtree_text_array* second)
+double TMJ(mtree_text_array* first, mtree_text_array* second)
 {
 	unsigned char lengthOfFirstArray = first->arrayLength;
 	unsigned char lengthOfSecondArray = second->arrayLength;
-	float a = 0.0;
-	float b = 0.0;
-	float c = 0.0;
+	double a = 0.0;
+	double b = 0.0;
+	double c = 0.0;
 
 	char* separator = "###";
 	char* saveFirst;
@@ -443,16 +443,16 @@ float TMJ(mtree_text_array* first, mtree_text_array* second)
 		strcpy(firstData, first->data[i]);
 
 		char* firstTagName = strtok_r(firstData, separator, &saveFirst);
-		float firstTagRelevance = (float)atoi(strtok_r(NULL, separator, &saveFirst));
+		double firstTagRelevance = (double)atoi(strtok_r(NULL, separator, &saveFirst));
 
-		float secondTagRelevance;
+		double secondTagRelevance;
 		for (unsigned char j = 0; j < lengthOfSecondArray; ++j) {
 			char* secondData = calloc(strlen(second->data[j]) + 1, sizeof(char));
 			char* secondDataStart = secondData;
 			strcpy(secondData, second->data[j]);
 
 			char* secondTagName = strtok_r(secondData, separator, &saveSecond);
-			secondTagRelevance = (float)atoi(strtok_r(NULL, separator, &saveSecond));
+			secondTagRelevance = (double)atoi(strtok_r(NULL, separator, &saveSecond));
 
 			if (strcmp(firstTagName, secondTagName) == 0) {
 				a += powf(firstTagRelevance - secondTagRelevance, 2);
@@ -474,12 +474,12 @@ float TMJ(mtree_text_array* first, mtree_text_array* second)
 
 // Mean Squablue Difference (MSD)
 // def msd(u,v):
-float MSD(mtree_text_array* first, mtree_text_array* second)
+double MSD(mtree_text_array* first, mtree_text_array* second)
 {
 	unsigned char lengthOfFirstArray = first->arrayLength;
 	unsigned char lengthOfSecondArray = second->arrayLength;
-	float a = 0.0;
-	float b = 0.0;
+	double a = 0.0;
+	double b = 0.0;
 
 	char* separator = "###";
 	char* saveFirst;
@@ -491,16 +491,16 @@ float MSD(mtree_text_array* first, mtree_text_array* second)
 		strcpy(firstData, first->data[i]);
 
 		char* firstTagName = strtok_r(firstData, separator, &saveFirst);
-		float firstTagRelevance = (float)atoi(strtok_r(NULL, separator, &saveFirst));
+		double firstTagRelevance = (double)atoi(strtok_r(NULL, separator, &saveFirst));
 
-		float secondTagRelevance;
+		double secondTagRelevance;
 		for (unsigned char j = 0; j < lengthOfSecondArray; ++j) {
 			char* secondData = calloc(strlen(second->data[j]) + 1, sizeof(char));
 			char* secondDataStart = secondData;
 			strcpy(secondData, second->data[j]);
 
 			char* secondTagName = strtok_r(secondData, separator, &saveSecond);
-			secondTagRelevance = (float)atoi(strtok_r(NULL, separator, &saveSecond));
+			secondTagRelevance = (double)atoi(strtok_r(NULL, separator, &saveSecond));
 
 			if (strcmp(firstTagName, secondTagName) == 0) {
 				b++;
@@ -522,12 +522,12 @@ float MSD(mtree_text_array* first, mtree_text_array* second)
 
 // RAtio-based
 // def ra(u,v):
-float RA(mtree_text_array* first, mtree_text_array* second)
+double RA(mtree_text_array* first, mtree_text_array* second)
 {
 	unsigned char lengthOfFirstArray = first->arrayLength;
 	unsigned char lengthOfSecondArray = second->arrayLength;
-	float a = 0.0;
-	float b = 0.0;
+	double a = 0.0;
+	double b = 0.0;
 
 	char* separator = "###";
 	char* saveFirst;
@@ -539,16 +539,16 @@ float RA(mtree_text_array* first, mtree_text_array* second)
 		strcpy(firstData, first->data[i]);
 
 		char* firstTagName = strtok_r(firstData, separator, &saveFirst);
-		float firstTagRelevance = (float)atoi(strtok_r(NULL, separator, &saveFirst));
+		double firstTagRelevance = (double)atoi(strtok_r(NULL, separator, &saveFirst));
 
-		float secondTagRelevance;
+		double secondTagRelevance;
 		for (unsigned char j = 0; j < lengthOfSecondArray; ++j) {
 			char* secondData = calloc(strlen(second->data[j]) + 1, sizeof(char));
 			char* secondDataStart = secondData;
 			strcpy(secondData, second->data[j]);
 
 			char* secondTagName = strtok_r(secondData, separator, &saveSecond);
-			secondTagRelevance = (float)atoi(strtok_r(NULL, separator, &saveSecond));
+			secondTagRelevance = (double)atoi(strtok_r(NULL, separator, &saveSecond));
 
 			if (strcmp(firstTagName, secondTagName) == 0) {
 				b++;
@@ -568,11 +568,11 @@ float RA(mtree_text_array* first, mtree_text_array* second)
 	}
 }
 
-float Euclidean(mtree_text_array* first, mtree_text_array* second)
+double Euclidean(mtree_text_array* first, mtree_text_array* second)
 {
 	unsigned char lengthOfFirstArray = first->arrayLength;
 	unsigned char lengthOfSecondArray = second->arrayLength;
-	float a = 0.0;
+	double a = 0.0;
 
 	char* separator = "###";
 	char* saveFirst;
@@ -584,16 +584,16 @@ float Euclidean(mtree_text_array* first, mtree_text_array* second)
 		strcpy(firstData, first->data[i]);
 
 		char* firstTagName = strtok_r(firstData, separator, &saveFirst);
-		float firstTagRelevance = (float)atoi(strtok_r(NULL, separator, &saveFirst));
+		double firstTagRelevance = (double)atoi(strtok_r(NULL, separator, &saveFirst));
 
-		float secondTagRelevance;
+		double secondTagRelevance;
 		for (unsigned char j = 0; j < lengthOfSecondArray; ++j) {
 			char* secondData = calloc(strlen(second->data[j]) + 1, sizeof(char));
 			char* secondDataStart = secondData;
 			strcpy(secondData, second->data[j]);
 
 			char* secondTagName = strtok_r(secondData, separator, &saveSecond);
-			secondTagRelevance = (float)atoi(strtok_r(NULL, separator, &saveSecond));
+			secondTagRelevance = (double)atoi(strtok_r(NULL, separator, &saveSecond));
 
 			if (strcmp(firstTagName, secondTagName) == 0) {
 				a += powf(firstTagRelevance - secondTagRelevance, 2);
@@ -608,12 +608,12 @@ float Euclidean(mtree_text_array* first, mtree_text_array* second)
 	return 1.0 - (1.0 / (1.0 + sqrtf(a)));
 }
 
-float Hamming(mtree_text_array* first, mtree_text_array* second)
+double Hamming(mtree_text_array* first, mtree_text_array* second)
 {
 	unsigned char lengthOfFirstArray = first->arrayLength;
 	unsigned char lengthOfSecondArray = second->arrayLength;
-	float a = 0.0;
-	float b = 0.0;
+	double a = 0.0;
+	double b = 0.0;
 
 	char* separator = "###";
 	char* saveFirst;
@@ -625,16 +625,16 @@ float Hamming(mtree_text_array* first, mtree_text_array* second)
 		strcpy(firstData, first->data[i]);
 
 		char* firstTagName = strtok_r(firstData, separator, &saveFirst);
-		float firstTagRelevance = (float)atoi(strtok_r(NULL, separator, &saveFirst));
+		double firstTagRelevance = (double)atoi(strtok_r(NULL, separator, &saveFirst));
 
-		float secondTagRelevance;
+		double secondTagRelevance;
 		for (unsigned char j = 0; j < lengthOfSecondArray; ++j) {
 			char* secondData = calloc(strlen(second->data[j]) + 1, sizeof(char));
 			char* secondDataStart = secondData;
 			strcpy(secondData, second->data[j]);
 
 			char* secondTagName = strtok_r(secondData, separator, &saveSecond);
-			secondTagRelevance = (float)atoi(strtok_r(NULL, separator, &saveSecond));
+			secondTagRelevance = (double)atoi(strtok_r(NULL, separator, &saveSecond));
 
 			if (strcmp(firstTagName, secondTagName) == 0) {
 				b++;
@@ -654,12 +654,12 @@ float Hamming(mtree_text_array* first, mtree_text_array* second)
 	}
 }
 
-float Manhatan(mtree_text_array* first, mtree_text_array* second)
+double Manhatan(mtree_text_array* first, mtree_text_array* second)
 {
 	unsigned char lengthOfFirstArray = first->arrayLength;
 	unsigned char lengthOfSecondArray = second->arrayLength;
-	float a = 0.0;
-	float b = 0.0;
+	double a = 0.0;
+	double b = 0.0;
 
 	char* separator = "###";
 	char* saveFirst;
@@ -671,16 +671,16 @@ float Manhatan(mtree_text_array* first, mtree_text_array* second)
 		strcpy(firstData, first->data[i]);
 
 		char* firstTagName = strtok_r(firstData, separator, &saveFirst);
-		float firstTagRelevance = (float)atoi(strtok_r(NULL, separator, &saveFirst));
+		double firstTagRelevance = (double)atoi(strtok_r(NULL, separator, &saveFirst));
 
-		float secondTagRelevance;
+		double secondTagRelevance;
 		for (unsigned char j = 0; j < lengthOfSecondArray; ++j) {
 			char* secondData = calloc(strlen(second->data[j]) + 1, sizeof(char));
 			char* secondDataStart = secondData;
 			strcpy(secondData, second->data[j]);
 
 			char* secondTagName = strtok_r(secondData, separator, &saveSecond);
-			secondTagRelevance = (float)atoi(strtok_r(NULL, separator, &saveSecond));
+			secondTagRelevance = (double)atoi(strtok_r(NULL, separator, &saveSecond));
 
 			if (strcmp(firstTagName, secondTagName) == 0) {
 				b++;
@@ -701,12 +701,12 @@ float Manhatan(mtree_text_array* first, mtree_text_array* second)
 	}
 }
 
-float SimED(mtree_text_array* first, mtree_text_array* second)
+double SimED(mtree_text_array* first, mtree_text_array* second)
 {
 	unsigned char lengthOfFirstArray = first->arrayLength;
 	unsigned char lengthOfSecondArray = second->arrayLength;
-	float a = 0.0;
-	float b = 0.0;
+	double a = 0.0;
+	double b = 0.0;
 
 	char* separator = "###";
 	char* saveFirst;
@@ -718,16 +718,16 @@ float SimED(mtree_text_array* first, mtree_text_array* second)
 		strcpy(firstData, first->data[i]);
 
 		char* firstTagName = strtok_r(firstData, separator, &saveFirst);
-		float firstTagRelevance = (float)atoi(strtok_r(NULL, separator, &saveFirst));
+		double firstTagRelevance = (double)atoi(strtok_r(NULL, separator, &saveFirst));
 
-		float secondTagRelevance;
+		double secondTagRelevance;
 		for (unsigned char j = 0; j < lengthOfSecondArray; ++j) {
 			char* secondData = calloc(strlen(second->data[j]) + 1, sizeof(char));
 			char* secondDataStart = secondData;
 			strcpy(secondData, second->data[j]);
 
 			char* secondTagName = strtok_r(secondData, separator, &saveSecond);
-			secondTagRelevance = (float)atoi(strtok_r(NULL, separator, &saveSecond));
+			secondTagRelevance = (double)atoi(strtok_r(NULL, separator, &saveSecond));
 
 			if (strcmp(firstTagName, secondTagName) == 0) {
 				b++;
@@ -748,11 +748,11 @@ float SimED(mtree_text_array* first, mtree_text_array* second)
 	}
 }
 
-float notCoTagsDistance(mtree_text_array* first, mtree_text_array* second)
+double notCoTagsDistance(mtree_text_array* first, mtree_text_array* second)
 {
 	unsigned char lengthOfFirstArray = first->arrayLength;
 	unsigned char lengthOfSecondArray = second->arrayLength;
-	float b = 0.0;
+	double b = 0.0;
 
 	char* separator = "###";
 	char* saveFirst;
@@ -764,16 +764,16 @@ float notCoTagsDistance(mtree_text_array* first, mtree_text_array* second)
 		strcpy(firstData, first->data[i]);
 
 		char* firstTagName = strtok_r(firstData, separator, &saveFirst);
-		// float firstTagRelevance = (float)atoi(strtok_r(NULL, separator, &saveFirst));
+		// double firstTagRelevance = (double)atoi(strtok_r(NULL, separator, &saveFirst));
 
-		// float secondTagRelevance;
+		// double secondTagRelevance;
 		for (unsigned char j = 0; j < lengthOfSecondArray; ++j) {
 			char* secondData = calloc(strlen(second->data[j]) + 1, sizeof(char));
 			char* secondDataStart = secondData;
 			strcpy(secondData, second->data[j]);
 
 			char* secondTagName = strtok_r(secondData, separator, &saveSecond);
-			// secondTagRelevance = (float)atoi(strtok_r(NULL, separator, &saveSecond));
+			// secondTagRelevance = (double)atoi(strtok_r(NULL, separator, &saveSecond));
 
 			if (strcmp(firstTagName, secondTagName) == 0) {
 				b++;

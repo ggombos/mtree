@@ -109,7 +109,6 @@ Datum mtree_float_array_consistent(PG_FUNCTION_ARGS)
 	StrategyNumber strategyNumber = (StrategyNumber)PG_GETARG_UINT16(2);
 	bool* recheck = (bool*)PG_GETARG_POINTER(4);
 	mtree_float_array* key = DatumGetMtreeFloatArray(entry->key);
-	// float distance = mtree_float_array_outer_distance(key, query);
 
 	*recheck = false;
 
@@ -250,7 +249,7 @@ Datum mtree_float_array_penalty(PG_FUNCTION_ARGS)
 	mtree_float_array* original = DatumGetMtreeFloatArray(originalEntry->key);
 	mtree_float_array* new = DatumGetMtreeFloatArray(newEntry->key);
 
-	float distance = mtree_float_array_outer_distance(original, new);
+	double distance = mtree_float_array_outer_distance(original, new);
 	*penalty = distance;
 
 	PG_RETURN_POINTER(penalty);
@@ -282,16 +281,16 @@ Datum mtree_float_array_picksplit(PG_FUNCTION_ARGS)
 		entries[i - FirstOffsetNumber] = DatumGetMtreeFloatArray(entryVector->vector[i].key);
 	}
 
-	float distances[maxOffset][maxOffset];
-	init_distances_float(maxOffset, *distances);
+	double distances[maxOffset][maxOffset];
+	init_distances(maxOffset, *distances);
 
 	int leftIndex, rightIndex, leftCandidateIndex, rightCandidateIndex;
 	int trialCount = 100;
-	float maxDistance = -1;
-	float minCoveringSum = -1.0;
-	float minCoveringMax = -1.0;
-	float minOverlapArea = -1.0;
-	float minSumArea = -1.0;
+	double maxDistance = -1.0;
+	double minCoveringSum = -1.0;
+	double minCoveringMax = -1.0;
+	double minOverlapArea = -1.0;
+	double minSumArea = -1.0;
 
 	MtreePickSplitStrategy PICKSPLIT_STRATEGY_FLOAT_ARRAY = SamplingMinOverlapArea;
 	if (PG_HAS_OPCLASS_OPTIONS()) {
@@ -320,7 +319,7 @@ Datum mtree_float_array_picksplit(PG_FUNCTION_ARGS)
 		case MaxDistanceFromFirst:
 			maxDistance = -1.0;
 			for (int r = 0; r < maxOffset; ++r) {
-				float distance = get_float_array_distance(maxOffset, entries, distances, 0, r);
+				double distance = get_float_array_distance(maxOffset, entries, distances, 0, r);
 				if (distance > maxDistance) {
 					maxDistance = distance;
 					rightCandidateIndex = r;
@@ -332,7 +331,7 @@ Datum mtree_float_array_picksplit(PG_FUNCTION_ARGS)
 		case MaxDistancePair:
 			for (OffsetNumber l = 0; l < maxOffset; ++l) {
 				for (OffsetNumber r = l; r < maxOffset; ++r) {
-					float distance = get_float_array_distance(maxOffset, entries, distances, l, r);
+					double distance = get_float_array_distance(maxOffset, entries, distances, l, r);
 					if (distance > maxDistance) {
 						maxDistance = distance;
 						leftCandidateIndex = l;
@@ -348,12 +347,12 @@ Datum mtree_float_array_picksplit(PG_FUNCTION_ARGS)
 				leftCandidateIndex = ((int)random()) % (maxOffset - 1);
 				rightCandidateIndex =
 					(leftCandidateIndex + 1) + (((int)random()) % (maxOffset - leftCandidateIndex - 1));
-				float leftRadius = 0.0, rightRadius = 0.0;
+				double leftRadius = 0.0, rightRadius = 0.0;
 
 				for (int currentIndex = 0; currentIndex < maxOffset; currentIndex++) {
-					float distanceLeft =
+					double distanceLeft =
 						get_float_array_distance(maxOffset, entries, distances, leftCandidateIndex, currentIndex);
-					float distanceRight =
+					double distanceRight =
 						get_float_array_distance(maxOffset, entries, distances, rightCandidateIndex, currentIndex);
 
 					if (distanceLeft < distanceRight) {
@@ -379,12 +378,12 @@ Datum mtree_float_array_picksplit(PG_FUNCTION_ARGS)
 				leftCandidateIndex = (random()) % (maxOffset - 1);
 				rightCandidateIndex =
 					(leftCandidateIndex + 1) + (((int)random()) % (maxOffset - leftCandidateIndex - 1));
-				float leftRadius = 0.0, rightRadius = 0.0;
+				double leftRadius = 0.0, rightRadius = 0.0;
 
 				for (int currentIndex = 0; currentIndex < maxOffset; ++currentIndex) {
-					float distanceLeft =
+					double distanceLeft =
 						get_float_array_distance(maxOffset, entries, distances, leftCandidateIndex, currentIndex);
-					float distanceRight =
+					double distanceRight =
 						get_float_array_distance(maxOffset, entries, distances, rightCandidateIndex, currentIndex);
 
 					if (distanceLeft < distanceRight) {
@@ -410,14 +409,14 @@ Datum mtree_float_array_picksplit(PG_FUNCTION_ARGS)
 				leftCandidateIndex = ((int)random()) % (maxOffset - 1);
 				rightCandidateIndex =
 					(leftCandidateIndex + 1) + (((int)random()) % (maxOffset - leftCandidateIndex - 1));
-				float distance =
+				double distance =
 					get_float_array_distance(maxOffset, entries, distances, leftCandidateIndex, rightCandidateIndex);
-				float leftRadius = 0.0, rightRadius = 0.0;
+				double leftRadius = 0.0, rightRadius = 0.0;
 
 				for (int currentIndex = 0; currentIndex < maxOffset; currentIndex++) {
-					float distanceLeft =
+					double distanceLeft =
 						get_float_array_distance(maxOffset, entries, distances, leftCandidateIndex, currentIndex);
-					float distanceRight =
+					double distanceRight =
 						get_float_array_distance(maxOffset, entries, distances, rightCandidateIndex, currentIndex);
 
 					if (distanceLeft < distanceRight) {
@@ -431,9 +430,9 @@ Datum mtree_float_array_picksplit(PG_FUNCTION_ARGS)
 					}
 				}
 
-				double currentOverlapArea = overlap_area_float(leftRadius, rightRadius, distance);
+				double currentOverlapArea = overlap_area(leftRadius, rightRadius, distance);
 				if (minOverlapArea == -1.0 || currentOverlapArea < minOverlapArea) {
-					minOverlapArea = (float)currentOverlapArea;
+					minOverlapArea = currentOverlapArea;
 					leftIndex = leftCandidateIndex;
 					rightIndex = rightCandidateIndex;
 				}
@@ -444,14 +443,14 @@ Datum mtree_float_array_picksplit(PG_FUNCTION_ARGS)
 				for (int j = i + 1; j < maxOffset; j++) {
 					leftCandidateIndex = i;
 					rightCandidateIndex = j;
-					float distance = get_float_array_distance(maxOffset, entries, distances, leftCandidateIndex,
-															  rightCandidateIndex);
-					float leftRadius = 0.0, rightRadius = 0.0;
+					double distance = get_float_array_distance(maxOffset, entries, distances, leftCandidateIndex,
+															   rightCandidateIndex);
+					double leftRadius = 0.0, rightRadius = 0.0;
 
 					for (int currentIndex = 0; currentIndex < maxOffset; currentIndex++) {
-						float distanceLeft =
+						double distanceLeft =
 							get_float_array_distance(maxOffset, entries, distances, leftCandidateIndex, currentIndex);
-						float distanceRight =
+						double distanceRight =
 							get_float_array_distance(maxOffset, entries, distances, rightCandidateIndex, currentIndex);
 
 						if (distanceLeft < distanceRight) {
@@ -465,13 +464,10 @@ Datum mtree_float_array_picksplit(PG_FUNCTION_ARGS)
 						}
 					}
 
-					double currentOverlapArea = overlap_area_float(leftRadius, rightRadius, distance);
+					double currentOverlapArea = overlap_area(leftRadius, rightRadius, distance);
 					if ((minOverlapArea == -1.0 || currentOverlapArea < minOverlapArea) &&
 						(currentOverlapArea != 0.0)) {
-						minOverlapArea = (float)currentOverlapArea;
-						elog(INFO, "I: %d, J: %d, LEFTRADIUS: %f, RIGHTRADIUS: %f, DISTANCE: %f", i, j, leftRadius,
-							 rightRadius, distance);
-						elog(INFO, "OVERLAPAREA: %f, %f", currentOverlapArea, minOverlapArea);
+						minOverlapArea = currentOverlapArea;
 						leftIndex = leftCandidateIndex;
 						rightIndex = rightCandidateIndex;
 					}
@@ -483,12 +479,12 @@ Datum mtree_float_array_picksplit(PG_FUNCTION_ARGS)
 				leftCandidateIndex = ((int)random()) % (maxOffset - 1);
 				rightCandidateIndex =
 					(leftCandidateIndex + 1) + (((int)random()) % (maxOffset - leftCandidateIndex - 1));
-				float leftRadius = 0.0, rightRadius = 0.0;
+				double leftRadius = 0.0, rightRadius = 0.0;
 
 				for (int currentIndex = 0; currentIndex < maxOffset; currentIndex++) {
-					float distanceLeft =
+					double distanceLeft =
 						get_float_array_distance(maxOffset, entries, distances, leftCandidateIndex, currentIndex);
-					float distanceRight =
+					double distanceRight =
 						get_float_array_distance(maxOffset, entries, distances, rightCandidateIndex, currentIndex);
 
 					if (distanceLeft < distanceRight) {
@@ -502,7 +498,7 @@ Datum mtree_float_array_picksplit(PG_FUNCTION_ARGS)
 					}
 				}
 
-				float currentSumArea = leftRadius * leftRadius + rightRadius * rightRadius;
+				double currentSumArea = leftRadius * leftRadius + rightRadius * rightRadius;
 				if (minSumArea == -1.0 || currentSumArea < minSumArea) {
 					minSumArea = currentSumArea;
 					leftIndex = leftCandidateIndex;
@@ -520,44 +516,30 @@ Datum mtree_float_array_picksplit(PG_FUNCTION_ARGS)
 	mtree_float_array* unionRight = mtree_float_array_deep_copy(entries[rightIndex]);
 	mtree_float_array* current;
 
-	// int left_size = 0;
-	// int right_rize = 0;
-
 	for (OffsetNumber i = FirstOffsetNumber; i <= maxOffset; i = OffsetNumberNext(i)) {
-		float distanceLeft = get_float_array_distance(maxOffset, entries, distances, leftIndex, i - 1);
-		float distanceRight = get_float_array_distance(maxOffset, entries, distances, rightIndex, i - 1);
+		double distanceLeft = get_float_array_distance(maxOffset, entries, distances, leftIndex, i - 1);
+		double distanceRight = get_float_array_distance(maxOffset, entries, distances, rightIndex, i - 1);
 		current = entries[i - 1];
 
 		if (distanceLeft < distanceRight) {
 			if (distanceLeft + current->coveringRadius > unionLeft->coveringRadius) {
 				unionLeft->coveringRadius = distanceLeft + current->coveringRadius;
 			}
-			// elog(INFO, "B: %f, %f, %f", current->data[0], current->data[1], current->data[2]);
 			*left = i;
 			++left;
 			++(vector->spl_nleft);
-
-			// left_size++;
 		} else {
 			if (distanceRight + current->coveringRadius > unionRight->coveringRadius) {
 				unionRight->coveringRadius = distanceRight + current->coveringRadius;
 			}
-			// elog(INFO, "J: %f, %f, %f", current->data[0], current->data[1], current->data[2]);
 			*right = i;
 			++right;
 			++(vector->spl_nright);
-
-			// right_rize++;
 		}
 	}
 
 	vector->spl_ldatum = PointerGetDatum(unionLeft);
 	vector->spl_rdatum = PointerGetDatum(unionRight);
-
-	// elog(INFO, "BELSO CSUCS B: %f, %f, %f, %f", unionLeft->data[0], unionLeft->data[1], unionLeft->data[2],
-	// unionLeft->coveringRadius); elog(INFO, "BELSO CSUCS J: %f, %f, %f, %f", unionRight->data[0], unionRight->data[1],
-	// unionRight->data[2], unionRight->coveringRadius); elog(INFO, "MAX OFFSET: %d, LEFT SIZE: %d, RIGHT SIZE: %d",
-	// maxOffset, left_size, right_rize);
 
 	PG_RETURN_POINTER(vector);
 }
@@ -578,7 +560,7 @@ Datum mtree_float_array_distance(PG_FUNCTION_ARGS)
 	mtree_float_array* query = PG_GETARG_MTREE_FLOAT_ARRAY_P(1);
 	mtree_float_array* key = DatumGetMtreeFloatArray(entry->key);
 
-	PG_RETURN_FLOAT4((float4)mtree_float_array_outer_distance(query, key));
+	PG_RETURN_FLOAT8((float8)mtree_float_array_outer_distance(query, key));
 }
 
 Datum mtree_float_array_distance_operator(PG_FUNCTION_ARGS)
@@ -586,14 +568,13 @@ Datum mtree_float_array_distance_operator(PG_FUNCTION_ARGS)
 	mtree_float_array* first = PG_GETARG_MTREE_FLOAT_ARRAY_P(0);
 	mtree_float_array* second = PG_GETARG_MTREE_FLOAT_ARRAY_P(1);
 
-	PG_RETURN_FLOAT4((float4)mtree_float_array_outer_distance(first, second));
+	PG_RETURN_FLOAT8((float8)mtree_float_array_outer_distance(first, second));
 }
 
 Datum mtree_float_array_overlap_operator(PG_FUNCTION_ARGS)
 {
 	mtree_float_array* first = PG_GETARG_MTREE_FLOAT_ARRAY_P(0);
 	mtree_float_array* second = PG_GETARG_MTREE_FLOAT_ARRAY_P(1);
-
 	bool result = mtree_float_array_overlap_distance(first, second);
 
 	PG_RETURN_BOOL(result);

@@ -14,8 +14,8 @@
 #define PG_RETURN_MTREE_TEXT_ARRAY_P(x)	  PG_RETURN_POINTER(x)
 
 typedef struct {
-	int parentDistance;
-	int coveringRadius;
+	double parentDistance;
+	double coveringRadius;
 	int level;
 	unsigned char arrayLength;
 	char data[FLEXIBLE_ARRAY_MEMBER][MTREE_TEXT_ARRAY_MAX_STRINGLENGTH];

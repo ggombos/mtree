@@ -4,19 +4,19 @@
 
 #include "mtree_int32_array_util.h"
 
-long long mtree_int32_array_outer_distance(mtree_int32_array* first, mtree_int32_array* second)
+double mtree_int32_array_outer_distance(mtree_int32_array* first, mtree_int32_array* second)
 {
-	long long distance = int32_array_euclidean_distance(first, second);
-	long long outer_distance = distance - first->coveringRadius - second->coveringRadius;
+	double distance = int32_array_euclidean_distance(first, second);
+	double outer_distance = distance - first->coveringRadius - second->coveringRadius;
 
-	if (outer_distance < 0) {
-		outer_distance = 0;
+	if (outer_distance < 0.0) {
+		outer_distance = 0.0;
 	}
 
 	return outer_distance;
 }
 
-long long mtree_int32_array_full_distance(mtree_int32_array* first, mtree_int32_array* second)
+double mtree_int32_array_full_distance(mtree_int32_array* first, mtree_int32_array* second)
 {
 	return int32_array_euclidean_distance(first, second);
 }
@@ -38,13 +38,13 @@ bool mtree_int32_array_equals(mtree_int32_array* first, mtree_int32_array* secon
 
 bool mtree_int32_array_overlap_distance(mtree_int32_array* first, mtree_int32_array* second)
 {
-	int32 full_distance = mtree_int32_array_full_distance(first, second);
+	double full_distance = mtree_int32_array_full_distance(first, second);
 	return full_distance - (first->coveringRadius + second->coveringRadius) < 0;
 }
 
 bool mtree_int32_array_contains_distance(mtree_int32_array* first, mtree_int32_array* second)
 {
-	int32 full_distance = mtree_int32_array_full_distance(first, second);
+	double full_distance = mtree_int32_array_full_distance(first, second);
 	return full_distance + second->coveringRadius < first->coveringRadius;
 }
 
@@ -60,8 +60,7 @@ mtree_int32_array* mtree_int32_array_deep_copy(mtree_int32_array* source)
 	return destination;
 }
 
-long long get_int32_array_distance(int size, mtree_int32_array* entries[size], long long distances[size][size], int i,
-								   int j)
+double get_int32_array_distance(int size, mtree_int32_array* entries[size], double distances[size][size], int i, int j)
 {
 	if (distances[i][j] == -1) {
 		distances[i][j] = mtree_int32_array_full_distance(entries[i], entries[j]);
@@ -69,9 +68,9 @@ long long get_int32_array_distance(int size, mtree_int32_array* entries[size], l
 	return distances[i][j];
 }
 
-long long int32_simple_distance(mtree_int32_array* first, mtree_int32_array* second)
+double int32_simple_distance(mtree_int32_array* first, mtree_int32_array* second)
 {
-	long long distance = 0;
+	double distance = 0.0;
 	unsigned char minimumLength;  //, maximumLength;
 	// mtree_int32_array* longer;
 
@@ -92,9 +91,9 @@ long long int32_simple_distance(mtree_int32_array* first, mtree_int32_array* sec
 	return distance;
 }
 
-long long int32_array_sum_distance(mtree_int32_array* first, mtree_int32_array* second)
+double int32_array_sum_distance(mtree_int32_array* first, mtree_int32_array* second)
 {
-	long long distance = 0;
+	double distance = 0.0;
 	unsigned char minimumLength, maximumLength;
 	mtree_int32_array* longer;
 
@@ -121,12 +120,12 @@ long long int32_array_sum_distance(mtree_int32_array* first, mtree_int32_array* 
 		distance += longer->data[i];
 	}
 
-	return distance;
+	return fabs(distance);
 }
 
-long long int32_array_kullback_leibler_distance(mtree_int32_array* first, mtree_int32_array* second)
+double int32_array_kullback_leibler_distance(mtree_int32_array* first, mtree_int32_array* second)
 {
-	long long distance = 0;
+	double distance = 0.0;
 	unsigned char minimumLength, maximumLength;
 	mtree_int32_array* longer;
 
@@ -155,9 +154,9 @@ long long int32_array_kullback_leibler_distance(mtree_int32_array* first, mtree_
 	return distance;
 }
 
-long long int32_array_euclidean_distance(mtree_int32_array* first, mtree_int32_array* second)
+double int32_array_euclidean_distance(mtree_int32_array* first, mtree_int32_array* second)
 {
-	float distance = 0.0;
+	double distance = 0.0;
 	int minimumLength, maximumLength;
 	mtree_int32_array* longer;
 
@@ -172,13 +171,12 @@ long long int32_array_euclidean_distance(mtree_int32_array* first, mtree_int32_a
 	}
 
 	for (int i = 0; i < minimumLength; ++i) {
-		distance += ((first->data[i] - second->data[i]) * (first->data[i] - second->data[i]));
+		distance += ((double)(first->data[i] - second->data[i]) * (double)(first->data[i] - second->data[i]));
 	}
 
 	for (int i = minimumLength; i < maximumLength; ++i) {
-		distance += longer->data[i] * longer->data[i];
+		distance += ((double)(longer->data[i]) * (double)(longer->data[i]));
 	}
 
-	elog(INFO, "Distance: %f", sqrt(distance));
 	return sqrt(distance);
 }
