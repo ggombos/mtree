@@ -5,7 +5,6 @@
 #include "mtree_util.h"
 
 #include "postgres.h"
-// #include "fdlibm.h"
 
 double string_distance(const char* a, const char* b)
 {

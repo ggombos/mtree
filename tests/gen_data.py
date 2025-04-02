@@ -3,7 +3,8 @@ import string
 import argparse
 
 NUMBER_OF_ARRAY_ELEMENTS = 3
-NUMBER_OF_CHARACTERS = 8
+MIN_NUMBER_OF_CHARACTERS = 1
+MAX_NUMBER_OF_CHARACTERS = 50
 DELIMITER = ','
 TYPES = ['float_array', 'float', 'int32_array', 'int32', 'text_array', 'text']
 TREES = ['mtree', 'cube']
@@ -71,7 +72,7 @@ def generate_int32_array_data(path, number_of_rows):
 def generate_text_data(path, number_of_rows):
     values = []
     for _ in range(number_of_rows):
-        values.append(''.join(random.choice(string.ascii_lowercase) for _ in range(NUMBER_OF_CHARACTERS)))
+        values.append(''.join(random.choice(string.ascii_lowercase) for _ in range(random.randint(MIN_NUMBER_OF_CHARACTERS, MAX_NUMBER_OF_CHARACTERS))))
 
     for tree in TREES:
         filename = f'text_{number_of_rows}_{tree}.csv'
@@ -86,7 +87,7 @@ def generate_text_data(path, number_of_rows):
 def generate_text_array_data(path, number_of_rows):
     values = []
     for _ in range(number_of_rows):
-        values.append([''.join(random.choice(string.ascii_lowercase) for _ in range(NUMBER_OF_CHARACTERS)) for _ in range(NUMBER_OF_ARRAY_ELEMENTS)])
+        values.append([''.join(random.choice(string.ascii_lowercase) for _ in range(random.randint(MIN_NUMBER_OF_CHARACTERS, MAX_NUMBER_OF_CHARACTERS))) for _ in range(NUMBER_OF_ARRAY_ELEMENTS)])
 
     for tree in TREES:
         filename = f'text_array_{number_of_rows}_{tree}.csv'

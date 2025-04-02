@@ -1,8 +1,11 @@
 import psycopg2
 import os
+import heapq
 
 THRESHOLD = 0.0001
 KNN_CENTER_POINTS = [3, 8, 10, 23, 45, 56, 67, 87, 99]
+KNN_NEIGHBOURS = 10
+DELIMITER = ','
 
 def connect_to_database():
     try:
@@ -42,7 +45,7 @@ def create_table(curs, table_name, point_type):
 
 
 def read_csv_into_table(curs, file_name, table_name):
-    query = f"COPY public.{table_name} (point) FROM '/home/data/mtree/tests/{file_name}' DELIMITER '''' CSV;"
+    query = f"COPY public.{table_name} (point) FROM '/home/data/mtree/{file_name}' DELIMITER '''' CSV;"
     curs.execute(query)
 
 
@@ -67,10 +70,10 @@ def create_index(curs, structure, index_name, table_name, type=None):
         curs.execute(query)
 
 
-def knn_test(curs, table_name, center_point_id, nn_count=10):
+def knn_test(curs, table_name, center_point_id, neighbour_count):
     query = f"""SELECT c.id, c.point, (c.point <-> (SELECT ic.point FROM public.{table_name} ic WHERE ic.id = {center_point_id})) dist
                 FROM public.{table_name} c
-                ORDER BY c.point <-> (SELECT ic.point FROM public.{table_name} ic WHERE ic.id = {center_point_id}) LIMIT {nn_count};"""
+                ORDER BY c.point <-> (SELECT ic.point FROM public.{table_name} ic WHERE ic.id = {center_point_id}) LIMIT {neighbour_count};"""
     curs.execute(query)
     return curs.fetchall()
 
@@ -91,7 +94,7 @@ def cleanup(curs, tables, indexes):
     curs.execute(query)
 
 
-def assert_equal(result1, result2) -> bool:
+def assert_equal(result1, result2, check_id) -> bool:
     if len(result1) != len(result2):
         return False
 
@@ -99,10 +102,11 @@ def assert_equal(result1, result2) -> bool:
         id1 = result1[i][0]
         id2 = result2[i][0]
 
-        # If the points are equidistant, they may end up being swapped.
-        if ((id1 not in [r_id2 for r_id2, _, _ in result2]) or
-            (id2 not in [r_id1 for r_id1, _, _ in result1])):
-            return False
+        if check_id:
+            # If the points are equidistant, they may end up being swapped.
+            if ((id1 not in [r_id2 for r_id2, _, _ in result2]) or
+                (id2 not in [r_id1 for r_id1, _, _ in result1])):
+                return False
         
         dist1 = float(result1[i][2])
         dist2 = float(result2[i][2])
@@ -111,6 +115,80 @@ def assert_equal(result1, result2) -> bool:
             return False
     
     return True
+
+
+def text_distance(str1, str2):
+    x_axis_len = len(str1) + 1
+    y_axis_len = len(str2) + 1
+    cost = 1
+
+    m = [[0 for _ in range(y_axis_len)] for _ in range(x_axis_len)]
+    for i in range(x_axis_len):
+        for j in range(y_axis_len):
+            if i == 0:
+                m[i][j] = j
+            elif j == 0:
+                m[i][j] = i
+            else:
+                
+                if str1[i-1] == str2[j-1]:
+                    c_val = 0
+                else:
+                    c_val = cost
+                
+                m[i][j] = min(m[i-1][j] + cost, m[i][j-1] + cost, m[i-1][j-1] + c_val)
+
+    return float(m[x_axis_len - 1][y_axis_len - 1])
+
+
+def select_center_point(file, cp):
+    with open(file, 'r') as f:
+        idx = 1
+        line = f.readline()
+        while idx < cp:
+            idx += 1
+            line = f.readline()
+
+        return (idx, line.strip('\n'))
+
+
+def calculate_knn(file, center):
+    neighbours_heap = []
+    nearest_neighbours = []
+
+    with open(file, 'r') as f:
+        for idx, line in enumerate(f):
+            line = line.strip('\n')
+            
+            if DELIMITER in line:
+                texts = line.split(DELIMITER)
+                cp_texts = center[1].split(DELIMITER)
+                dist = 0.0
+                for i in range(len(cp_texts)): # Assume that arrays have the same amount of elements.
+                    dist += text_distance(cp_texts[i], texts[i])
+            else:
+                dist = text_distance(center[1], line)
+            
+            heapq.heappush(neighbours_heap, (dist, (idx + 1), line))
+
+        for dist, idx, line in heapq.nsmallest(KNN_NEIGHBOURS, neighbours_heap):
+            nearest_neighbours.append((idx, line, dist))
+    
+    return nearest_neighbours
+
+
+def print_result(result, mtree_res, rtree_res):
+    print("✅" if result else "❌")
+    if not result:
+        print()
+        print("\t\tOutput:")
+        print("\t\t\tMtree")
+        for item in mtree_res:
+            print("\t\t\t", item)
+        print("\t\t\tRtree")
+        for item in rtree_res:
+            print("\t\t\t", item)
+        print()
 
 
 def main():
@@ -139,50 +217,57 @@ def main():
                 continue
 
             for file in csv_files:
-                if 'text' in type:
-                    continue # TODO how to test 'text'?
-
                 print(f"\t[{file}]")
                 mtree_table = f'{file}_mtree'
                 rtree_table = f'{file}_cube'
                 mtree_index = f'{file}_mtree_index'
                 rtree_index = f'{file}_cube_index'
 
-                create_table(curs=curs, table_name=mtree_table, point_type=f"mtree_{type}")
-                create_table(curs=curs, table_name=rtree_table, point_type="cube")
+                if 'text' in type:
+                    create_table(curs=curs, table_name=mtree_table, point_type=f"mtree_{type}")
+                    read_csv_into_table(curs=curs, file_name=f"tests/{type}/{file}_mtree.csv", table_name=mtree_table)
+                    create_index(curs=curs, structure="mtree", index_name=mtree_index, table_name=mtree_table, type=f"mtree_{type}")
+                    tables.append(mtree_table)
+                    indexes.append(mtree_index)
 
-                read_csv_into_table(curs=curs, file_name=f"{type}/{file}_mtree.csv", table_name=mtree_table)
-                read_csv_into_table(curs=curs, file_name=f"{type}/{file}_cube.csv", table_name=rtree_table)
+                    for center_point in KNN_CENTER_POINTS:
+                        print(f"\t\tCenter point of KNN is {center_point}:", end="", flush=True)
 
-                create_index(curs=curs, structure="mtree", index_name=mtree_index, table_name=mtree_table, type=f"mtree_{type}")
-                create_index(curs=curs, structure="rtree", index_name=rtree_index, table_name=rtree_table)
+                        mtree_res = knn_test(curs=curs, table_name=mtree_table, center_point_id=center_point, neighbour_count=KNN_NEIGHBOURS)
+                        cp = select_center_point(f"tests/{type}/{file}_mtree.csv", center_point)
+                        rtree_res = calculate_knn(f"tests/{type}/{file}_mtree.csv", cp)
+
+                        result = assert_equal(mtree_res, rtree_res, check_id=False)
+                        if not result:
+                            final_result = False
+                        print_result(result, mtree_res, rtree_res)
                 
-                tables.append(mtree_table)
-                tables.append(rtree_table)
-                indexes.append(mtree_index)
-                indexes.append(rtree_index)
+                else:
+                    create_table(curs=curs, table_name=mtree_table, point_type=f"mtree_{type}")
+                    create_table(curs=curs, table_name=rtree_table, point_type="cube")
 
-                for center_point in KNN_CENTER_POINTS:
-                    print(f"\t\tCenter point of KNN is {center_point}:", end="", flush=True)
+                    read_csv_into_table(curs=curs, file_name=f"tests/{type}/{file}_mtree.csv", table_name=mtree_table)
+                    read_csv_into_table(curs=curs, file_name=f"tests/{type}/{file}_cube.csv", table_name=rtree_table)
 
-                    mtree_res = knn_test(curs=curs, table_name=mtree_table, center_point_id=center_point)
-                    rtree_res = knn_test(curs=curs, table_name=rtree_table, center_point_id=center_point)
+                    create_index(curs=curs, structure="mtree", index_name=mtree_index, table_name=mtree_table, type=f"mtree_{type}")
+                    create_index(curs=curs, structure="rtree", index_name=rtree_index, table_name=rtree_table)
                     
-                    result = assert_equal(mtree_res, rtree_res)
+                    tables.append(mtree_table)
+                    tables.append(rtree_table)
+                    indexes.append(mtree_index)
+                    indexes.append(rtree_index)
 
-                    print("✅" if result else "❌")
-                    if not result:
-                        final_result = False
-                        print()
-                        print("\t\tOutput:")
-                        print("\t\t\tMtree")
-                        for item in mtree_res:
-                            print("\t\t\t", item)
-                        print("\t\t\tRtree")
-                        for item in rtree_res:
-                            print("\t\t\t", item)
-                        print()
+                    for center_point in KNN_CENTER_POINTS:
+                        print(f"\t\tCenter point of KNN is {center_point}:", end="", flush=True)
 
+                        mtree_res = knn_test(curs=curs, table_name=mtree_table, center_point_id=center_point, neighbour_count=KNN_NEIGHBOURS)
+                        rtree_res = knn_test(curs=curs, table_name=rtree_table, center_point_id=center_point, neighbour_count=KNN_NEIGHBOURS)
+                        
+                        result = assert_equal(mtree_res, rtree_res, check_id=True)
+                        if not result:
+                            final_result = False
+                        print_result(result, mtree_res, rtree_res)
+                    
                 print()
         
         cleanup(curs, tables, indexes)

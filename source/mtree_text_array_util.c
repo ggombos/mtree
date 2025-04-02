@@ -8,31 +8,14 @@
 
 double mtree_text_array_outer_distance(mtree_text_array* first, mtree_text_array* second)
 {
-	return simple_text_array_distance(first, second);
-	// return weighted_text_array_distance(first, second);
+	double distance = simple_text_array_distance(first, second);
+	double outer_distance = distance - first->coveringRadius - second->coveringRadius;
 
-	// ez nem jo semmire
-	//  double dist = PCC(first, second);
-	//  az a probléma hogy nem foglalkozik a nem kozos elemekkel
-	//  double dist = ExtendedJaccard(first,second);
-
-	// double dist = Euclidean(first,second);
-	// double dist = Hamming(first,second);
-	// double dist = Manhatan(first,second);
-	// double dist = SimED(first,second);
-	// double dist = Cosine(first,second);
-	// double dist = Jaccard(first,second);
-	// double dist = TMJ(first,second);
-	// double dist = MSD(first,second);
-	double dist = RA(first, second);
-
-	// ha a nem közös tagokkal is akarunk foglalkozni
-	dist += (1.0 - dist) * notCoTagsDistance(first, second);
-	if (dist > 1.0) {
-		dist = 1.0;
+	if (outer_distance < 0.0) {
+		outer_distance = 0.0;
 	}
 
-	return dist;
+	return outer_distance;
 }
 
 double mtree_text_array_full_distance(mtree_text_array* first, mtree_text_array* second)
@@ -89,7 +72,7 @@ double get_text_array_distance(int size, mtree_text_array* entries[size], double
 
 double simple_text_array_distance(mtree_text_array* first, mtree_text_array* second)
 {
-	double sum = 0.0;
+	double dist = 0.0;
 	unsigned char arrayLength = first->arrayLength;
 
 	if (second->arrayLength < arrayLength) {
@@ -97,20 +80,10 @@ double simple_text_array_distance(mtree_text_array* first, mtree_text_array* sec
 	}
 
 	for (unsigned char i = 0; i < arrayLength; ++i) {
-		unsigned char stringLength = strlen(first->data[i]);
-
-		if (strlen(second->data[i]) > stringLength) {
-			stringLength = strlen(second->data[i]);
-		}
-
-		for (unsigned char j = 0; j < stringLength; ++j) {
-			if (first->data[i][j] != second->data[i][j]) {
-				sum += 1;
-			}
-		}
+		dist += string_distance(first->data[i], second->data[i]);
 	}
 
-	return arrayLength - sum;
+	return dist;
 }
 
 #define MIN_FLOAT(x, y) (((x) < (y)) ? (1.0 * x) : (1.0 * y))
