@@ -1,0 +1,51 @@
+cmake_minimum_required(VERSION 3.10)
+project(mtree_gist C)
+
+set(POSTGRESQL_INCLUDE_DIR "/usr/include/postgresql/15/server")
+set(POSTGRESQL_EXTENSION_DIR "/usr/share/postgresql/15/extension")
+set(POSTGRESQL_LIBRARY_DIR "/usr/share/postgresql/15/postgre")
+
+set(FILES
+    "mtree_text"
+    "mtree_text_util"
+    "mtree_text_array"
+    "mtree_text_array_util"
+    "mtree_int32"
+    "mtree_int32_util"
+    "mtree_int32_array"
+    "mtree_int32_array_util"
+    "mtree_float"
+    "mtree_float_util"
+    "mtree_float_array"
+    "mtree_float_array_util"
+    "mtree_util"
+    "mtree_gist"
+)
+
+foreach(FILE ${FILES})
+    list(APPEND OBJECT_FILES "${CMAKE_SOURCE_DIR}/${FILE}.c")
+endforeach()
+
+add_library(mtree_gist SHARED ${OBJECT_FILES})
+target_include_directories(mtree_gist PRIVATE ${POSTGRESQL_INCLUDE_DIR})
+
+set_target_properties(mtree_gist PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}"
+)
+
+install(TARGETS mtree_gist LIBRARY DESTINATION ${POSTGRESQL_LIBRARY_DIR})
+
+install(FILES
+    "${CMAKE_SOURCE_DIR}/mtree_gist--1.0.sql"
+    DESTINATION ${POSTGRESQL_EXTENSION_DIR}
+)
+
+add_custom_command(
+    OUTPUT "${CMAKE_SOURCE_DIR}/mtree_gist_tmp.control"
+    COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_SOURCE_DIR}/mtree_gist.control" "${CMAKE_SOURCE_DIR}/mtree_gist_tmp.control"
+    COMMAND sed -i 's,%libdir%,${POSTGRESQL_LIBRARY_DIR},g' "${CMAKE_SOURCE_DIR}/mtree_gist_tmp.control"
+    COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_SOURCE_DIR}/mtree_gist_tmp.control" "${POSTGRESQL_EXTENSION_DIR}/mtree_gist.control"
+    COMMAND ${CMAKE_COMMAND} -E rm -f "${CMAKE_SOURCE_DIR}/mtree_gist_tmp.control"
+)
+
+add_custom_target(modify_control ALL)

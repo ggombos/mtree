@@ -39,13 +39,14 @@ jobs:
             postgis \
             postgresql-15-postgis \
             gcc \
+            cmake \
             python3-psycopg2
           docker exec labor_postgresql pip install psycopg2
           docker exec labor_postgresql bash -c "mkdir /usr/share/postgresql/15/postgre/"
 
       - name: Build the Code
         run: |
-          docker exec labor_postgresql bash -c "cd /home/data/mtree && bash script/install.sh"
+          docker exec labor_postgresql bash -c "cd /home/data/mtree/source && mkdir build && cd build && cmake .. && make"
 
       - name: Run Unit Tests in Docker
         run: |
