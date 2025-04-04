@@ -46,7 +46,7 @@ jobs:
 
       - name: Build the Code
         run: |
-          docker exec labor_postgresql bash -c "cd /home/data/mtree/source && mkdir build && cd build && cmake .. && make"
+          docker exec labor_postgresql bash -c "cd /home/data/mtree/source && mkdir build && cd build && cmake .. && make && make install"
 
       - name: Run Unit Tests in Docker
         run: |
