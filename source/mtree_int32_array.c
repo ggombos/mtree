@@ -159,50 +159,6 @@ Datum mtree_int32_array_union(PG_FUNCTION_ARGS)
 		entries[i] = DatumGetMtreeInt32Array(entry[i].key);
 	}
 
-	// int searchRange;
-	//
-	// MtreeUnionStrategy UNION_STRATEGY_INT32_ARRAY = MinMaxDistance;
-	// if (PG_HAS_OPCLASS_OPTIONS())
-	//{
-	//	MtreeOptions* options = (MtreeOptions *) PG_GET_OPCLASS_OPTIONS();
-	//	UNION_STRATEGY_INT32_ARRAY = options->union_strategy;
-	//}
-	//
-	// switch (UNION_STRATEGY_INT32_ARRAY) {
-	// case First:
-	//	searchRange = 1;
-	//	break;
-	// case MinMaxDistance:
-	//	searchRange = ranges;
-	//	break;
-	// default:
-	//	ereport(ERROR,
-	//		errcode(ERRCODE_SYNTAX_ERROR),
-	//		errmsg("Invalid StrategyNumber for union function: %u", UNION_STRATEGY_INT32_ARRAY));
-	//	break;
-	//}
-	//
-	// double coveringRadii[searchRange];
-	//
-	// for (int i = 0; i < searchRange; ++i) {
-	//	coveringRadii[i] = 0;
-	//
-	//	for (int j = 0; j < ranges; ++j) {
-	//		double distance = mtree_int32_array_outer_distance(entries[i], entries[j]);
-	//		double newCoveringRadius = distance + entries[j]->coveringRadius;
-	//
-	//		if (coveringRadii[i] < newCoveringRadius) {
-	//			coveringRadii[i] = newCoveringRadius;
-	//		}
-	//	}
-	//}
-	//
-	// int minimumIndex = 0;
-	// for (int i = 1; i < searchRange; ++i) {
-	//	if (coveringRadii[i] < coveringRadii[minimumIndex]) {
-	//		minimumIndex = i;
-	//	}
-	//}
 	mtree_int32_array* out = mtree_int32_array_deep_copy(entries[0]);
 	out->coveringRadius += mtree_int32_array_outer_distance(entries[0], entries[1]);
 

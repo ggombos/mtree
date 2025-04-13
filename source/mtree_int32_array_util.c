@@ -171,11 +171,13 @@ double int32_array_euclidean_distance(mtree_int32_array* first, mtree_int32_arra
 	}
 
 	for (int i = 0; i < minimumLength; ++i) {
-		distance += ((double)(first->data[i] - second->data[i]) * (double)(first->data[i] - second->data[i]));
+		double diff = (double)first->data[i] - (double)second->data[i];
+		distance += diff * diff;
 	}
 
 	for (int i = minimumLength; i < maximumLength; ++i) {
-		distance += ((double)(longer->data[i]) * (double)(longer->data[i]));
+		double value = (double)(longer->data[i]);
+		distance += value * value;
 	}
 
 	return sqrt(distance);
