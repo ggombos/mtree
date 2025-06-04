@@ -1,0 +1,53 @@
+name: Run Unit Tests in Docker
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Build Docker Image
+        run: |
+          docker build -t my-custom-image -f docker/Dockerfile .
+
+      - name: Configure Docker Container
+        run: |
+          docker run -d --name labor_postgresql \
+            -v $(pwd):/home/data/mtree \
+            -p 10000:5432 \
+            -e POSTGRES_DB=pointclouds \
+            -e POSTGRES_USER=postgres \
+            -e POSTGRES_PASSWORD=Katona01 \
+            my-custom-image
+
+          # Wait for PostgreSQL to be ready
+          sleep 5
+
+      - name: Install required packages inside the container
+        run: |
+          docker exec labor_postgresql apt-get update
+          docker exec labor_postgresql apt-get install -y \
+            postgresql-server-dev-15 \
+            postgresql-15-pointcloud \
+            postgis \
+            postgresql-15-postgis \
+            gcc \
+            cmake \
+            python3-psycopg2
+          docker exec labor_postgresql pip install psycopg2
+          docker exec labor_postgresql bash -c "mkdir /usr/share/postgresql/15/postgre/"
+
+      - name: Build the Code
+        run: |
+          docker exec labor_postgresql bash -c "cd /home/data/mtree/source && mkdir build && cd build && cmake .. && make && make install"
+
+      - name: Run Unit Tests in Docker
+        run: |
+          docker exec labor_postgresql bash -c "cd /home/data/mtree && python3 tests/unit_test.py"

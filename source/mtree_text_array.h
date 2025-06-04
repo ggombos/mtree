@@ -8,18 +8,17 @@
 #include "mtree_gist.h"
 
 #define MTREE_TEXT_ARRAY_MAX_STRINGLENGTH 128
-#define MTREE_TEXT_ARRAY_SIZE (2 * sizeof(float) + sizeof(unsigned char))
-#define DatumGetMtreeTextArray(x) ((mtree_text_array *) PG_DETOAST_DATUM(x))
-#define PG_GETARG_MTREE_TEXT_ARRAY_P(x) DatumGetMtreeTextArray(PG_GETARG_DATUM(x))
-#define PG_RETURN_MTREE_TEXT_ARRAY_P(x) PG_RETURN_POINTER(x)
+#define MTREE_TEXT_ARRAY_SIZE			  sizeof(mtree_text_array)
+#define DatumGetMtreeTextArray(x)		  ((mtree_text_array *)PG_DETOAST_DATUM(x))
+#define PG_GETARG_MTREE_TEXT_ARRAY_P(x)	  DatumGetMtreeTextArray(PG_GETARG_DATUM(x))
+#define PG_RETURN_MTREE_TEXT_ARRAY_P(x)	  PG_RETURN_POINTER(x)
 
-typedef struct
-{
-	float parentDistance;
-	float coveringRadius;
+typedef struct {
+	double parentDistance;
+	double coveringRadius;
+	int level;
 	unsigned char arrayLength;
 	char data[FLEXIBLE_ARRAY_MEMBER][MTREE_TEXT_ARRAY_MAX_STRINGLENGTH];
-}
-mtree_text_array;
+} __attribute__((packed, aligned(1))) mtree_text_array;
 
 #endif
