@@ -188,7 +188,7 @@ Datum mtree_text_same(PG_FUNCTION_ARGS)
 {
 	mtree_text* first = (mtree_text*)PG_GETARG_POINTER(0);
 	mtree_text* second = (mtree_text*)PG_GETARG_POINTER(1);
-	PG_RETURN_POINTER(mtree_text_equals(first, second));
+	PG_RETURN_BOOL(mtree_text_equals(first, second));
 }
 
 Datum mtree_text_penalty(PG_FUNCTION_ARGS)
