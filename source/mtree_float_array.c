@@ -249,7 +249,7 @@ Datum mtree_float_array_penalty(PG_FUNCTION_ARGS)
 	mtree_float_array* original = DatumGetMtreeFloatArray(originalEntry->key);
 	mtree_float_array* new = DatumGetMtreeFloatArray(newEntry->key);
 
-	double distance = mtree_float_array_outer_distance(original, new);
+	double distance = mtree_float_array_full_distance(original, new);
 	*penalty = distance;
 
 	PG_RETURN_POINTER(penalty);

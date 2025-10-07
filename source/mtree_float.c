@@ -195,7 +195,7 @@ Datum mtree_float_penalty(PG_FUNCTION_ARGS)
 	mtree_float* original = DatumGetMtreeFloat(originalEntry->key);
 	mtree_float* new = DatumGetMtreeFloat(newEntry->key);
 
-	double distance = mtree_float_outer_distance(original, new);
+	double distance = mtree_float_full_distance(original, new);
 	*penalty = distance;
 	PG_RETURN_POINTER(penalty);
 }

@@ -199,7 +199,7 @@ Datum mtree_text_penalty(PG_FUNCTION_ARGS)
 	mtree_text* original = DatumGetMtreeText(originalEntry->key);
 	mtree_text* new = DatumGetMtreeText(newEntry->key);
 
-	double distance = mtree_text_outer_distance(original, new);
+	double distance = mtree_text_full_distance(original, new);
 	*penalty = distance;
 
 	PG_RETURN_POINTER(penalty);

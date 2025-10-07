@@ -193,7 +193,7 @@ Datum mtree_int32_penalty(PG_FUNCTION_ARGS)
 	mtree_int32* original = DatumGetMtreeInt32(originalEntry->key);
 	mtree_int32* new = DatumGetMtreeInt32(newEntry->key);
 
-	double distance = mtree_int32_outer_distance(original, new);
+	double distance = mtree_int32_full_distance(original, new);
 	*penalty = distance;
 
 	PG_RETURN_POINTER(penalty);
