@@ -5,7 +5,11 @@
 #ifndef __MTREE_TEXT_ARRAY_UTIL_H__
 #define __MTREE_TEXT_ARRAY_UTIL_H__
 
+#include <stdlib.h>
 #include "mtree_text_array.h"
+
+#define MAX_TAGS 2048
+#define MAX_TAG_LEN 256
 
 double mtree_text_array_outer_distance(mtree_text_array* first, mtree_text_array* second);
 double mtree_text_array_full_distance(mtree_text_array* first, mtree_text_array* second);

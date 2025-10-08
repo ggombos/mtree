@@ -7,7 +7,7 @@
 
 #include "mtree_gist.h"
 
-#define MTREE_TEXT_ARRAY_MAX_STRINGLENGTH 128
+#define MTREE_TEXT_ARRAY_MAX_STRINGLENGTH 2048
 #define MTREE_TEXT_ARRAY_SIZE			  sizeof(mtree_text_array)
 #define DatumGetMtreeTextArray(x)		  ((mtree_text_array *)PG_DETOAST_DATUM(x))
 #define PG_GETARG_MTREE_TEXT_ARRAY_P(x)	  DatumGetMtreeTextArray(PG_GETARG_DATUM(x))

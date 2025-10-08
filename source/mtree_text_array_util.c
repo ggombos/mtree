@@ -92,55 +92,113 @@ double simple_text_array_distance(mtree_text_array* first, mtree_text_array* sec
  * This distance function is used for song similarity queries with the
  * Million Songs Dataset.
  */
-double weighted_text_array_distance(mtree_text_array* first, mtree_text_array* second)
-{
-	unsigned char lengthOfFirstArray = first->arrayLength;
-	unsigned char lengthOfSecondArray = second->arrayLength;
-	unsigned char numberOfMatchingTags = 0;
-	char* separator = "###";
-	char* saveFirst;
-	char* saveSecond;
-	double sum = 0.0;
+double weighted_text_array_distance(mtree_text_array *first, mtree_text_array *second) {
+    char tags[MAX_TAGS][MAX_TAG_LEN];
+    double rel_vals1[MAX_TAGS] = {0};
+    double rel_vals2[MAX_TAGS] = {0};
+    int tag_count = 0;
 
-	for (unsigned char i = 0; i < lengthOfFirstArray; ++i) {
-		char* firstData = calloc(strlen(first->data[i]) + 1, sizeof(char));
-		char* firstDataStart = firstData;
-		strcpy(firstData, first->data[i]);
+    // Parse tags of first
+    if (first->arrayLength > 2) {
+        char buff[4096];
+        strncpy(buff, first->data[2], sizeof(buff) - 1);
+        buff[sizeof(buff) - 1] = '\0';
 
-		char* firstTagName = strtok_r(firstData, separator, &saveFirst);
-		int firstTagRelevance = atoi(strtok_r(NULL, separator, &saveFirst));
+        char *tok;
+        char *saveptr;
+        tok = strtok_r(buff, ";", &saveptr);
+        while (tok) {
+            char tag_name[MAX_TAG_LEN] = {0};
+            double rel_val = 0.0;
 
-		bool isMatchingTag = false;
-		int secondTagRelevance;
-		for (unsigned char j = 0; j < lengthOfSecondArray; ++j) {
-			char* secondData = calloc(strlen(second->data[j]) + 1, sizeof(char));
-			char* secondDataStart = secondData;
-			strcpy(secondData, second->data[j]);
+            char *sep = strstr(tok, "###");
+            if (sep) {
+                size_t len = sep - tok;
+                if (len >= MAX_TAG_LEN) len = MAX_TAG_LEN - 1;
+                memcpy(tag_name, tok, len);
+                tag_name[len] = '\0';
+                rel_val = strtod(sep + 3, NULL);
+            } else {
+                strncpy(tag_name, tok, MAX_TAG_LEN - 1);
+            }
 
-			char* secondTagName = strtok_r(secondData, separator, &saveSecond);
-			secondTagRelevance = atoi(strtok_r(NULL, separator, &saveSecond));
+            int found = -1;
+            for (int t = 0; t < tag_count; t++) {
+                if (strcmp(tags[t], tag_name) == 0) {
+                    found = t;
+                    break;
+                }
+            }
 
-			if (strcmp(firstTagName, secondTagName) == 0) {
-				isMatchingTag = true;
-				numberOfMatchingTags++;
+            if (found == -1 && tag_count < MAX_TAGS) {
+                strcpy(tags[tag_count], tag_name);
+                rel_vals1[tag_count] = rel_val;
+                rel_vals2[tag_count] = 0.0;
+                tag_count++;
+            } else if (found != -1) {
+                rel_vals1[found] += rel_val;
+            }
 
-				free(secondDataStart);
-				continue;
-			}
+            tok = strtok_r(NULL, ";", &saveptr);
+        }
+    }
 
-			free(secondDataStart);
-		}
+    // Parse tags of second
+    if (second->arrayLength > 2) {
+        char buff[4096];
+        strncpy(buff, second->data[2], sizeof(buff) - 1);
+        buff[sizeof(buff) - 1] = '\0';
 
-		if (isMatchingTag) {
-			sum += MIN_FLOAT(firstTagRelevance, secondTagRelevance);
-		}
+        char *tok;
+        char *saveptr;
+        tok = strtok_r(buff, ";", &saveptr);
+        while (tok) {
+            char tag_name[MAX_TAG_LEN] = {0};
+            double rel_val = 0.0;
 
-		free(firstDataStart);
-	}
+            char *sep = strstr(tok, "###");
+            if (sep) {
+                size_t len = sep - tok;
+                if (len >= MAX_TAG_LEN) len = MAX_TAG_LEN - 1;
+                memcpy(tag_name, tok, len);
+                tag_name[len] = '\0';
+                rel_val = strtod(sep + 3, NULL);
+            } else {
+                strncpy(tag_name, tok, MAX_TAG_LEN - 1);
+            }
 
-	sum /= 1.0 * (lengthOfFirstArray + lengthOfSecondArray - numberOfMatchingTags);
+            int found = -1;
+            for (int t = 0; t < tag_count; t++) {
+                if (strcmp(tags[t], tag_name) == 0) {
+                    found = t;
+                    break;
+                }
+            }
 
-	return 100.0 - sum;
+            if (found == -1 && tag_count < MAX_TAGS) {
+                strcpy(tags[tag_count], tag_name);
+                rel_vals1[tag_count] = 0.0;
+                rel_vals2[tag_count] = rel_val;
+                tag_count++;
+            } else if (found != -1) {
+                rel_vals2[found] += rel_val;
+            }
+
+            tok = strtok_r(NULL, ";", &saveptr);
+        }
+    }
+
+    // Compute weighted distance
+    double min_sum = 0.0;
+    double max_sum = 0.0;
+    for (int t = 0; t < tag_count; t++) {
+        double v1 = rel_vals1[t];
+        double v2 = rel_vals2[t];
+        min_sum += (v1 < v2) ? v1 : v2;
+        max_sum += (v1 > v2) ? v1 : v2;
+    }
+
+    return (max_sum > 0.0) ? (1.0 - (min_sum / max_sum)) : 1.0;
 }
 
 // Pearson correlation coefficient (PCC)
