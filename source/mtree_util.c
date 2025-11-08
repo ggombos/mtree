@@ -78,9 +78,7 @@ double string_distance(const char* a, const char* b)
 		}
 	}
 
-	double normalized_dist = (column[lengthOfA] / MAX(lengthOfA, lengthOfB));
-	double tie_breaker = calc_tie_breaker(a, b);
-	return normalized_dist + tie_breaker;
+	return column[lengthOfA];
 }
 
 void init_distances(const int size, double* distances)
