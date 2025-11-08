@@ -17,8 +17,8 @@ typedef struct {
 	double parentDistance;
 	double coveringRadius;
 	int level;
-	char vl_length[4];
-	char vl_data[FLEXIBLE_ARRAY_MEMBER];
+	char length[4];
+	char data[FLEXIBLE_ARRAY_MEMBER];
 } __attribute__((packed, aligned(1))) mtree_text;
 
 #endif

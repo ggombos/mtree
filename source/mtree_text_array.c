@@ -2,6 +2,7 @@
  * contrib/mtree_gist/mtree_text_array.c
  */
 
+#include <time.h>
 #include "mtree_text_array.h"
 
 #include "mtree_text_array_util.h"
@@ -42,7 +43,6 @@ Datum mtree_text_array_input(PG_FUNCTION_ARGS)
 	unsigned char arrayLength = get_array_length(input, inputLength);
 
 	size_t size = MTREE_TEXT_ARRAY_SIZE + arrayLength * MTREE_TEXT_ARRAY_MAX_STRINGLENGTH * sizeof(char) + 1;
-	elog(INFO, "Text array size: %ld, size variable %ld", MTREE_TEXT_ARRAY_SIZE, size);
 	mtree_text_array* result = (mtree_text_array*)palloc(size);
 
 	char* arrayElement = strtok(input, ",");
@@ -189,6 +189,9 @@ Datum mtree_text_array_union(PG_FUNCTION_ARGS)
 	mtree_text_array* out = mtree_text_array_deep_copy(entries[0]);
 	out->coveringRadius += mtree_text_array_outer_distance(entries[0], entries[1]);
 
+	//elog(INFO, "entries[0]: %s, %s", entries[0]->data[0], entries[0]->data[1]);
+	//elog(INFO, "entries[1]: %s, %s", entries[1]->data[0], entries[1]->data[1]);
+
 	PG_RETURN_MTREE_TEXT_ARRAY_P(out);
 }
 
@@ -210,11 +213,18 @@ Datum mtree_text_array_penalty(PG_FUNCTION_ARGS)
 	double distance = mtree_text_array_full_distance(original, new);
 	*penalty = distance;
 
+	//elog(INFO, "Penalty original: %s, %s", original->data[0], original->data[1]);
+	//elog(INFO, "Penalty new: %s, %s", new->data[0], new->data[1]);
+	//elog(INFO, "Penalty: %f", *penalty);
+
 	PG_RETURN_POINTER(penalty);
 }
 
 Datum mtree_text_array_picksplit(PG_FUNCTION_ARGS)
 {
+	// struct timespec begin, end;
+    // clock_gettime(CLOCK_MONOTONIC, &begin);
+
 	GistEntryVector* entryVector = (GistEntryVector*)PG_GETARG_POINTER(0);
 	GIST_SPLITVEC* vector = (GIST_SPLITVEC*)PG_GETARG_POINTER(1);
 	OffsetNumber maxOffset = (OffsetNumber)entryVector->n - 1;
@@ -257,20 +267,11 @@ Datum mtree_text_array_picksplit(PG_FUNCTION_ARGS)
 			rightIndex = (leftIndex + 1) + (((int)random()) % (maxOffset - leftIndex - 1));
 			break;
 		case FirstTwo:
-			leftIndex = -1;
-			rightIndex = -1;
-
-			for (int i = 0; i < maxOffset - 1; ++i) {
-				if (entries[i]->level == entries[i + 1]->level) {
-					leftIndex = i;
-					rightIndex = i + 1;
-					break;
-				}
-			}
-
+			leftIndex = 0;
+			rightIndex = 1;
 			break;
 		case MaxDistanceFromFirst:
-			maxDistance = -1;
+			maxDistance = -1.0;
 			for (int r = 0; r < maxOffset; ++r) {
 				double distance = get_text_array_distance(maxOffset, entries, distances, 0, r);
 				if (distance > maxDistance) {
@@ -433,6 +434,9 @@ Datum mtree_text_array_picksplit(PG_FUNCTION_ARGS)
 	mtree_text_array* unionRight = mtree_text_array_deep_copy(entries[rightIndex]);
 	mtree_text_array* current;
 
+	// int left_size = 0;
+	// int right_rize = 0;
+
 	for (OffsetNumber i = FirstOffsetNumber; i <= maxOffset; i = OffsetNumberNext(i)) {
 		double distanceLeft = get_text_array_distance(maxOffset, entries, distances, leftIndex, i - 1);
 		double distanceRight = get_text_array_distance(maxOffset, entries, distances, rightIndex, i - 1);
@@ -442,21 +446,37 @@ Datum mtree_text_array_picksplit(PG_FUNCTION_ARGS)
 			if (distanceLeft + current->coveringRadius > unionLeft->coveringRadius) {
 				unionLeft->coveringRadius = distanceLeft + current->coveringRadius;
 			}
+			//elog(INFO, "B: %s, %s", current->data[0], current->data[1]);
 			*left = i;
 			++left;
 			++(vector->spl_nleft);
+
+			// left_size++;
 		} else {
 			if (distanceRight + current->coveringRadius > unionRight->coveringRadius) {
 				unionRight->coveringRadius = distanceRight + current->coveringRadius;
 			}
+			//elog(INFO, "J: %s, %s", current->data[0], current->data[1]);
 			*right = i;
 			++right;
 			++(vector->spl_nright);
+
+			// right_rize++;
 		}
 	}
 
 	vector->spl_ldatum = PointerGetDatum(unionLeft);
 	vector->spl_rdatum = PointerGetDatum(unionRight);
+
+	//elog(INFO, "SPLIT_POINTS %i", maxOffset);
+	//elog(INFO, "BELSO CSUCS B: %s, %s, %f", unionLeft->data[0], unionLeft->data[1], unionLeft->coveringRadius);
+	//elog(INFO, "BELSO CSUCS J: %s, %s, %f", unionRight->data[0], unionRight->data[1], unionRight->coveringRadius);
+	//elog(INFO, "SPLIT: %s, %s, %f", current->data[0], current->data[1], current->coveringRadius);
+	//elog(INFO, "MAX OFFSET: %d, LEFT SIZE: %d, RIGHT SIZE: %d", maxOffset, left_size, right_rize);
+
+	// clock_gettime(CLOCK_MONOTONIC, &end);
+    // long long elapsed_ns = (end.tv_sec - begin.tv_sec) * 1000000000LL + (end.tv_nsec - begin.tv_nsec);
+	// elog(INFO, "time: %llu", (unsigned long long)elapsed_ns);
 
 	PG_RETURN_POINTER(vector);
 }

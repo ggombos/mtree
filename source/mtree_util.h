@@ -11,6 +11,7 @@
 
 #define MIN3(a, b, c) ((a) < (b) ? ((a) < (c) ? (a) : (c)) : ((b) < (c) ? (b) : (c)))
 
+double calc_tie_breaker(const char* a, const char* b);
 double string_distance(const char*, const char*);
 void init_distances(const int, double*);
 double overlap_area(double, double, double);

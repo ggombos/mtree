@@ -8,7 +8,7 @@
 
 double mtree_text_outer_distance(mtree_text* first, mtree_text* second)
 {
-	double distance = string_distance(first->vl_data, second->vl_data);
+	double distance = string_distance(first->data, second->data);
 	double outer_distance = distance - first->coveringRadius - second->coveringRadius;
 
 	if (outer_distance < 0.0) {
@@ -19,12 +19,12 @@ double mtree_text_outer_distance(mtree_text* first, mtree_text* second)
 }
 double mtree_text_full_distance(mtree_text* first, mtree_text* second)
 {
-	return string_distance(first->vl_data, second->vl_data);
+	return string_distance(first->data, second->data);
 }
 
 bool mtree_text_equals(mtree_text* first, mtree_text* second)
 {
-	return strcmp(first->vl_data, second->vl_data) == 0;
+	return strcmp(first->data, second->data) == 0;
 }
 
 bool mtree_text_overlap_distance(mtree_text* first, mtree_text* second)

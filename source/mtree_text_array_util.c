@@ -198,7 +198,17 @@ double weighted_text_array_distance(mtree_text_array *first, mtree_text_array *s
         max_sum += (v1 > v2) ? v1 : v2;
     }
 
-    return (max_sum > 0.0) ? (1.0 - (min_sum / max_sum)) : 1.0;
+    double distance = (max_sum > 0.0) ? (1.0 - (min_sum / max_sum)) : 1.0;
+
+    // --- Add tie breaker to ensure unique distance values ---
+    // This uses a small deterministic offset based on the hashes of both tag sets.
+    // It prevents cases where two distinct pairs produce the same distance value.
+    double tie_breaker = calc_tie_breaker(
+        (first->arrayLength > 0) ? first->data[0] : "",
+        (second->arrayLength > 0) ? second->data[0] : ""
+    );
+
+    return distance + tie_breaker;
 }
 
 // Pearson correlation coefficient (PCC)

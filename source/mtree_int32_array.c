@@ -183,6 +183,10 @@ Datum mtree_int32_array_penalty(PG_FUNCTION_ARGS)
 	double distance = mtree_int32_array_full_distance(original, new);
 	*penalty = distance;
 
+	// elog(INFO, "Penalty original: %i, %i", original->data[0], original->data[1]);
+	// elog(INFO, "Penalty new: %i, %i", new->data[0], new->data[1]);
+	// elog(INFO, "Penalty: %f", *penalty);
+
 	PG_RETURN_POINTER(penalty);
 }
 
@@ -231,17 +235,8 @@ Datum mtree_int32_array_picksplit(PG_FUNCTION_ARGS)
 			rightIndex = (leftIndex + 1) + (((int)random()) % (maxOffset - leftIndex - 1));
 			break;
 		case FirstTwo:
-			leftIndex = -1;
-			rightIndex = -1;
-
-			for (int i = 0; i < maxOffset - 1; ++i) {
-				if (entries[i]->level == entries[i + 1]->level) {
-					leftIndex = i;
-					rightIndex = i + 1;
-					break;
-				}
-			}
-
+			leftIndex = 0;
+			rightIndex = 1;
 			break;
 		case MaxDistanceFromFirst:
 			maxDistance = -1.0;
@@ -431,6 +426,11 @@ Datum mtree_int32_array_picksplit(PG_FUNCTION_ARGS)
 
 	vector->spl_ldatum = PointerGetDatum(unionLeft);
 	vector->spl_rdatum = PointerGetDatum(unionRight);
+
+	// elog(INFO, "SPLIT_POINTS %i", maxOffset);
+	// elog(INFO, "BELSO CSUCS B: %i, %i, %f", unionLeft->data[0], unionLeft->data[1], unionLeft->coveringRadius);
+	// elog(INFO, "BELSO CSUCS J: %i, %i, %f", unionRight->data[0], unionRight->data[1], unionRight->coveringRadius);
+	// elog(INFO, "SPLIT: %i, %i, %f", current->data[0], current->data[1], current->coveringRadius);
 
 	PG_RETURN_POINTER(vector);
 }

@@ -197,6 +197,11 @@ Datum mtree_float_penalty(PG_FUNCTION_ARGS)
 
 	double distance = mtree_float_full_distance(original, new);
 	*penalty = distance;
+
+	// elog(INFO, "Penalty original: %f", original->data);
+	// elog(INFO, "Penalty new: %f", new->data);
+	// elog(INFO, "Penalty: %f", *penalty);
+
 	PG_RETURN_POINTER(penalty);
 }
 
@@ -246,17 +251,8 @@ Datum mtree_float_picksplit(PG_FUNCTION_ARGS)
 			rightIndex = (leftIndex + 1) + (((int)random()) % (maxOffset - leftIndex - 1));
 			break;
 		case FirstTwo:
-			leftIndex = -1;
-			rightIndex = -1;
-
-			for (int i = 0; i < maxOffset - 1; ++i) {
-				if (entries[i]->level == entries[i + 1]->level) {
-					leftIndex = i;
-					rightIndex = i + 1;
-					break;
-				}
-			}
-
+			leftIndex = 0;
+			rightIndex = 1;
 			break;
 		case MaxDistanceFromFirst:
 			maxDistance = -1.0;
@@ -446,6 +442,11 @@ Datum mtree_float_picksplit(PG_FUNCTION_ARGS)
 
 	vector->spl_ldatum = PointerGetDatum(unionLeft);
 	vector->spl_rdatum = PointerGetDatum(unionRight);
+
+	// elog(INFO, "SPLIT_POINTS %i", maxOffset);
+	// elog(INFO, "BELSO CSUCS B: %f, %f", unionLeft->data, unionLeft->coveringRadius);
+	// elog(INFO, "BELSO CSUCS J: %f, %f", unionRight->data, unionRight->coveringRadius);
+	// elog(INFO, "SPLIT: %f, %f", current->data, current->coveringRadius);
 
 	PG_RETURN_POINTER(vector);
 }

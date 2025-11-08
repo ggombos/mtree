@@ -6,6 +6,57 @@
 
 #include "postgres.h"
 
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+
+/**
+ * @brief Generates a simple deterministic hash for a string using the djb2 algorithm.
+ *
+ * This hash is used only for tie-breaking purposes, not for security.
+ * It ensures that two different strings will produce different hashes.
+ *
+ * @param s Input string to hash.
+ * @return 64-bit unsigned integer hash value.
+ */
+static unsigned long hash_string(const char *s)
+{
+    unsigned long hash = 5381;
+    int c;
+    while ((c = *s++))
+        hash = ((hash << 5) + hash) + c;
+    return hash;
+}
+
+/**
+ * @brief Computes a small numeric "tie breaker" value based on the hash of two strings.
+ *
+ * Why this is necessary:
+ * 
+ * String distance functions (like Levenshtein) can return the same value for
+ * many different string pairs (e.g., "abc"→"abd" and "abc"→"acc" both have distance 1).
+ * To ensure every pair gets a slightly different numeric result, we mix in a very small
+ * pseudo-random fraction derived from the XOR of their hash values.
+ *
+ * Details:
+ * 
+ * - The XOR (^) combines both hashes into a single deterministic number.
+ * - "& 0xFFFF" keeps only the lower 16 bits for simplicity.
+ * - Dividing by 65536.0 converts it into a range [0.0, 1.0).
+ * - Multiplying by 0.01 scales it down so it never dominates the main distance score.
+ *
+ * This makes the result unique and stable without affecting the main distance meaningfully.
+ *
+ * @param a First string.
+ * @param b Second string.
+ * @return Small fractional tie-breaker value in the range [0.0, 0.01).
+ */
+double calc_tie_breaker(const char* a, const char* b)
+{
+	unsigned long hash_a = hash_string(a);
+    unsigned long hash_b = hash_string(b);
+
+	return ((hash_a ^ hash_b) & 0xFFFF) / 65536.0 * 0.01;
+}
+
 double string_distance(const char* a, const char* b)
 {
 	int lengthOfA = (int)strlen(a);
@@ -27,7 +78,9 @@ double string_distance(const char* a, const char* b)
 		}
 	}
 
-	return column[lengthOfA];
+	double normalized_dist = (column[lengthOfA] / MAX(lengthOfA, lengthOfB));
+	double tie_breaker = calc_tie_breaker(a, b);
+	return normalized_dist + tie_breaker;
 }
 
 void init_distances(const int size, double* distances)

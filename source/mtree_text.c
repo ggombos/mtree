@@ -40,8 +40,8 @@ Datum mtree_text_input(PG_FUNCTION_ARGS)
 
 	SET_VARSIZE(result, MTREE_TEXT_SIZE + stringLength * sizeof(char) + 1);
 
-	strcpy(result->vl_data, input);
-	result->vl_data[stringLength] = '\0';
+	strcpy(result->data, input);
+	result->data[stringLength] = '\0';
 
 	PG_RETURN_POINTER(result);
 }
@@ -52,9 +52,9 @@ Datum mtree_text_output(PG_FUNCTION_ARGS)
 	char* result;
 
 	if (text->coveringRadius == 0) {
-		result = psprintf("%s", text->vl_data);
+		result = psprintf("%s", text->data);
 	} else {
-		result = psprintf("distance|%f data|%s", text->coveringRadius, text->vl_data);
+		result = psprintf("distance|%f data|%s", text->coveringRadius, text->data);
 	}
 
 	PG_RETURN_CSTRING(result);
@@ -181,6 +181,9 @@ Datum mtree_text_union(PG_FUNCTION_ARGS)
 	mtree_text* out = mtree_text_deep_copy(entries[0]);
 	out->coveringRadius += mtree_text_outer_distance(entries[0], entries[1]);
 
+	// elog(INFO, "entries[0]: %s", entries[0]->data);
+	// elog(INFO, "entries[1]: %s", entries[1]->data);
+
 	PG_RETURN_MTREE_TEXT_P(out);
 }
 
@@ -201,6 +204,10 @@ Datum mtree_text_penalty(PG_FUNCTION_ARGS)
 
 	double distance = mtree_text_full_distance(original, new);
 	*penalty = distance;
+
+	// elog(INFO, "Penalty original: %s", original->data);
+	// elog(INFO, "Penalty new: %s", new->data);
+	// elog(INFO, "Penalty: %f", *penalty);
 
 	PG_RETURN_POINTER(penalty);
 }
@@ -249,17 +256,8 @@ Datum mtree_text_picksplit(PG_FUNCTION_ARGS)
 			rightIndex = (leftIndex + 1) + (((int)random()) % (maxOffset - leftIndex - 1));
 			break;
 		case FirstTwo:
-			leftIndex = -1;
-			rightIndex = -1;
-
-			for (int i = 0; i < maxOffset - 1; ++i) {
-				if (entries[i]->level == entries[i + 1]->level) {
-					leftIndex = i;
-					rightIndex = i + 1;
-					break;
-				}
-			}
-
+			leftIndex = 0;
+			rightIndex = 1;
 			break;
 		case MaxDistanceFromFirst:
 			maxDistance = -1.0;
