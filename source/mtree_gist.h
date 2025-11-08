@@ -5,7 +5,7 @@
 #define __MTREE_GIST_H__
 
 #include "postgres.h"
-#include "varatt.h"
+//#include "varatt.h"
 #include "access/gist.h"
 #include "access/reloptions.h"
 
