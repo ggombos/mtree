@@ -94,7 +94,7 @@ def cleanup(curs, tables, indexes):
     curs.execute(query)
 
 
-def assert_equal(result1, result2, check_id) -> bool:
+def assert_equal(result1, result2) -> bool:
     if len(result1) != len(result2):
         return False
 
@@ -102,11 +102,10 @@ def assert_equal(result1, result2, check_id) -> bool:
         id1 = result1[i][0]
         id2 = result2[i][0]
 
-        if check_id:
-            # If the points are equidistant, they may end up being swapped.
-            if ((id1 not in [r_id2 for r_id2, _, _ in result2]) or
-                (id2 not in [r_id1 for r_id1, _, _ in result1])):
-                return False
+        # If the points are equidistant, they may end up being swapped.
+        if ((id1 not in [r_id2 for r_id2, _, _ in result2]) or
+            (id2 not in [r_id1 for r_id1, _, _ in result1])):
+            return False
         
         dist1 = float(result1[i][2])
         dist2 = float(result2[i][2])
@@ -177,7 +176,7 @@ def calculate_knn(file, center):
     return nearest_neighbours
 
 
-def print_result(result, mtree_res, rtree_res):
+def print_result(result, mtree_res, rtree_res, is_text_result=False):
     print("✅" if result else "❌")
     if not result:
         print()
@@ -185,7 +184,10 @@ def print_result(result, mtree_res, rtree_res):
         print("\t\t\tMtree")
         for item in mtree_res:
             print("\t\t\t", item)
-        print("\t\t\tRtree")
+        
+        if is_text_result:  print("\t\t\tPython tester")
+        else:               print("\t\t\tRtree")
+        
         for item in rtree_res:
             print("\t\t\t", item)
         print()
@@ -237,10 +239,10 @@ def main():
                         cp = select_center_point(f"tests/{type}/{file}_mtree.csv", center_point)
                         rtree_res = calculate_knn(f"tests/{type}/{file}_mtree.csv", cp)
 
-                        result = assert_equal(mtree_res, rtree_res, check_id=False)
+                        result = assert_equal(mtree_res, rtree_res)
                         if not result:
                             final_result = False
-                        print_result(result, mtree_res, rtree_res)
+                        print_result(result, mtree_res, rtree_res, is_text_result=True)
                 
                 else:
                     create_table(curs=curs, table_name=mtree_table, point_type=f"mtree_{type}")
@@ -263,7 +265,7 @@ def main():
                         mtree_res = knn_test(curs=curs, table_name=mtree_table, center_point_id=center_point, neighbour_count=KNN_NEIGHBOURS)
                         rtree_res = knn_test(curs=curs, table_name=rtree_table, center_point_id=center_point, neighbour_count=KNN_NEIGHBOURS)
                         
-                        result = assert_equal(mtree_res, rtree_res, check_id=True)
+                        result = assert_equal(mtree_res, rtree_res)
                         if not result:
                             final_result = False
                         print_result(result, mtree_res, rtree_res)
